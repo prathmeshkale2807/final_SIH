@@ -1,0 +1,17 @@
+{
+  "hosting": {
+    "site": "hackathon8080-6d410-cd8a8",
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

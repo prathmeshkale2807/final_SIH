@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KRISHAK — We Love Maximizing Profit | Agricultural Intelligence Platform</title>
+  <meta name="description"
+    content="Predict. Compare. Connect. Sell Smarter. Maximizing farmer expected net profit through multi-channel intelligence.">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Remix Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            emerald: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .font-display {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 1rem);
+    }
+  </style>
+</head>
+
+<body
+  class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 pointer-events-none flex flex-col gap-2"></div>
+
+  <!-- ========================================================================= -->
+  <!-- PUBLIC NAVBAR (VISIBLE ONLY TO PUBLIC USERS) -->
+  <!-- ========================================================================= -->
+  <header id="public-header" class="sticky top-0 z-40 glass-nav border-b border-slate-200/80 transition-all shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+
+      <!-- KRISHAK LOGO (GREEN & GOLD EMBLEM: FARMER + PAGDI + DHANUSH/BOW + WHEAT) -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('landing')">
+        <div
+          class="h-11 w-11 rounded-2xl bg-gradient-to-tr from-emerald-950 via-emerald-800 to-emerald-600 text-white shadow-md shadow-emerald-900/25 p-2 flex items-center justify-center border border-emerald-600/40">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+            <circle cx="24" cy="18" r="5.5" fill="#FDE047" />
+            <path d="M18 16C18 13 20.5 10.5 24 10.5C27.5 10.5 30 13 30 16C30 17 29 18 27.5 18H20.5C19 18 18 17 18 16Z"
+              fill="#EAB308" />
+            <path d="M16 38V30C16 26 19.5 24 24 24C28.5 24 32 26 32 30V38" stroke="white" stroke-width="3"
+              stroke-linecap="round" />
+            <path d="M20 28L32 30L44 26" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M40 10C48 18 52 26 52 34C52 42 48 50 40 58" stroke="#FBBF24" stroke-width="3.5"
+              stroke-linecap="round" />
+            <line x1="40" y1="10" x2="40" y2="58" stroke="white" stroke-width="1.2" stroke-dasharray="2 2"
+              opacity="0.8" />
+            <line x1="26" y1="34" x2="56" y2="34" stroke="#34D399" stroke-width="2.5" stroke-linecap="round" />
+            <polygon points="58,34 52,30 54,34 52,38" fill="#34D399" />
+            <path d="M12 52C14 46 20 44 26 44" stroke="#A7F3D0" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5 leading-none">
+            <span class="text-2xl font-display font-black tracking-tight text-slate-900">
+              KRISHAK
+            </span>
+            <span
+              class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-sans">
+              SIH 2026
+            </span>
+          </div>
+          <div class="text-[9.5px] font-extrabold text-emerald-700 tracking-wider uppercase mt-0.5">
+            WE LOVE MAXIMIZING PROFIT.
+          </div>
+        </div>
+      </div>
+
+      <!-- PUBLIC CENTER LINKS -->
+      <nav class="hidden lg:flex items-center space-x-8 text-sm font-semibold text-slate-600">
+        <button onclick="scrollToSection('hero')" class="hover:text-emerald-700 transition-colors">Home</button>
+        <button onclick="scrollToSection('how-it-works')" class="hover:text-emerald-700 transition-colors">How It
+          Works</button>
+        <button onclick="scrollToSection('market-intelligence')" class="hover:text-emerald-700 transition-colors">Market
+          Intelligence</button>
+        <button onclick="scrollToSection('ai-insights')" class="hover:text-emerald-700 transition-colors">AI
+          Insights</button>
+        <button onclick="scrollToSection('why-krishak')" class="hover:text-emerald-700 transition-colors">Why
+          KRISHAK</button>
+      </nav>
+
+      <!-- RIGHT CONTROLS -->
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <!-- LANGUAGE SELECTOR -->
+        <select id="lang-selector" onchange="changeLanguage(this.value)"
+          class="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl px-2.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all cursor-pointer">
+          <option value="en">🌐 English</option>
+          <option value="hi">🌐 हिंदी (Hindi)</option>
+          <option value="mr">🌐 मराठी (Marathi)</option>
+        </select>
+
+        <div class="hidden sm:flex items-center space-x-3">
+          <button onclick="navigateTo('farmer_login')"
+            class="px-4 py-2 text-slate-700 hover:text-emerald-700 text-xs sm:text-sm font-bold transition-colors">
+            Sign In
+          </button>
+          <button onclick="navigateTo('farmer_login')"
+            class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-xl text-xs sm:text-sm font-black shadow-md shadow-emerald-600/20 transition-all">
+            Start Selling 🌾
+          </button>
+        </div>
+
+        <button onclick="toggleMobileMenu()"
+          class="lg:hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xl">
+          <i id="hamburger-icon" class="ri-menu-line"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- MOBILE MENU DRAWER (PUBLIC) -->
+    <div id="mobile-menu-drawer"
+      class="hidden lg:hidden bg-white border-b border-slate-200 px-4 py-6 space-y-4 shadow-xl">
+      <nav class="flex flex-col space-y-3 text-sm font-bold text-slate-700">
+        <button onclick="scrollToSection('hero'); toggleMobileMenu();"
+          class="text-left py-2 border-b border-slate-100">Home</button>
+        <button onclick="scrollToSection('how-it-works'); toggleMobileMenu();"
+          class="text-left py-2 border-b border-slate-100">How It Works</button>
+        <button onclick="scrollToSection('market-intelligence'); toggleMobileMenu();"
+          class="text-left py-2 border-b border-slate-100">Market Intelligence</button>
+        <button onclick="scrollToSection('ai-insights'); toggleMobileMenu();"
+          class="text-left py-2 border-b border-slate-100">AI Insights</button>
+        <button onclick="scrollToSection('why-krishak'); toggleMobileMenu();"
+          class="text-left py-2 border-b border-slate-100">Why KRISHAK</button>
+      </nav>
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        <button onclick="navigateTo('farmer_login'); toggleMobileMenu();"
+          class="py-3 bg-emerald-600 text-white rounded-xl text-center font-black text-xs shadow-md">
+          🌾 Farmer Login
+        </button>
+        <button onclick="navigateTo('buyer_login'); toggleMobileMenu();"
+          class="py-3 bg-slate-900 text-white rounded-xl text-center font-black text-xs shadow-md">
+          🏪 Buyer Login
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN APP CONTAINER (PUBLIC OR AUTHENTICATED DESKTOP SIDEBAR + OUTLET) -->
+  <!-- ========================================================================= -->
+  <div id="app-container" class="flex-1 flex flex-col w-full">
+    <!-- Injected dynamically based on auth state -->
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MOBILE BOTTOM NAVIGATION (AUTHENTICATED ONLY) -->
+  <!-- ========================================================================= -->
+  <nav id="mobile-bottom-nav"
+    class="hidden md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-1.5 flex items-center justify-around shadow-2xl safe-bottom">
+    <!-- Injected dynamically -->
+  </nav>
+
+  <!-- ========================================================================= -->
+  <!-- STATE & APPLICATION LOGIC -->
+  <!-- ========================================================================= -->
+  <script>
+    const translations = {
+      en: {
+        "app_name": "KRISHAK",
+        "tagline": "WE LOVE MAXIMIZING PROFIT.",
+        "sub_tagline": "Predict. Compare. Connect. Sell Smarter.",
+        "hero_title": "Sell Smarter. Earn Better.",
+        "philosophy": "KRISHAK does not simply show the farmer the highest price. KRISHAK helps the farmer find the selling strategy expected to maximize net profit.",
+        "start_selling": "Start Selling",
+        "i_want_to_buy": "I Want to Buy",
+        "nav_home": "Dashboard",
+        "nav_sell": "Sell My Produce",
+        "nav_deals": "Best Deal",
+        "nav_markets": "Markets",
+        "nav_ai": "AI Insights",
+        "nav_lots": "My Produce",
+        "nav_offers": "Offers",
+        "nav_escrow": "Escrow & Payments",
+        "nav_txns": "Transactions",
+        "nav_profile": "Profile",
+        "nav_support": "Support",
+        "nav_search": "Search Produce",
+        "nav_post": "Post Requirement",
+        "nav_orders": "Orders & Escrow",
+        "farmer_login_title": "Farmer Sign In",
+        "farmer_login_sub": "Enter your registered mobile to access your profit optimization dashboard.",
+        "buyer_login_title": "Buyer / Processor Sign In",
+        "buyer_login_sub": "Direct farm-gate sourcing for food processors, traders, and exporters.",
+        "demo_otp_hint": "Demo OTP: 123456 (Autofill)",
+        "send_otp": "Send OTP",
+        "verify_otp": "Verify & Enter Dashboard",
+        "logout": "Logout",
+        "list_produce_title": "Sell My Produce",
+        "list_produce_sub": "Add your harvest to find direct verified buyers and calculate maximum net profit.",
+        "post_req_title": "Post Procurement Requirement",
+        "post_req_sub": "Broadcast your purchase tender to verified farmers in high-yield clusters.",
+        "best_deal_title": "Maximum Profit Optimization Engine",
+        "highest_price_not_highest_profit": "Highest Price ≠ Highest Profit",
+        "total_expected_profit": "Expected Total Net Profit"
+      },
+      hi: {
+        "app_name": "कृषक (KRISHAK)",
+        "tagline": "WE LOVE MAXIMIZING PROFIT.",
+        "sub_tagline": "अनुमान लगाएं. तुलना करें. जुड़ें. समझदारी से बेचें.",
+        "hero_title": "समझदारी से बेचें. अधिक कमाएं.",
+        "philosophy": "कृषक किसान को केवल उच्चतम मूल्य नहीं दिखाता, बल्कि वह रणनीति बताता है जिससे किसान का वास्तविक शुद्ध लाभ अधिकतम हो।",
+        "start_selling": "बेचना शुरू करें",
+        "i_want_to_buy": "खरीदना चाहते हैं",
+        "nav_home": "डैशबोर्ड",
+        "nav_sell": "फसल बेचें",
+        "nav_deals": "सर्वश्रेष्ठ सौदा",
+        "nav_markets": "मंडी भाव",
+        "nav_ai": "एआई अनुमान",
+        "nav_lots": "मेरी फसलें",
+        "nav_offers": "खरीदार प्रस्ताव",
+        "nav_escrow": "एस्क्रो व भुगतान",
+        "nav_txns": "लेन-देन",
+        "nav_profile": "प्रोफ़ाइल",
+        "nav_support": "सहायता",
+        "nav_search": "फसल खोजें",
+        "nav_post": "खरीद मांग दर्ज करें",
+        "nav_orders": "ऑर्डर व एस्क्रो",
+        "farmer_login_title": "किसान लॉगिन",
+        "farmer_login_sub": "अपने पंजीकृत मोबाइल नंबर से लाभ अनुकूलन डैशबोर्ड में प्रवेश करें।",
+        "buyer_login_title": "खरीदार / प्रोसेसर लॉगिन",
+        "buyer_login_sub": "फूड प्रोसेसर्स और व्यापारियों के लिए सीधा फार्म-गेट सोर्सिंग।",
+        "demo_otp_hint": "डेमो ओटीपी: 123456 (ऑटोफिल)",
+        "send_otp": "ओटीपी भेजें",
+        "verify_otp": "सत्यापित करें और आगे बढ़ें",
+        "logout": "लॉगआउट",
+        "list_produce_title": "अपनी फसल बेचें",
+        "list_produce_sub": "सीधे सत्यापित खरीदारों से जुड़ें और अधिकतम शुद्ध लाभ प्राप्त करें।",
+        "post_req_title": "खरीद मांग पोस्ट करें",
+        "post_req_sub": "सत्यापित किसानों तक अपनी खरीद निविदा सीधे पहुंचाएं।",
+        "best_deal_title": "अधिकतम लाभ अनुकूलन इंजन",
+        "highest_price_not_highest_profit": "उच्चतम भाव ≠ अधिकतम लाभ",
+        "total_expected_profit": "अनुमानित कुल शुद्ध लाभ"
+      },
+      mr: {
+        "app_name": "कृषक (KRISHAK)",
+        "tagline": "WE LOVE MAXIMIZING PROFIT.",
+        "sub_tagline": "अंदाज लावा. तुलना करा. जोडा. हुशारीने विका.",
+        "hero_title": "हुशारीने विका. जास्त नफा मिळवा.",
+        "philosophy": "कृषक शेतकऱ्याला फक्त सर्वात जास्त भाव दाखवत नाही, तर निव्वळ नफा जास्तीत जास्त मिळवून देणारी विक्री रणनीती सुचवतो.",
+        "start_selling": "विक्री सुरू करा",
+        "i_want_to_buy": "खरेदी करायची आहे",
+        "nav_home": "डॅशबोर्ड",
+        "nav_sell": "शेतमाल विका",
+        "nav_deals": "सर्वोत्कृष्ट सौदा",
+        "nav_markets": "बाजारभाव",
+        "nav_ai": "एआय अंदाज",
+        "nav_lots": "माझा शेतमाल",
+        "nav_offers": "खरेदीदार ऑफर्स",
+        "nav_escrow": "एस्क्रो व देयके",
+        "nav_txns": "व्यवहार",
+        "nav_profile": "प्रोफाइल",
+        "nav_support": "मदत",
+        "nav_search": "शेतमाल शोधा",
+        "nav_post": "मागणी नोंदवा",
+        "nav_orders": "ऑर्डर व एस्क्रो",
+        "farmer_login_title": "शेतकरी लॉगिन",
+        "farmer_login_sub": "तुमच्या नफा वाढवणार्‍या डॅशबोर्डमध्ये प्रवेश करण्यासाठी मोबाइल नंबर वापरा.",
+        "buyer_login_title": "खरेदीदार लॉगिन",
+        "buyer_login_sub": "प्रक्रिया उद्योगांसाठी थेट शेतातून खरेदी.",
+        "demo_otp_hint": "डेमो ओटीपी: 123456 (ऑटोफिल)",
+        "send_otp": "ओटीपी पाठवा",
+        "verify_otp": "पडताळणी करा आणि उघडा",
+        "logout": "लॉगआउट",
+        "list_produce_title": "शेतमाल विक्री नोंदणी",
+        "list_produce_sub": "थेट खरेदीदारांना शेतमाल दाखवा आणि जास्तीत जास्त निव्वळ नफा मिळवा.",
+        "post_req_title": "खरेदी मागणी नोंदवा",
+        "post_req_sub": "शेतकऱ्यांपर्यंत तुमची खरेदी मागणी थेट पोहोचवा.",
+        "best_deal_title": "कमाल नफा ऑप्टिमायझेशन इंजिन",
+        "highest_price_not_highest_profit": "सर्वोच्च भाव ≠ सर्वोच्च नफा",
+        "total_expected_profit": "अपेक्षित एकूण निव्वळ नफा"
+      }
+    };
+
+    let currentLang = localStorage.getItem('krishak_lang') || localStorage.getItem('krishk_lang') || 'en';
+    let currentUser = JSON.parse(localStorage.getItem('krishak_auth_user') || localStorage.getItem('krishk_auth_user') || 'null');
+    let currentView = 'landing'; // default to flagship startup landing page!
+    let mobileMenuOpen = false;
+
+    function t(key, fallback = '') {
+      const dict = translations[currentLang] || translations.en;
+      return dict[key] || translations.en[key] || fallback || key;
+    }
+
+    function changeLanguage(lang) {
+      if (translations[lang]) {
+        currentLang = lang;
+        localStorage.setItem('krishak_lang', lang);
+        document.getElementById('lang-selector').value = lang;
+        renderApp();
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const c = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 text-xs font-bold border border-slate-700 transform transition-all duration-300';
+      toast.innerHTML = `
+        <span class="text-base">${type === 'success' ? '🔔' : '⚠️'}</span>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white pl-2">✕</button>
+      `;
+      c.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    function toggleMobileMenu() {
+      mobileMenuOpen = !mobileMenuOpen;
+      const drawer = document.getElementById('mobile-menu-drawer');
+      const icon = document.getElementById('hamburger-icon');
+      if (mobileMenuOpen) {
+        drawer.classList.remove('hidden');
+        icon.className = 'ri-close-line';
+      } else {
+        drawer.classList.add('hidden');
+        icon.className = 'ri-menu-line';
+      }
+    }
+
+    function scrollToSection(id) {
+      if (currentView !== 'landing') {
+        navigateTo('landing');
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function navigateTo(view) {
+      currentView = view;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      renderApp();
+    }
+
+    function logoutUser() {
+      currentUser = null;
+      localStorage.removeItem('krishak_auth_user');
+      localStorage.removeItem('krishk_auth_user');
+      navigateTo('landing');
+      showToast('Logged out successfully.');
+    }
+
+    function loginAsFarmer() {
+      currentUser = {
+        id: 'FARM-2026-MH01',
+        role: 'farmer',
+        name: 'Rahul Jadhav',
+        mobile: '9876543210',
+        location: 'Nashik & Pune Cluster, Maharashtra',
+        landArea: '8.5 Acres',
+        primaryCrop: 'Nashik Red Onion',
+        token: 'mock-jwt-farmer'
+      };
+      localStorage.setItem('krishak_auth_user', JSON.stringify(currentUser));
+      navigateTo('farmer_dashboard');
+      showToast('Welcome Rahul Jadhav!');
+    }
+
+    function loginAsBuyer() {
+      currentUser = {
+        id: 'BUY-2026-PN08',
+        role: 'buyer',
+        businessName: 'AgroFresh Processors Ltd.',
+        ownerName: 'Vikram Mehta',
+        mobile: '9822012345',
+        location: 'Pune APMC Yard, Maharashtra',
+        trustScore: 96,
+        status: 'VERIFIED',
+        token: 'mock-jwt-buyer'
+      };
+      localStorage.setItem('krishak_auth_user', JSON.stringify(currentUser));
+      navigateTo('buyer_dashboard');
+      showToast('Welcome Vikram Mehta (AgroFresh)');
+    }
+
+    // =========================================================================
+    // MAIN APP RENDER CONTROLLER
+    // =========================================================================
+    function renderApp() {
+      document.getElementById('lang-selector').value = currentLang;
+      const publicHeader = document.getElementById('public-header');
+      const appContainer = document.getElementById('app-container');
+      const mobBottom = document.getElementById('mobile-bottom-nav');
+
+      if (!currentUser || currentView === 'landing' || currentView === 'farmer_login' || currentView === 'farmer_reg' || currentView === 'buyer_login' || currentView === 'buyer_reg') {
+        // PUBLIC / AUTHENTICATION VIEW
+        publicHeader.classList.remove('hidden');
+        mobBottom.classList.add('hidden');
+
+        if (currentView === 'landing') {
+          appContainer.innerHTML = getLandingHTML();
+        } else if (currentView === 'farmer_login') {
+          appContainer.innerHTML = getFarmerLoginHTML();
+        } else if (currentView === 'farmer_reg') {
+          appContainer.innerHTML = getFarmerRegHTML();
+        } else if (currentView === 'buyer_login') {
+          appContainer.innerHTML = getBuyerLoginHTML();
+        } else if (currentView === 'buyer_reg') {
+          appContainer.innerHTML = getBuyerRegHTML();
+        }
+      } else {
+        // AUTHENTICATED APPLICATION WITH DESKTOP LEFT SIDEBAR
+        publicHeader.classList.add('hidden');
+        mobBottom.classList.remove('hidden');
+
+        appContainer.innerHTML = `
+          <div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col md:flex-row antialiased w-full">
+            <!-- DESKTOP FIXED LEFT SIDEBAR -->
+            <aside class="hidden md:flex flex-col w-64 lg:w-72 bg-white border-r border-slate-200/80 fixed inset-y-0 left-0 z-30 shadow-sm">
+              <div class="h-20 px-6 flex items-center border-b border-slate-100 cursor-pointer" onclick="navigateTo('${currentUser.role === 'farmer' ? 'farmer_dashboard' : 'buyer_dashboard'}')">
+                <div class="flex items-center space-x-3">
+                  <div class="h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-950 to-emerald-700 text-white p-2 flex items-center justify-center">
+                    <svg viewBox="0 0 64 64" fill="none" class="w-full h-full">
+                      <circle cx="24" cy="18" r="5.5" fill="#FDE047" />
+                      <path d="M18 16C18 13 20.5 10.5 24 10.5C27.5 10.5 30 13 30 16C30 17 29 18 27.5 18H20.5C19 18 18 17 18 16Z" fill="#EAB308" />
+                      <path d="M40 10C48 18 52 26 52 34C52 42 48 50 40 58" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round" />
+                      <line x1="26" y1="34" x2="56" y2="34" stroke="#34D399" stroke-width="2.5" stroke-linecap="round" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-1 leading-none">
+                      <span class="text-xl font-display font-black text-slate-900">KRISHAK</span>
+                      <span class="text-[8px] font-black uppercase px-1 py-0.2 bg-emerald-100 text-emerald-800 rounded">SIH</span>
+                    </div>
+                    <div class="text-[8.5px] font-extrabold text-emerald-700 uppercase mt-0.5">WE LOVE MAXIMIZING PROFIT.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SIDEBAR NAV -->
+              <div class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+                <div class="px-3 pb-2 text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                  ${currentUser.role === 'farmer' ? 'Farmer Portal' : 'Procurement Sourcing'}
+                </div>
+                ${currentUser.role === 'farmer' ? `
+                  <button onclick="navigateTo('farmer_dashboard')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${currentView === 'farmer_dashboard' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200 font-extrabold shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">
+                    <div class="flex items-center space-x-3"><i class="ri-dashboard-line text-lg text-emerald-700"></i><span>Dashboard</span></div>
+                  </button>
+                  <button onclick="navigateTo('list_produce')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition-all">
+                    <div class="flex items-center space-x-3"><i class="ri-add-circle-line text-lg text-white"></i><span>+ Sell My Produce</span></div>
+                  </button>
+                  <button onclick="navigateTo('best_deal')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${currentView === 'best_deal' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200 font-extrabold shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">
+                    <div class="flex items-center space-x-3"><i class="ri-trophy-line text-lg text-emerald-700"></i><span>🏆 Best Deal</span></div>
+                    <span class="text-[9px] font-mono font-black uppercase px-2 py-0.5 bg-amber-400 text-slate-950 rounded-md">PROFIT</span>
+                  </button>
+                  <button onclick="navigateTo('farmer_markets')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${currentView === 'farmer_markets' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200 font-extrabold shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">
+                    <div class="flex items-center space-x-3"><i class="ri-line-chart-line text-lg text-slate-400"></i><span>Markets</span></div>
+                  </button>
+                  <button onclick="navigateTo('farmer_lots')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${currentView === 'farmer_lots' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200 font-extrabold shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">
+                    <div class="flex items-center space-x-3"><i class="ri-archive-line text-lg text-slate-400"></i><span>My Produce</span></div>
+                  </button>
+                  <button onclick="navigateTo('farmer_offers')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${currentView === 'farmer_offers' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200 font-extrabold shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">
+                    <div class="flex items-center space-x-3"><i class="ri-hand-heart-line text-lg text-slate-400"></i><span>Offers</span></div>
+                  </button>
+                  <button onclick="navigateTo('farmer_txns')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${currentView === 'farmer_txns' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200 font-extrabold shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">
+                    <div class="flex items-center space-x-3"><i class="ri-shield-check-line text-lg text-slate-400"></i><span>Escrow & Payments</span></div>
+                  </button>
+                  <button onclick="navigateTo('farmer_profile')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${currentView === 'farmer_profile' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200 font-extrabold shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">
+                    <div class="flex items-center space-x-3"><i class="ri-user-3-line text-lg text-slate-400"></i><span>Profile</span></div>
+                  </button>
+                ` : `
+                  <button onclick="navigateTo('buyer_dashboard')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${currentView === 'buyer_dashboard' ? 'bg-blue-50 text-blue-900 border border-blue-200 font-extrabold shadow-sm' : 'text-slate-600 hover:bg-slate-100'}">
+                    <div class="flex items-center space-x-3"><i class="ri-dashboard-line text-lg text-blue-700"></i><span>Dashboard</span></div>
+                  </button>
+                  <button onclick="navigateTo('post_req')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-black bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 transition-all">
+                    <div class="flex items-center space-x-3"><i class="ri-add-circle-line text-lg text-white"></i><span>+ Post Requirement</span></div>
+                  </button>
+                  <button onclick="navigateTo('farmer_txns')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100">
+                    <div class="flex items-center space-x-3"><i class="ri-truck-line text-lg text-slate-400"></i><span>Orders & Escrow</span></div>
+                  </button>
+                  <button onclick="navigateTo('farmer_profile')" class="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100">
+                    <div class="flex items-center space-x-3"><i class="ri-store-2-line text-lg text-slate-400"></i><span>Profile</span></div>
+                  </button>
+                `}
+              </div>
+
+              <!-- LOGOUT -->
+              <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div class="overflow-hidden text-left">
+                  <div class="text-xs font-bold text-slate-900 truncate">${currentUser.name || currentUser.businessName}</div>
+                  <div class="text-[10px] text-emerald-700 font-mono font-bold">${currentUser.id}</div>
+                </div>
+                <button onclick="logoutUser()" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl" title="Logout">
+                  <i class="ri-logout-box-r-line text-lg"></i>
+                </button>
+              </div>
+            </aside>
+
+            <!-- MAIN CONTENT AREA -->
+            <div class="flex-1 md:pl-64 lg:pl-72 flex flex-col min-w-0">
+              <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80 h-16 sm:h-20 px-4 sm:px-8 flex items-center justify-between shadow-sm">
+                <div class="flex items-center space-x-2 md:hidden">
+                  <span class="font-display font-black text-xl text-slate-900">KRISHAK</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-2 text-xs text-slate-500 font-medium">
+                  <span>KRISHAK</span><span>/</span><span class="text-slate-900 font-bold capitalize">${currentView.replace('farmer_', '').replace('_', ' ')}</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                  <button class="relative p-2 rounded-xl bg-slate-100 text-slate-600 text-lg">
+                    <i class="ri-notification-3-line"></i>
+                    <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-500"></span>
+                  </button>
+                  <button onclick="logoutUser()" class="hidden sm:block px-3.5 py-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 rounded-xl text-xs font-bold text-slate-600">
+                    Logout
+                  </button>
+                </div>
+              </header>
+
+              <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 md:pb-10">
+                ${renderInnerView()}
+              </main>
+            </div>
+          </div>
+        `;
+
+        // RENDER MOBILE BOTTOM NAV
+        if (currentUser.role === 'farmer') {
+          mobBottom.innerHTML = `
+            <button onclick="navigateTo('farmer_dashboard')" class="flex flex-col items-center flex-1 py-1 ${currentView === 'farmer_dashboard' ? 'text-emerald-600 font-bold' : 'text-slate-500'}">
+              <i class="ri-home-4-line text-xl"></i><span class="text-[10px] mt-0.5">Home</span>
+            </button>
+            <button onclick="navigateTo('farmer_markets')" class="flex flex-col items-center flex-1 py-1 ${currentView === 'farmer_markets' ? 'text-emerald-600 font-bold' : 'text-slate-500'}">
+              <i class="ri-line-chart-line text-xl"></i><span class="text-[10px] mt-0.5">Markets</span>
+            </button>
+            <button onclick="navigateTo('list_produce')" class="flex flex-col items-center flex-1 py-1 text-emerald-700 font-black">
+              <div class="p-2 rounded-2xl bg-emerald-600 text-white scale-110 shadow-lg shadow-emerald-600/30">
+                <i class="ri-add-line text-2xl"></i>
+              </div>
+              <span class="text-[10px] mt-1 font-bold">Sell</span>
+            </button>
+            <button onclick="navigateTo('best_deal')" class="flex flex-col items-center flex-1 py-1 ${currentView === 'best_deal' ? 'text-emerald-600 font-bold' : 'text-slate-500'}">
+              <i class="ri-trophy-line text-xl"></i><span class="text-[10px] mt-0.5">Deals</span>
+            </button>
+            <button onclick="navigateTo('farmer_profile')" class="flex flex-col items-center flex-1 py-1 ${currentView === 'farmer_profile' ? 'text-emerald-600 font-bold' : 'text-slate-500'}">
+              <i class="ri-user-3-line text-xl"></i><span class="text-[10px] mt-0.5">Profile</span>
+            </button>
+          `;
+        } else {
+          mobBottom.innerHTML = `
+            <button onclick="navigateTo('buyer_dashboard')" class="flex flex-col items-center flex-1 py-1 text-blue-600 font-bold">
+              <i class="ri-dashboard-line text-xl"></i><span class="text-[10px] mt-0.5">Home</span>
+            </button>
+            <button onclick="navigateTo('post_req')" class="flex flex-col items-center flex-1 py-1 text-blue-700 font-black">
+              <div class="p-2 rounded-2xl bg-blue-600 text-white scale-110 shadow-lg"><i class="ri-add-line text-2xl"></i></div>
+              <span class="text-[10px] mt-1 font-bold">Post</span>
+            </button>
+            <button onclick="navigateTo('farmer_txns')" class="flex flex-col items-center flex-1 py-1 text-slate-500">
+              <i class="ri-truck-line text-xl"></i><span class="text-[10px] mt-0.5">Orders</span>
+            </button>
+            <button onclick="navigateTo('farmer_profile')" class="flex flex-col items-center flex-1 py-1 text-slate-500">
+              <i class="ri-store-2-line text-xl"></i><span class="text-[10px] mt-0.5">Profile</span>
+            </button>
+          `;
+        }
+      }
+    }
+
+    function renderInnerView() {
+      switch (currentView) {
+        case 'farmer_dashboard': return getFarmerDashboardHTML();
+        case 'list_produce': return getListProduceHTML();
+        case 'best_deal': return getBestDealHTML();
+        case 'farmer_markets': return getFarmerMarketsHTML();
+        case 'farmer_lots': return getFarmerLotsHTML();
+        case 'farmer_offers': return getFarmerOffersHTML();
+        case 'farmer_txns': return getFarmerTxnsHTML();
+        case 'farmer_profile': return getFarmerProfileHTML();
+        case 'buyer_dashboard': return getBuyerDashboardHTML();
+        case 'post_req': return getPostReqHTML();
+        default: return getFarmerDashboardHTML();
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // HTML FRAGMENTS FOR ALL VIEWS
+    // -------------------------------------------------------------------------
+    function getLandingHTML() {
+      return `
+        <div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
+          <section id="hero" class="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 bg-gradient-to-b from-emerald-50/80 via-slate-50 to-slate-100 border-b border-slate-200/70">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                  <div class="inline-flex items-center space-x-2 bg-emerald-100 text-emerald-900 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm">
+                    <span>🌾</span><span>Smart Agricultural Marketplace & Decision Engine</span>
+                  </div>
+                  <h1 class="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tight text-slate-900 leading-[1.08]">
+                    Sell Smarter.<br /><span class="text-emerald-600">Earn Better.</span>
+                  </h1>
+                  <p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                    KRISHAK helps farmers compare buyers and markets, understand price movement, analyze location-based opportunities and discover the selling strategy expected to provide better net profit.
+                  </p>
+                  <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                    <button onclick="navigateTo('farmer_login')" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-2xl font-black text-base shadow-xl shadow-emerald-600/30 transition-all flex items-center space-x-3">
+                      <span class="text-xl">🌾</span><span>Start Selling</span><span class="text-lg">→</span>
+                    </button>
+                    <button onclick="navigateTo('buyer_login')" class="px-8 py-4 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white rounded-2xl font-black text-base shadow-md transition-all flex items-center space-x-3">
+                      <span class="text-xl">🏪</span><span>I Want to Buy</span><span class="text-lg">→</span>
+                    </button>
+                  </div>
+                  <div class="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-bold text-slate-600">
+                    <div class="flex items-center space-x-1.5 justify-center lg:justify-start"><span class="text-emerald-600 font-bold">✓</span><span>Compare Markets</span></div>
+                    <div class="flex items-center space-x-1.5 justify-center lg:justify-start"><span class="text-emerald-600 font-bold">✓</span><span>Find Buyers</span></div>
+                    <div class="flex items-center space-x-1.5 justify-center lg:justify-start"><span class="text-emerald-600 font-bold">✓</span><span>AI Price Insights</span></div>
+                    <div class="flex items-center space-x-1.5 justify-center lg:justify-start"><span class="text-emerald-600 font-bold">✓</span><span>Maximum Profit</span></div>
+                  </div>
+                </div>
+
+                <div class="lg:col-span-5">
+                  <div class="relative bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200/90 space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                      <div>
+                        <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">Live Market Insights</span>
+                        <h3 class="text-xl font-extrabold text-slate-900 mt-1">Onion (Nashik Red)</h3>
+                      </div>
+                      <div class="text-right">
+                        <div class="text-2xl font-black font-mono text-slate-900">₹18.40 <span class="text-xs font-bold text-slate-400">/ KG</span></div>
+                        <span class="text-xs font-black text-emerald-600">↑ 5.2% Today</span>
+                      </div>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex items-center justify-between text-xs">
+                      <div>
+                        <span class="text-slate-500 block font-semibold">AI Predicted Range (7 Days)</span>
+                        <span class="text-base font-black text-emerald-700 font-mono">₹19.00 – ₹22.00 / KG</span>
+                      </div>
+                      <div class="text-right"><span class="text-[10px] font-bold text-slate-400 block">Confidence</span><span class="font-extrabold text-slate-800 font-mono bg-white px-2 py-0.5 rounded border">78%</span></div>
+                    </div>
+                    <div class="bg-emerald-950 text-white rounded-2xl p-5 space-y-3 shadow-inner border border-emerald-800">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono uppercase tracking-widest text-emerald-300 font-bold">🏆 KRISHAK Recommendation</span>
+                        <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded">Optimal Split</span>
+                      </div>
+                      <div class="space-y-1.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-emerald-800/80"><span class="text-emerald-200">600 KG → ABC Food Processors</span><span class="font-bold text-white font-mono">₹11,400</span></div>
+                        <div class="flex justify-between py-1"><span class="text-emerald-200">400 KG → Nashik APMC Yard</span><span class="font-bold text-white font-mono">₹7,200</span></div>
+                      </div>
+                      <div class="pt-2 border-t border-emerald-800 flex items-center justify-between">
+                        <span class="text-xs text-emerald-300 font-bold">Expected Better Profit:</span>
+                        <span class="text-lg font-black text-emerald-400 font-mono">+₹8,500</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- HOW KRISHAK WORKS -->
+          <section id="how-it-works" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div class="text-center max-w-2xl mx-auto mb-16 space-y-3">
+              <span class="text-xs font-mono uppercase text-emerald-700 font-bold tracking-widest">Streamlined 4-Step Process</span>
+              <h2 class="text-3xl sm:text-4xl font-display font-extrabold text-slate-900">How KRISHAK Works</h2>
+              <p class="text-sm text-slate-500">From listing produce to optimal profit allocation and direct bank settlement.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+                <div class="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-800 text-xl font-bold flex items-center justify-center">🌾</div>
+                <h3 class="font-bold text-slate-900 text-base">01. List Your Produce</h3>
+                <p class="text-xs text-slate-500">Add crop details, quantity (KG/Quintal/Ton), quality grade, farm location, and expected price.</p>
+              </div>
+              <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+                <div class="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-800 text-xl font-bold flex items-center justify-center">📊</div>
+                <h3 class="font-bold text-slate-900 text-base">02. Compare Opportunities</h3>
+                <p class="text-xs text-slate-500">KRISHAK compares nearby verified buyers, regional APMC mandis, and direct contracts.</p>
+              </div>
+              <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+                <div class="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-800 text-xl font-bold flex items-center justify-center">🤖</div>
+                <h3 class="font-bold text-slate-900 text-base">03. Understand Price Trends</h3>
+                <p class="text-xs text-slate-500">Analyze historical price movements, market arrivals drop, and future AI price forecasts.</p>
+              </div>
+              <div class="bg-emerald-950 text-white p-6 rounded-3xl shadow-xl space-y-3">
+                <div class="h-12 w-12 rounded-2xl bg-emerald-600 text-white text-xl font-bold flex items-center justify-center">🏆</div>
+                <h3 class="font-bold text-white text-base">04. Find Your Best Deal</h3>
+                <p class="text-xs text-emerald-200">Discover the multi-buyer split allocation calculated to give you the highest net profit.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- LIVE MARKET FEEDS -->
+          <section id="market-intelligence" class="py-20 bg-slate-100/70 border-y border-slate-200/80 w-full">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+              <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                  <span class="text-xs font-mono uppercase text-emerald-700 font-bold tracking-widest">Real-Time Benchmark Feeds</span>
+                  <h2 class="text-3xl sm:text-4xl font-display font-extrabold text-slate-900">Know What Your Crop Is Worth</h2>
+                </div>
+                <button onclick="navigateTo('farmer_login')" class="px-6 py-3 bg-white border border-slate-200 text-slate-800 font-bold text-xs rounded-2xl shadow-sm">Explore Market Intelligence →</button>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border space-y-3"><span class="text-xs text-slate-400 font-bold uppercase">Nashik APMC</span><h3 class="text-xl font-bold">Onion (Nashik Red)</h3><div class="text-3xl font-black font-mono">₹18.40/KG <span class="text-xs font-bold text-emerald-600">↑ 5.2%</span></div></div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border space-y-3"><span class="text-xs text-slate-400 font-bold uppercase">Pune APMC</span><h3 class="text-xl font-bold">Tomato (Hybrid)</h3><div class="text-3xl font-black font-mono">₹32.10/KG <span class="text-xs font-bold text-rose-600">↓ 2.4%</span></div></div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border space-y-3"><span class="text-xs text-slate-400 font-bold uppercase">Mumbai APMC</span><h3 class="text-xl font-bold">Potato (Jyoti)</h3><div class="text-3xl font-black font-mono">₹24.50/KG <span class="text-xs font-bold text-emerald-600">↑ 1.8%</span></div></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- MAXIMUM PROFIT CONCEPT -->
+          <section class="py-20 bg-white border-t border-slate-200/80 w-full">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+              <div class="text-center max-w-2xl mx-auto space-y-3">
+                <span class="text-xs font-mono uppercase text-emerald-700 font-bold tracking-widest">Core Economic Philosophy</span>
+                <h2 class="text-3xl sm:text-4xl font-display font-extrabold text-slate-900">Highest Price ≠ Highest Profit</h2>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="p-7 rounded-3xl bg-slate-50 border border-slate-200 space-y-3">
+                  <h3 class="font-extrabold text-base text-slate-700">Option A: Mumbai APMC (Distant High Nominal Rate)</h3>
+                  <div class="text-3xl font-black font-mono text-slate-900">₹20.00 / KG</div>
+                  <div class="text-xs text-slate-500 space-y-1"><div>Transport: -₹2.00/KG</div><div>Mandi Cess: -₹0.50/KG</div></div>
+                  <div class="pt-2 border-t font-bold text-slate-800">Net Take-Home: <span class="text-xl font-black font-mono">₹17.50 / KG</span></div>
+                </div>
+                <div class="p-7 rounded-3xl bg-emerald-50 border-2 border-emerald-500 space-y-3 shadow-lg">
+                  <div class="flex justify-between items-center"><h3 class="font-extrabold text-base text-emerald-950">Option B: Nearby Verified Buyer</h3><span class="text-xs font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full">🏆 BETTER NET PROFIT</span></div>
+                  <div class="text-3xl font-black font-mono text-emerald-950">₹19.00 / KG</div>
+                  <div class="text-xs text-emerald-800 space-y-1"><div>Transport: -₹0.40/KG (Farm Gate)</div><div>Mandi Cess: -₹0.00</div></div>
+                  <div class="pt-2 border-t border-emerald-200 font-bold text-emerald-950">Net Take-Home: <span class="text-xl font-black font-mono text-emerald-700">₹18.60 / KG (+₹1.10/KG Higher)</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- FOOTER -->
+          <footer class="py-12 bg-slate-900 text-white border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="text-xs text-slate-400">
+                <div class="text-xl font-display font-black text-white">KRISHAK</div>
+                <p class="mt-1">WE LOVE MAXIMIZING PROFIT. Smart agricultural marketplace & decision engine.</p>
+              </div>
+              <div class="text-xs text-slate-400 text-center sm:text-right">
+                <p class="font-bold text-slate-300">Smart India Hackathon 2026</p>
+                <p>Problem Statement: Strengthening market linkages & price discovery for farmers</p>
+              </div>
+            </div>
+          </footer>
+        </div>
+      `;
+    }
+
+    function getFarmerLoginHTML() {
+      return `
+        <div class="min-h-screen bg-slate-50 flex flex-col justify-between">
+          <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-16 items-center gap-12">
+            <div class="hidden lg:block lg:col-span-6 space-y-6">
+              <h1 class="text-4xl font-display font-black text-slate-900 leading-tight">Empowering Farmers to Make Smarter Selling Decisions.</h1>
+              <p class="text-slate-600 text-sm">Access live APMC modal feeds, direct industrial buyer bids, AI price forecasts, and optimal profit allocation calculations.</p>
+            </div>
+            <div class="lg:col-span-6 max-w-md mx-auto w-full bg-white rounded-3xl p-6 sm:p-10 shadow-xl border space-y-6">
+              <div><h2 class="text-2xl font-extrabold">Farmer Sign In</h2><p class="text-xs text-slate-500">Access your profit optimization dashboard.</p></div>
+              <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-xs text-emerald-900 flex justify-between"><span>💡 <strong>Demo OTP: 123456</strong></span><span class="font-mono text-[10px] bg-emerald-200/70 px-2 py-0.5 rounded font-bold">Fast Autofill</span></div>
+              <form onsubmit="event.preventDefault(); loginAsFarmer();" class="space-y-4">
+                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Farmer ID</label><input type="text" value="FARM-2026-MH01" class="w-full p-3.5 bg-slate-50 border rounded-2xl text-sm font-bold" /></div>
+                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Mobile Number</label><input type="tel" value="9876543210" class="w-full p-3.5 bg-slate-50 border rounded-2xl text-sm font-bold" /></div>
+                <button type="submit" class="w-full py-4 bg-emerald-600 text-white font-black text-sm rounded-2xl shadow-lg">Login with Demo OTP 123456 →</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getBuyerLoginHTML() {
+      return `
+        <div class="min-h-screen bg-slate-50 flex flex-col justify-between">
+          <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-16 items-center gap-12">
+            <div class="hidden lg:block lg:col-span-6 space-y-6">
+              <h1 class="text-4xl font-display font-black text-slate-900 leading-tight">Direct Farm-Gate Sourcing for Processors & Traders.</h1>
+            </div>
+            <div class="lg:col-span-6 max-w-md mx-auto w-full bg-white rounded-3xl p-6 sm:p-10 shadow-xl border space-y-6">
+              <div><h2 class="text-2xl font-extrabold">Buyer Sign In</h2><p class="text-xs text-slate-500">Enterprise sourcing desk.</p></div>
+              <form onsubmit="event.preventDefault(); loginAsBuyer();" class="space-y-4">
+                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Buyer ID</label><input type="text" value="BUY-2026-PN08" class="w-full p-3.5 bg-slate-50 border rounded-2xl text-sm font-bold" /></div>
+                <div><label class="text-xs font-bold text-slate-500 uppercase block mb-1">Mobile Number</label><input type="tel" value="9822012345" class="w-full p-3.5 bg-slate-50 border rounded-2xl text-sm font-bold" /></div>
+                <button type="submit" class="w-full py-4 bg-slate-900 text-white font-black text-sm rounded-2xl shadow-lg">Login with Demo OTP 123456 →</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getFarmerDashboardHTML() {
+      return `
+        <div class="space-y-6">
+          <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+              <span class="text-xs font-mono uppercase text-emerald-700 font-bold">Verified Farmer Account</span>
+              <h1 class="text-2xl sm:text-3xl font-display font-extrabold text-slate-900 mt-0.5">Good Morning, Rahul 👋</h1>
+              <p class="text-xs text-slate-500 mt-1">📍 Nashik & Pune Cluster, Maharashtra • Primary: <strong>Nashik Red Onion</strong> • 8.5 Acres</p>
+            </div>
+            <div class="flex items-center space-x-3 w-full sm:w-auto">
+              <button onclick="navigateTo('list_produce')" class="flex-1 sm:flex-none px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm rounded-2xl shadow-lg">+ Sell My Produce</button>
+              <button onclick="navigateTo('best_deal')" class="flex-1 sm:flex-none px-6 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-extrabold text-xs sm:text-sm rounded-2xl">🏆 Find My Best Deal</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-3xl shadow-sm border space-y-2"><div class="text-xs font-bold text-slate-400 uppercase">Today's Market Price</div><div class="text-2xl font-black font-mono">₹18.40/KG <span class="text-xs font-bold text-emerald-600">+5.2%</span></div><p class="text-[11px] text-slate-500">Nashik APMC: ₹18.40 | Pune: ₹32.10</p></div>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border space-y-2"><div class="text-xs font-bold text-slate-400 uppercase">AI Predicted Price</div><div class="text-2xl font-black text-emerald-700 font-mono">₹19.00–₹22.00</div><p class="text-[11px] text-emerald-600">📈 Upward Trend (78% Conf)</p></div>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border space-y-2"><div class="text-xs font-bold text-slate-400 uppercase">Best Selling Opportunity</div><div class="text-2xl font-black text-blue-700 font-mono">₹68,500</div><p class="text-[11px] text-slate-500">ABC Processors (45 km Pickup)</p></div>
+            <div class="bg-emerald-950 text-white p-5 rounded-3xl shadow-sm space-y-2"><div class="text-xs font-bold text-emerald-300 uppercase">KRISHAK Strategy</div><div class="text-xl font-black text-emerald-400">SPLIT SALE (60/40) 🔵</div><p class="text-[11px] text-emerald-200">+₹8,500 better than single market</p></div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 shadow-sm border space-y-4">
+            <div class="flex justify-between items-center"><div><h3 class="text-lg font-extrabold">Active Produce Lots</h3></div><button onclick="navigateTo('list_produce')" class="text-xs font-bold text-emerald-700">+ Add Lot</button></div>
+            <div class="p-4 rounded-2xl bg-slate-50 border flex justify-between items-center">
+              <div><div class="text-xs font-mono text-slate-400 font-bold">LOT-2026-ON-01</div><h4 class="font-bold text-sm">Nashik Red Onion (500 KG / 5 Q)</h4><div class="text-xs text-slate-500">Expected: ₹18/KG • Grade A</div></div>
+              <button onclick="navigateTo('best_deal')" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-sm">Find Deal →</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getListProduceHTML() {
+      return `
+        <div class="max-w-3xl mx-auto space-y-6">
+          <div class="bg-gradient-to-r from-emerald-900 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
+            <h1 class="text-2xl sm:text-3xl font-display font-extrabold">Sell My Produce</h1>
+            <p class="text-xs sm:text-sm text-emerald-100/90 mt-1">6-step progressive crop listing wizard.</p>
+          </div>
+          <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border space-y-6">
+            <form onsubmit="event.preventDefault(); showToast('Produce published successfully! Visible to 84 buyers.'); navigateTo('farmer_lots');" class="space-y-6">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div><label class="text-xs font-bold text-slate-600 block mb-1">Crop Name *</label><select class="w-full p-3.5 bg-slate-50 border rounded-2xl text-xs font-bold"><option>🧅 Onion (Pyaz / कांदा)</option><option>🍅 Tomato</option><option>🥔 Potato</option></select></div>
+                <div><label class="text-xs font-bold text-slate-600 block mb-1">Variety *</label><input type="text" value="Nashik Red Onion" class="w-full p-3.5 bg-slate-50 border rounded-2xl text-xs font-bold" /></div>
+                <div><label class="text-xs font-bold text-slate-600 block mb-1">Quality Grade</label><select class="w-full p-3.5 bg-slate-50 border rounded-2xl text-xs font-bold"><option>Grade A (Export / Processing)</option><option>Grade B (Standard)</option></select></div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-6">
+                <div><label class="text-xs font-bold text-slate-600 block mb-1">Quantity *</label><input type="number" value="500" class="w-full p-3.5 bg-slate-50 border rounded-2xl font-mono text-base font-bold" /></div>
+                <div><label class="text-xs font-bold text-slate-600 block mb-1">Unit</label><div class="grid grid-cols-3 gap-2"><button type="button" class="p-3 bg-emerald-600 text-white font-bold text-xs rounded-2xl">KG</button><button type="button" class="p-3 bg-slate-50 border font-bold text-xs rounded-2xl">Quintal</button><button type="button" class="p-3 bg-slate-50 border font-bold text-xs rounded-2xl">Ton</button></div></div>
+              </div>
+              <div class="border-t pt-6 space-y-3">
+                <div class="grid grid-cols-3 gap-3 text-xs"><div class="bg-slate-50 p-3 rounded-2xl border">Market: <strong>₹15–₹18/KG</strong></div><div class="bg-emerald-50 p-3 rounded-2xl border text-emerald-900">Trend: <strong>📈 +5.2%</strong></div><div class="bg-blue-50 p-3 rounded-2xl border text-blue-900">AI: <strong>₹19–₹22/KG</strong></div></div>
+                <div><label class="text-xs font-bold text-slate-600 block mb-1">Expected Price (₹/KG) *</label><input type="number" value="18" class="w-full p-3.5 bg-slate-50 border rounded-2xl text-base font-bold font-mono" /></div>
+              </div>
+              <div class="border-t pt-6"><button type="button" onclick="showToast('GPS Location Captured: Nashik Cluster');" class="w-full py-3 bg-slate-50 border font-bold text-xs rounded-2xl">📍 [ 📍 Enable Current Location ]</button></div>
+              <button type="submit" class="w-full py-4 bg-emerald-600 text-white font-black text-sm rounded-2xl shadow-xl">Publish Produce ✓</button>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    function getBestDealHTML() {
+      return `
+        <div class="space-y-6">
+          <div class="bg-gradient-to-r from-emerald-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
+            <h1 class="text-2xl sm:text-3xl font-display font-extrabold text-white">Maximum Profit Optimization Engine</h1>
+            <p class="text-xs sm:text-sm text-emerald-100/90 max-w-2xl mt-1">KRISHAK calculates optimal selling allocation to maximize your expected net profit.</p>
+          </div>
+          <div class="bg-white rounded-3xl p-6 shadow-sm border space-y-4">
+            <h2 class="text-sm font-extrabold uppercase tracking-wider">Highest Price ≠ Highest Profit</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="p-5 rounded-2xl bg-slate-50 border space-y-2">
+                <div class="text-xs font-bold text-slate-500 uppercase">Option A: Mumbai Market (Distant High Nominal Rate)</div>
+                <div class="text-xl font-bold">Selling Price: ₹20 / KG</div>
+                <div class="text-xs text-slate-500">Transport: ₹2.00/KG • Mandi Charges: ₹0.50/KG</div>
+                <div class="text-base font-black text-slate-700 border-t pt-2">Net Realization: ₹17.50 / KG</div>
+              </div>
+              <div class="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2">
+                <div class="flex justify-between items-center"><div class="text-xs font-bold text-emerald-800 uppercase">Option B: Nearby Verified Buyer</div><span class="text-[10px] bg-emerald-600 text-white font-black px-2 py-0.5 rounded-full">🏆 HIGHEST NET PROFIT</span></div>
+                <div class="text-xl font-bold text-emerald-950">Selling Price: ₹19 / KG</div>
+                <div class="text-xs text-emerald-800">Transport: ₹0.40/KG • Mandi Charges: ₹0.00</div>
+                <div class="text-base font-black text-emerald-700 border-t border-emerald-200 pt-2">Net Realization: ₹18.60 / KG (+₹1.10/KG Higher Profit)</div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-emerald-950 text-white rounded-3xl p-6 sm:p-8 shadow-2xl border space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-emerald-800 pb-5">
+              <div><span class="text-xs font-mono uppercase text-emerald-400 font-bold">Optimal Multi-Channel Allocation</span><h3 class="text-2xl font-display font-black mt-1">Available Produce: 1,000 KG (10 Quintals) Onion</h3></div>
+              <div class="text-right bg-emerald-900/80 px-5 py-3 rounded-2xl border border-emerald-600/40"><div class="text-[11px] font-bold text-emerald-300 uppercase">Expected Total Net Profit</div><div class="text-3xl sm:text-4xl font-black font-mono">₹68,500</div></div>
+            </div>
+            <div class="bg-emerald-500/15 border border-emerald-400/30 p-4 rounded-2xl flex items-center space-x-3"><span class="text-2xl">📈</span><p class="text-xs sm:text-sm font-bold text-emerald-200">+₹8,500 Better Expected Profit compared to dumping all produce in distant single market.</p></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 space-y-1"><span class="text-xs font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded">600 KG Allocation</span><h4 class="font-bold text-white text-sm">→ ABC Food Processors</h4><div class="text-xs text-slate-400">₹19/KG • Farm Gate</div><div class="text-sm font-black text-emerald-400 font-mono pt-1 border-t border-slate-800">Net: ₹11,160</div></div>
+              <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 space-y-1"><span class="text-xs font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded">250 KG Allocation</span><h4 class="font-bold text-white text-sm">→ Metro Wholesale</h4><div class="text-xs text-slate-400">₹18.5/KG • 25 km</div><div class="text-sm font-black text-emerald-400 font-mono pt-1 border-t border-slate-800">Net: ₹4,475</div></div>
+              <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 space-y-1"><span class="text-xs font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded">150 KG Allocation</span><h4 class="font-bold text-white text-sm">→ Nashik APMC Yard</h4><div class="text-xs text-slate-400">₹17/KG • Immediate</div><div class="text-sm font-black text-emerald-400 font-mono pt-1 border-t border-slate-800">Net: ₹2,370</div></div>
+            </div>
+            <button onclick="showToast('Selling allocation executed!');" class="w-full py-4 bg-emerald-500 text-slate-950 font-black rounded-2xl text-sm shadow-xl">Execute This Selling Strategy →</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function getFarmerMarketsHTML() {
+      return `
+        <div class="space-y-6">
+          <div class="bg-white rounded-3xl p-6 shadow-sm border"><h1 class="text-2xl font-extrabold">Market Intelligence</h1></div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-5 rounded-3xl border space-y-2"><h3 class="font-bold">Pune APMC</h3><div class="text-2xl font-black font-mono">₹18.40/KG</div><div class="text-xs text-emerald-600 font-bold">+5.2% • High Demand</div></div>
+            <div class="bg-white p-5 rounded-3xl border space-y-2"><h3 class="font-bold">Nashik APMC</h3><div class="text-2xl font-black font-mono">₹18.10/KG</div><div class="text-xs text-emerald-600 font-bold">+3.2% • Steady</div></div>
+            <div class="bg-white p-5 rounded-3xl border space-y-2"><h3 class="font-bold">Mumbai APMC</h3><div class="text-2xl font-black font-mono">₹20.00/KG</div><div class="text-xs text-amber-700 font-bold">⚠️ High Freight (-₹2.50/KG)</div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getFarmerLotsHTML() {
+      return `
+        <div class="space-y-6">
+          <div class="bg-white rounded-3xl p-6 shadow-sm border flex justify-between items-center"><div><h1 class="text-2xl font-extrabold">My Produce</h1></div><button onclick="navigateTo('list_produce')" class="px-5 py-2.5 bg-emerald-600 text-white rounded-2xl text-xs font-bold">+ Sell Produce</button></div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-5 rounded-3xl border space-y-2">
+              <div class="flex justify-between text-xs"><span class="font-mono text-slate-400">LOT-2026-ON-01</span><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">ACTIVE</span></div>
+              <h3 class="font-bold text-lg">Nashik Red Onion (500 KG)</h3>
+              <div class="text-xs text-emerald-700 font-bold">🤝 3 Verified Buyer Inquiries Available</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getFarmerOffersHTML() {
+      return `
+        <div class="space-y-6">
+          <div class="bg-white rounded-3xl p-6 shadow-sm border"><h1 class="text-2xl font-extrabold">Buyer Offers</h1></div>
+          <div class="bg-white p-5 rounded-3xl border flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div><h3 class="font-bold">ABC Food Processors Ltd.</h3><p class="text-xs text-slate-500">Onion (Grade A) • 600 KG • ₹19/KG (Farm Gate Pickup)</p></div>
+            <button onclick="showToast('Offer accepted! Escrow contract initialized.');" class="px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold">Accept Offer ✓</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function getFarmerTxnsHTML() {
+      return `
+        <div class="space-y-6">
+          <div class="bg-white rounded-3xl p-6 shadow-sm border"><h1 class="text-2xl font-extrabold">Transactions & Escrow</h1></div>
+          <div class="bg-white p-6 rounded-3xl border space-y-3">
+            <div class="flex justify-between text-sm"><span class="font-bold">TXN-2026-8831 (600 KG Onion → ABC Processors)</span><span class="font-bold text-emerald-700 font-mono">₹11,400 Settled</span></div>
+            <div class="text-xs text-slate-500">1. Offer Accepted → 2. Lot Confirmed → 3. Pickup Scheduled → 4. Delivered → 5. Quality Verified → 6. Payment Released ✓</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getFarmerProfileHTML() {
+      return `
+        <div class="max-w-xl mx-auto space-y-6">
+          <div class="bg-white rounded-3xl p-6 shadow-sm border text-center space-y-2">
+            <div class="h-16 w-16 bg-emerald-100 text-emerald-800 rounded-3xl text-3xl flex items-center justify-center mx-auto">🌾</div>
+            <h1 class="text-2xl font-extrabold">${currentUser?.name || 'Rahul Jadhav'}</h1>
+            <p class="text-xs font-mono text-emerald-700 font-bold">${currentUser?.id || 'FARM-2026-MH01'}</p>
+          </div>
+          <button onclick="logoutUser();" class="w-full py-4 bg-rose-50 text-rose-700 font-black text-sm rounded-2xl border border-rose-200">Logout</button>
+        </div>
+      `;
+    }
+
+    function getBuyerDashboardHTML() {
+      return `
+        <div class="space-y-6">
+          <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div><span class="text-xs font-mono text-blue-700 font-bold">Enterprise Sourcing Desk</span><h1 class="text-2xl font-extrabold mt-0.5">${currentUser?.businessName || 'AgroFresh Processors Ltd.'}</h1></div>
+            <button onclick="navigateTo('post_req')" class="px-6 py-3 bg-blue-600 text-white font-black text-sm rounded-2xl">+ Post Requirement</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white p-5 rounded-3xl border"><div class="text-xs text-slate-400 font-bold">Active Tenders</div><div class="text-3xl font-black font-mono">2</div></div>
+            <div class="bg-white p-5 rounded-3xl border"><div class="text-xs text-slate-400 font-bold">Matching Farmers</div><div class="text-3xl font-black font-mono text-emerald-600">24</div></div>
+            <div class="bg-white p-5 rounded-3xl border"><div class="text-xs text-slate-400 font-bold">Shipments</div><div class="text-3xl font-black font-mono text-blue-600">1</div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getPostReqHTML() {
+      return `
+        <div class="max-w-3xl mx-auto space-y-6">
+          <div class="bg-gradient-to-r from-blue-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl"><h1 class="text-2xl font-extrabold">Post Procurement Requirement</h1></div>
+          <div class="bg-white rounded-3xl p-6 shadow-sm border space-y-4">
+            <form onsubmit="event.preventDefault(); showToast('Tender broadcasted! 24 matching farmers found (94% compatibility).'); navigateTo('buyer_dashboard');" class="space-y-4">
+              <div><label class="text-xs font-bold text-slate-600 block mb-1">Target Crop</label><input type="text" value="Onion (Nashik Red)" class="w-full p-3.5 bg-slate-50 border rounded-2xl text-xs font-bold" /></div>
+              <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-xs font-bold text-slate-600 block mb-1">Required Quantity (KG)</label><input type="number" value="2000" class="w-full p-3.5 bg-slate-50 border rounded-2xl font-mono text-sm font-bold" /></div>
+                <div><label class="text-xs font-bold text-slate-600 block mb-1">Max Price (₹/KG)</label><input type="number" value="19" class="w-full p-3.5 bg-slate-50 border rounded-2xl font-mono text-sm font-bold" /></div>
+              </div>
+              <button type="submit" class="w-full py-4 bg-blue-600 text-white font-black text-sm rounded-2xl">Post Buying Tender →</button>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderApp();
+    });
+  </script>
+</body>
+
+</html>

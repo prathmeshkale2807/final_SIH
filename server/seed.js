@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { connectDB } from './config/db.js';
 import { Farmer } from './models/Farmer.js';
 import { Buyer } from './models/Buyer.js';
 import { Produce } from './models/Produce.js';
@@ -9,13 +9,11 @@ import { Transaction } from './models/Transaction.js';
 
 dotenv.config();
 
-const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/krishak_db';
-
 async function seedDatabase() {
   try {
-    console.log(`Connecting to MongoDB at ${mongoURI}...`);
-    await mongoose.connect(mongoURI);
-    console.log('MongoDB Connected. Clearing existing collections...');
+    console.log('Connecting to Firebase Cloud Firestore...');
+    await connectDB();
+    console.log('Firebase Connected. Clearing existing collections...');
 
     await Promise.all([
       Farmer.deleteMany({}),
@@ -26,7 +24,7 @@ async function seedDatabase() {
       Transaction.deleteMany({}),
     ]);
 
-    console.log('Inserting seed records...');
+    console.log('Inserting seed records into Firebase Firestore...');
 
     // 1. Seed Farmer
     const farmer = await Farmer.create({
@@ -128,7 +126,6 @@ async function seedDatabase() {
     console.log(`  Requirement: ${requirement.crop} ${requirement.quantity} KG (${requirement.requirementId})`);
     console.log('=============================================');
 
-    await mongoose.disconnect();
     process.exit(0);
   } catch (error) {
     console.error('Seeding error:', error.message);

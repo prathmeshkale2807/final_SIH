@@ -14,14 +14,14 @@ export const FarmerRegister = () => {
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    name: 'Rahul Jadhav',
-    mobile: '9876543210',
+    name: '',
+    mobile: '',
     primaryCrop: 'Onion',
-    otherCrops: 'Tomato, Soybean',
-    landArea: '8.5',
-    village: 'Ausa',
-    taluka: 'Ausa',
-    district: 'Latur',
+    otherCrops: '',
+    landArea: '',
+    village: '',
+    taluka: '',
+    district: '',
     state: 'Maharashtra',
     gpsCoords: null
   });

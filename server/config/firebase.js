@@ -53,6 +53,17 @@ export const getFirebaseAdminAuth = () => {
   return isInitialized ? admin.auth() : null;
 };
 
+export const getFirestoreDB = () => {
+  if (!isInitialized) {
+    initFirebaseAdmin();
+  }
+  try {
+    return isInitialized ? admin.firestore() : null;
+  } catch (err) {
+    return null;
+  }
+};
+
 /**
  * Verifies a Firebase ID Token sent from the frontend
  */
@@ -65,3 +76,4 @@ export const verifyFirebaseIdToken = async (idToken) => {
 };
 
 export default admin;
+

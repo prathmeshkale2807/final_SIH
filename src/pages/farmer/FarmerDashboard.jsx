@@ -46,15 +46,15 @@ export const FarmerDashboard = () => {
             <div className="inline-flex items-center space-x-1.5 bg-emerald-900/40 backdrop-blur-md px-3 py-1 rounded-full text-xs text-emerald-100 font-mono font-semibold border border-white/10">
               <span>☀️ 29°C Sunny</span>
               <span>•</span>
-              <span>Ausa, Latur</span>
+              <span>{user?.village || user?.district ? `${user.village ? user.village + ', ' : ''}${user.district || user.state || 'Maharashtra'}` : (user?.location || 'Maharashtra')}</span>
             </div>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            {t('good_morning', 'Good Morning')}, {user?.name || 'Rahul Jadhav'} 👋
+            {t('good_morning', 'Good Morning')}, {user?.name || user?.farmerName || 'Farmer'} 👋
           </h1>
           <p className="text-xs sm:text-sm text-emerald-50 leading-relaxed font-medium">
-            {t('primary_crop_label', 'Primary Crop:')} <strong className="text-white font-black underline decoration-harvest-400 underline-offset-2">Onion (कांदा / Pyaz)</strong> • 8.5 Acres • 100 Quintals {t('ready_for_selling', 'Ready For Selling')}
+            {t('primary_crop_label', 'Primary Crop:')} <strong className="text-white font-black underline decoration-harvest-400 underline-offset-2">{user?.primaryCrop || 'Onion (कांदा / Pyaz)'}</strong> • {user?.landArea ? (String(user.landArea).includes('Acres') ? user.landArea : `${user.landArea} Acres`) : 'Farm'} • {t('ready_for_selling', 'Ready For Selling')}
           </p>
         </div>
 

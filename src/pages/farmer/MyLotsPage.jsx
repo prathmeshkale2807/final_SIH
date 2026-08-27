@@ -1,25 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 
 export const MyLotsPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { showToast } = useApp ? useApp() : { showToast: () => {} };
+
+  const computedLoc = user?.location || [user?.village, user?.taluka, user?.district, user?.state].filter(Boolean).join(', ') || 'Farm Gate / Shed';
 
   const [lots, setLots] = useState([
     {
       id: 'LOT-2026-ON-01',
-      crop: 'Onion (Nashik Garwa Red)',
-      grade: 'Grade A (55mm+ Export Quality)',
+      crop: `${user?.primaryCrop || 'Onion'} (Grade A / Standard)`,
+      grade: 'Grade A (Export / Processing Quality)',
       qty: '100 Quintals',
-      harvestDate: '24 Aug 2026',
+      harvestDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       freshness: 'Fresh Harvest (< 48 hrs)',
-      expectedPrice: '₹1,480 / q',
+      expectedPrice: '₹1,820 / q',
       status: 'ACTIVE',
       inquiries: 3,
       moisture: '8.5%',
       qrCodeGenerated: true,
-      farmLocation: 'Gat No. 42, Farm Shed, Ausa, Latur',
+      farmLocation: computedLoc,
     },
     {
       id: 'LOT-2026-TM-02',
@@ -33,7 +37,7 @@ export const MyLotsPage = () => {
       inquiries: 5,
       moisture: '12.0%',
       qrCodeGenerated: true,
-      farmLocation: 'Gat No. 42, Farm Shed, Ausa, Latur',
+      farmLocation: computedLoc,
     },
   ]);
 

@@ -1,4 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
+import { getFirestore } from 'firebase/firestore';
 import {
   getAuth,
   RecaptchaVerifier,
@@ -39,9 +41,21 @@ if (typeof window !== 'undefined') {
 // Initialize Firebase App exactly once
 export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+// Initialize Firebase Analytics safely in browser
+export let analytics = null;
+if (typeof window !== 'undefined') {
+  isAnalyticsSupported().then((supported) => {
+    if (supported) {
+      analytics = getAnalytics(app);
+    }
+  }).catch(() => {});
+}
 
 if (typeof window !== 'undefined') {
   console.log('[Firebase Diagnostics] Firebase Auth initialized:', !!auth);
+  console.log('[Firebase Diagnostics] Cloud Firestore initialized:', !!db);
 }
 
 // Enable browser session persistence

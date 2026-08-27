@@ -1,28 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { LanguageSwitcher } from '../../components/common/LanguageSwitcher';
+import { firestoreService } from '../../services/firestoreService';
 
 export const FarmerProfilePage = () => {
-  const { user, logout } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const { showToast } = useApp ? useApp() : { showToast: () => {} };
+
+  const getComputedLocation = (u) => {
+    if (u?.location) return u.location;
+    const parts = [u?.village, u?.taluka, u?.district, u?.state].filter(Boolean);
+    return parts.length > 0 ? parts.join(', ') : 'Maharashtra';
+  };
 
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: user?.name || user?.businessName || 'Rahul Jadhav',
-    mobile: user?.mobile || '9876543210',
-    location: user?.location || 'Ausa, Latur, Maharashtra',
-    primaryCrop: 'Onion (Nashik Red / Garwa)',
-    landArea: '8.5 Acres',
-    bankName: 'HDFC Bank Ltd.',
-    accountNo: '•••• •••• 4019',
-    ifsc: 'HDFC0001824',
-    escrowKyc: 'KYC Verified (Aadhaar & Land Record 7/12 Linked ✓)',
+    name: user?.name || user?.farmerName || user?.businessName || 'Farmer',
+    mobile: user?.mobile || '',
+    location: getComputedLocation(user),
+    primaryCrop: user?.primaryCrop || 'Onion',
+    landArea: user?.landArea ? (String(user.landArea).includes('Acres') ? user.landArea : `${user.landArea} Acres`) : '5 Acres',
+    bankName: user?.bankName || 'State Bank of India',
+    accountNo: user?.accountNo || '•••• •••• ' + (user?.mobile ? user.mobile.slice(-4) : '4019'),
+    ifsc: user?.ifsc || 'SBIN0001824',
+    escrowKyc: 'KYC Verified (Direct Farm Escrow Linked ✓)',
   });
 
-  const handleSaveProfile = (e) => {
+  useEffect(() => {
+    if (user) {
+      setProfileData((prev) => ({
+        ...prev,
+        name: user.name || user.farmerName || user.businessName || prev.name,
+        mobile: user.mobile || prev.mobile,
+        location: getComputedLocation(user),
+        primaryCrop: user.primaryCrop || prev.primaryCrop,
+        landArea: user.landArea ? (String(user.landArea).includes('Acres') ? user.landArea : `${user.landArea} Acres`) : prev.landArea,
+      }));
+    }
+  }, [user]);
+
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
     setIsEditing(false);
+    
+    // Save to Cloud Firestore directly
+    await firestoreService.saveFarmer({
+      ...user,
+      ...profileData,
+    });
+
+    if (updateUser) {
+      updateUser(profileData);
+    }
+    
     showToast('✓ Profile & Farm details updated successfully!', 'success');
   };
 
@@ -42,7 +73,7 @@ export const FarmerProfilePage = () => {
           </div>
           <h1 className="text-2xl font-black text-slate-900">{profileData.name}</h1>
           <p className="text-xs font-mono text-emerald-700 font-bold mt-0.5">
-            ID: {user?.id || (user?.role === 'buyer' ? 'BUY-2026-PN08' : 'FARM-2026-MH01')}
+            ID: {user?.farmerId || user?.shopId || user?.id || (user?.role === 'buyer' ? 'Buyer Account' : 'Farmer Account')}
           </p>
         </div>
 

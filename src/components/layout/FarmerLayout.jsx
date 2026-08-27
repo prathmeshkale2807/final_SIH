@@ -98,8 +98,8 @@ export const FarmerLayout = () => {
               🌾
             </div>
             <div className="overflow-hidden text-left leading-tight">
-              <div className="text-xs font-black text-slate-900 truncate">{user?.name || 'Rahul Jadhav'}</div>
-              <div className="text-[10px] text-emerald-700 font-mono font-bold truncate">{user?.id || 'FARM-2026-MH01'}</div>
+              <div className="text-xs font-black text-slate-900 truncate">{user?.name || user?.farmerName || 'Farmer'}</div>
+              <div className="text-[10px] text-emerald-700 font-mono font-bold truncate">{user?.farmerId || user?.id || user?.mobile || 'Farmer Account'}</div>
             </div>
           </div>
           

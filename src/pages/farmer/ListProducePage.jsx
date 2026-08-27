@@ -1,31 +1,34 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { LocationPicker } from '../../components/auth/LocationPicker';
+import { firestoreService } from '../../services/firestoreService';
 
 export const ListProducePage = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { user } = useAuth();
   const { showToast } = useApp();
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    cropName: 'Onion',
-    variety: 'Nashik Red Onion',
-    category: 'Vegetables / Allium',
+    cropName: user?.primaryCrop || 'Onion',
+    variety: 'Grade Standard',
+    category: 'Vegetables / Crops',
     quantity: '500',
     unit: 'KG', // KG | Quintal | Ton
     qualityGrade: 'Grade A (Export / Processing Quality)',
     size: 'Medium (45mm - 60mm)',
-    harvestDate: '2026-08-24',
+    harvestDate: new Date().toISOString().split('T')[0],
     freshness: 'Fresh Harvest (< 48 hrs)',
     expectedPrice: '18', // per KG
-    village: 'Dindori',
-    taluka: 'Dindori',
-    district: 'Nashik',
-    state: 'Maharashtra',
-    gpsCoords: null
+    village: user?.village || '',
+    taluka: user?.taluka || '',
+    district: user?.district || 'Nashik',
+    state: user?.state || 'Maharashtra',
+    gpsCoords: user?.gpsCoords || null
   });
 
   const benchmarkData = {
@@ -35,9 +38,14 @@ export const ListProducePage = () => {
     confidence: '78%'
   };
 
-  const handlePublish = (e) => {
+  const handlePublish = async (e) => {
     e.preventDefault();
-    showToast(`Produce listing published! ${formData.quantity} ${formData.unit} of ${formData.variety} is now live.`);
+    await firestoreService.saveProduce({
+      ...formData,
+      farmerId: user?.farmerId || user?.id || 'FARM-NEW',
+      farmerName: user?.name || user?.farmerName || 'Farmer',
+    });
+    showToast(`Produce listing published! ${formData.quantity} ${formData.unit} of ${formData.cropName} is now live.`);
     navigate('/farmer/lots');
   };
 

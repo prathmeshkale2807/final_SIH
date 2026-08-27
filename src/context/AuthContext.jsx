@@ -52,6 +52,14 @@ export const AuthProvider = ({ children }) => {
     } finally { setLoading(false); }
   };
 
+  const updateUser = (updatedData) => {
+    setUser((prev) => {
+      const merged = { ...prev, ...updatedData };
+      localStorage.setItem('krishak_auth_user', JSON.stringify(merged));
+      return merged;
+    });
+  };
+
   const logout = async () => {
     await authService.logout();
     setUser(null);
@@ -60,6 +68,8 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{
       user,
+      setUser,
+      updateUser,
       isAuthenticated: !!user,
       isFarmer: user?.role === 'farmer',
       isBuyer: user?.role === 'buyer',

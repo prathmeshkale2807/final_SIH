@@ -13,13 +13,13 @@ export const BuyerRegister = () => {
   const { showToast } = useApp();
 
   const [formData, setFormData] = useState({
-    businessName: 'AgroFresh Traders & Processors',
-    ownerName: 'Vikram Mehta',
-    mobile: '9822012345',
+    businessName: '',
+    ownerName: '',
+    mobile: '',
     businessType: 'Food Processor',
     cropInterests: ['Onion', 'Tomato'],
-    monthlyRequirement: 200,
-    city: 'Pune',
+    monthlyRequirement: '',
+    city: '',
     state: 'Maharashtra',
     agreed: true
   });

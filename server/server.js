@@ -41,7 +41,7 @@ app.use(
 );
 app.use(express.json());
 
-// 4. API Health endpoint reporting real backend, MongoDB, and Firebase status
+// 4. API Health endpoint reporting real backend and Firebase status
 app.get('/api/health', (req, res) => {
   const connected = isDBConnected();
   res.status(200).json({
@@ -49,7 +49,7 @@ app.get('/api/health', (req, res) => {
     backend: 'running',
     database: getDBStatus(),
     databaseName: getDBName(),
-    authMode: process.env.AUTH_MODE || 'mock',
+    authMode: process.env.AUTH_MODE || 'firebase',
     timestamp: new Date().toISOString(),
   });
 });
@@ -61,9 +61,10 @@ app.use('/api', apiRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-// 7. Connect to MongoDB and start server
+// 7. Connect to Firebase and start server
 async function startServer() {
   await connectDB();
+
 
   // Initialize Firebase Admin SDK safely (standby in mock mode)
   initFirebaseAdmin();

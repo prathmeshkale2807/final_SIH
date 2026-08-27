@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { SplashScreen } from './components/common/SplashScreen';
 import { LandingPage } from './pages/public/LandingPage';
 import { FarmerLogin } from './pages/auth/FarmerLogin';
 import { FarmerRegister } from './pages/auth/FarmerRegister';
@@ -25,6 +26,7 @@ import { FindFarmersPage } from './pages/buyer/FindFarmersPage';
 import { FpoDashboard } from './pages/fpo/FpoDashboard';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { useApp } from './context/AppContext';
+import { useAuth } from './context/AuthContext';
 import { Navbar } from './components/common/Navbar';
 
 // Auto scroll-to-top on route navigation
@@ -38,12 +40,33 @@ const ScrollToTop = () => {
 
 export const App = () => {
   const { toast, clearToast } = useApp();
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Startup Splash Screen: Shown on first initial load in session or at /splash
+  const [showSplash, setShowSplash] = useState(() => {
+    if (location.pathname === '/splash') return true;
+    const seen = sessionStorage.getItem('krishak_splash_seen_v2');
+    return !seen && !isAuthenticated && location.pathname === '/';
+  });
+
+  const handleSplashComplete = () => {
+    sessionStorage.setItem('krishak_splash_seen_v2', 'true');
+    setShowSplash(false);
+    if (!isAuthenticated) {
+      navigate('/login/farmer');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased selection:bg-emerald-500 selection:text-white">
       <ScrollToTop />
 
-      {/* GLOBAL TOAST NOTIFICATION - 100% SOLID OPAQUE */}
+      {/* 1. STARTUP ANIMATED SPLASH SCREEN OVERLAY */}
+      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+
+      {/* 2. GLOBAL TOAST NOTIFICATION - SOLID OPAQUE */}
       {toast && (
         <div className="fixed top-20 right-4 z-[100] bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl shadow-slate-950/40 flex items-center space-x-3 text-xs font-bold border-2 border-slate-700 animate-fade-in-up">
           <span className="text-base">🔔</span>
@@ -55,11 +78,15 @@ export const App = () => {
       )}
 
       <Routes>
+        {/* DEDICATED SPLASH ROUTE */}
+        <Route path="/splash" element={<SplashScreen onComplete={() => navigate('/login/farmer')} />} />
+
         {/* PUBLIC WEBSITE (FULL-WIDTH MODERN LANDING EXPERIENCE AT /) */}
         <Route path="/" element={<><Navbar /><div className="animate-fade-in"><LandingPage /></div></>} />
         <Route path="/welcome" element={<Navigate to="/" replace />} />
 
-        {/* AUTHENTICATION ROUTES (SPLIT DESKTOP / APP MOBILE) */}
+        {/* AUTHENTICATION ROUTES */}
+        <Route path="/login" element={<Navigate to="/login/farmer" replace />} />
         <Route path="/login/farmer" element={<div className="animate-fade-in"><FarmerLogin /></div>} />
         <Route path="/register/farmer" element={<div className="animate-fade-in"><FarmerRegister /></div>} />
         <Route path="/login/buyer" element={<div className="animate-fade-in"><BuyerLogin /></div>} />
@@ -69,7 +96,7 @@ export const App = () => {
         {/* FPO HUB (PUBLIC / COMMUNITY) */}
         <Route path="/fpo" element={<><Navbar /><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in"><FpoDashboard /></div></>} />
 
-        {/* AUTHENTICATED ADMIN PORTAL (ONLY ACCESSIBLE TO LOGGED-IN ADMIN) */}
+        {/* AUTHENTICATED ADMIN PORTAL */}
         <Route element={<ProtectedRoute allowedRole="admin" />}>
           <Route path="/admin" element={<><Navbar /><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in"><AdminDashboard /></div></>} />
         </Route>

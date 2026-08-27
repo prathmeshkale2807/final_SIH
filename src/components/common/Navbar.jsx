@@ -69,8 +69,22 @@ export const Navbar = () => {
     };
   }, []);
 
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+
+  // Close profile dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('#krishak-profile-container')) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   const handleLogout = async () => {
     try {
+      setProfileDropdownOpen(false);
       await logout();
       if (showToast) showToast('Signed out of KRISHAK session', 'info');
       navigate('/');
@@ -82,6 +96,7 @@ export const Navbar = () => {
 
   const scrollToSection = (id) => {
     setMobileMenuOpen(false);
+    setProfileDropdownOpen(false);
     if (location.pathname !== '/') {
       navigate('/');
       setTimeout(() => {
@@ -187,8 +202,6 @@ export const Navbar = () => {
           </Link>
         </div>
 
-
-
         {/* AUTHENTICATED FARMER DESKTOP NAV */}
         {isAuthenticated && isFarmer && (
           <nav className="hidden md:flex items-center space-x-1 bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80 text-xs font-extrabold shadow-inner">
@@ -274,7 +287,7 @@ export const Navbar = () => {
           </nav>
         )}
 
-        {/* RIGHT ACTION CONTROLS - REBALANCED, SPACIOUS & CLEAR HIERARCHY */}
+        {/* RIGHT ACTION CONTROLS - REBALANCED, PROFILE AVATAR & LOGOUT */}
         <div className="flex items-center space-x-3">
           
           {/* UTILITY CONTROLS: LANGUAGE & NOTIFICATIONS */}
@@ -287,7 +300,7 @@ export const Navbar = () => {
           <div className="hidden sm:block h-6 w-px bg-slate-200"></div>
 
           {!isAuthenticated ? (
-            /* SINGLE CLEAN SIGN IN BUTTON */
+            /* SINGLE CLEAN SIGN IN BUTTON FOR GUESTS */
             <div className="hidden sm:flex items-center">
               <Link
                 to="/login/farmer"
@@ -298,49 +311,172 @@ export const Navbar = () => {
               </Link>
             </div>
           ) : (
-            /* AUTHENTICATED USER BADGE & LOGOUT */
-            <div className="flex items-center space-x-2">
-              <div className="hidden sm:flex items-center space-x-2.5 pl-2 py-1 pr-3 bg-slate-100 rounded-2xl border border-slate-200/80 shadow-xs">
+            /* AUTHENTICATED USER PROFILE DROPDOWN & LOGOUT BUTTON */
+            <div className="flex items-center space-x-2.5 relative" id="krishak-profile-container">
+              
+              {/* PROFILE PILL BUTTON */}
+              <button
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                className="flex items-center space-x-2 pl-2 py-1 pr-3 bg-slate-100 hover:bg-slate-200/80 rounded-2xl border border-slate-200/80 hover:border-emerald-300 shadow-xs transition-all cursor-pointer group"
+                aria-expanded={profileDropdownOpen}
+              >
                 <div
                   className={`h-8 w-8 rounded-xl flex items-center justify-center font-bold text-sm shadow-xs ${
                     isAdmin
                       ? 'bg-slate-900 text-emerald-400'
                       : isFarmer
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-blue-100 text-blue-800'
+                      ? 'bg-emerald-600 text-white font-black'
+                      : 'bg-blue-600 text-white font-black'
                   }`}
                 >
                   {isAdmin ? '⚙️' : isFarmer ? '🌾' : '🏪'}
                 </div>
-                <div className="text-left leading-tight">
+                <div className="text-left leading-tight hidden sm:block">
                   <div className="text-xs font-black text-slate-900 max-w-[110px] truncate">
                     {isAdmin ? 'SuperAdmin' : user?.name || user?.businessName || 'User'}
                   </div>
                   <div
-                    className={`text-[10px] font-mono font-extrabold capitalize ${
+                    className={`text-[9.5px] font-mono font-extrabold capitalize ${
                       isAdmin ? 'text-emerald-700' : isFarmer ? 'text-emerald-700' : 'text-blue-700'
                     }`}
                   >
-                    {user?.role || 'Member'}
+                    {user?.role || (isFarmer ? 'Farmer' : 'Buyer')}
                   </div>
                 </div>
-              </div>
+                <span className="text-slate-400 text-xs group-hover:text-slate-700 transition-transform">
+                  {profileDropdownOpen ? '▲' : '▼'}
+                </span>
+              </button>
 
+              {/* DIRECT LOGOUT BUTTON */}
               <button
                 onClick={handleLogout}
                 title="Sign out of your account"
-                className="p-2 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-300 text-slate-600 hover:text-rose-600 rounded-xl text-xs font-extrabold transition-all active:scale-95 cursor-pointer flex items-center space-x-1"
+                className="p-2.5 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-300 text-slate-600 hover:text-rose-600 rounded-xl text-xs font-extrabold transition-all active:scale-95 cursor-pointer flex items-center space-x-1"
               >
-                <i className="ri-logout-box-r-line text-sm"></i>
-                <span className="hidden sm:inline">Sign Out</span>
+                <span>🚪</span>
+                <span className="hidden lg:inline text-[11px]">Logout</span>
               </button>
+
+              {/* FLOATING PROFILE DROPDOWN MENU */}
+              {profileDropdownOpen && (
+                <div className="absolute right-0 top-12 mt-2 w-72 bg-white/98 backdrop-blur-2xl rounded-3xl shadow-2xl border border-slate-200/90 py-3 z-50 animate-fade-in-up space-y-2 text-xs">
+                  
+                  {/* DROPDOWN USER HEADER */}
+                  <div className="px-4 py-3 bg-gradient-to-r from-emerald-50/80 to-teal-50/60 border-b border-slate-100 flex items-center space-x-3 rounded-t-2xl">
+                    <div className="h-12 w-12 rounded-2xl bg-emerald-600 text-white font-black text-xl flex items-center justify-center shadow-md shadow-emerald-700/20">
+                      {isFarmer ? '🌾' : isBuyer ? '🏪' : '⚙️'}
+                    </div>
+                    <div className="leading-tight flex-1 min-w-0">
+                      <div className="font-extrabold text-slate-900 text-sm truncate">
+                        {user?.name || user?.businessName || (isFarmer ? 'Rahul Jadhav' : 'AgroFresh')}
+                      </div>
+                      <div className="text-[11px] text-slate-500 font-medium truncate">
+                        {user?.mobile || '+91 9876543210'}
+                      </div>
+                      <span className="inline-block mt-1 text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full">
+                        ✓ Verified {isFarmer ? 'Farmer' : 'Buyer'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* NAVIGATION LINKS */}
+                  <div className="px-2 space-y-1 text-slate-700 font-bold">
+                    <Link
+                      to={isFarmer ? '/farmer/dashboard' : '/buyer/dashboard'}
+                      onClick={() => setProfileDropdownOpen(false)}
+                      className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-950 transition-all"
+                    >
+                      <span>📊</span>
+                      <span>My Dashboard</span>
+                    </Link>
+
+                    {isFarmer ? (
+                      <>
+                        <Link
+                          to="/farmer/list-produce"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-950 transition-all"
+                        >
+                          <span>🌾</span>
+                          <span>List New Harvest Lot</span>
+                        </Link>
+                        <Link
+                          to="/farmer/best-deal"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-950 transition-all"
+                        >
+                          <span>🏆</span>
+                          <span>Profit Optimizer</span>
+                        </Link>
+                        <Link
+                          to="/farmer/offers"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-950 transition-all"
+                        >
+                          <span>🏢</span>
+                          <span>Buyer Procurement Bids</span>
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          to="/buyer/find-farmers"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-950 transition-all"
+                        >
+                          <span>👨‍🌾</span>
+                          <span>Find Verified Farmers</span>
+                        </Link>
+                        <Link
+                          to="/buyer/post-requirement"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-950 transition-all"
+                        >
+                          <span>📝</span>
+                          <span>Post Sourcing Tender</span>
+                        </Link>
+                      </>
+                    )}
+
+                    <Link
+                      to={isFarmer ? '/farmer/transactions' : '/buyer/shipments'}
+                      onClick={() => setProfileDropdownOpen(false)}
+                      className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-emerald-950 transition-all"
+                    >
+                      <span>🛡️</span>
+                      <span>Escrow Payouts & Safety</span>
+                    </Link>
+
+                    <Link
+                      to="/splash"
+                      onClick={() => setProfileDropdownOpen(false)}
+                      className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-amber-50 hover:text-amber-900 transition-all text-amber-800"
+                    >
+                      <span>✨</span>
+                      <span>Replay Animated Intro</span>
+                    </Link>
+                  </div>
+
+                  {/* LOGOUT BUTTON */}
+                  <div className="px-2 pt-2 border-t border-slate-100">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-black transition-all cursor-pointer"
+                    >
+                      <span>🚪</span>
+                      <span>Sign Out of KRISHAK</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
           {/* MOBILE MENU TOGGLE BUTTON */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2.5 rounded-xl border border-slate-200 hover:border-emerald-300 bg-slate-100 text-slate-800 text-lg flex items-center justify-center lg:hidden transition-all active:scale-95"
+            className="p-2.5 rounded-xl border border-slate-200 hover:border-emerald-300 bg-slate-100 text-slate-800 text-lg flex items-center justify-center lg:hidden transition-all active:scale-95 cursor-pointer"
             aria-label="Toggle Mobile Navigation"
           >
             {mobileMenuOpen ? '✕' : '☰'}

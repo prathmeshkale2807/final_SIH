@@ -87,7 +87,7 @@ export const FarmerLogin = () => {
         if (res.success) {
           const name = res.user?.name || res.user?.farmerName || 'Farmer';
           showToast(language === 'mr' ? `स्वागत आहे, ${name}!` : `Welcome, ${name}!`, 'success');
-          navigate('/farmer/dashboard');
+          navigate('/');
         } else {
           showToast(res.message || 'Authentication failed', 'error');
         }
@@ -127,7 +127,7 @@ export const FarmerLogin = () => {
       if (res.success) {
         const name = res.user?.name || res.user?.farmerName || 'Farmer';
         showToast(language === 'mr' ? `स्वागत आहे, ${name}!` : `Welcome, ${name}!`, 'success');
-        navigate('/farmer/dashboard');
+        navigate('/');
       } else {
         showToast(res.message || (language === 'mr' ? 'अवैध OTP. डेमो: 123456' : 'Invalid OTP. Demo: 123456'), 'error');
       }
@@ -144,7 +144,7 @@ export const FarmerLogin = () => {
       const res = await loginFarmer({ mobile: '9876543210', otp: '123456' });
       if (res.success) {
         showToast(language === 'mr' ? 'शेतकरी लॉगिन यशस्वी!' : 'Farmer Login Successful!', 'success');
-        navigate('/farmer/dashboard');
+        navigate('/');
       }
     } finally {
       setLoading(false);
@@ -218,25 +218,34 @@ export const FarmerLogin = () => {
             <LanguageSwitcher />
           </div>
 
+          {/* DUAL ROLE SWITCHER: FARMER vs BUYER */}
+          <div className="p-1 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner flex items-center gap-1">
+            <button
+              type="button"
+              className="flex-1 py-2 px-3 bg-emerald-600 text-white rounded-xl text-xs sm:text-sm font-extrabold shadow-md shadow-emerald-700/25 flex items-center justify-center space-x-1.5"
+            >
+              <span>🌾</span>
+              <span>{language === 'mr' ? 'शेतकरी लॉगिन' : 'Farmer Login'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/login/buyer')}
+              className="flex-1 py-2 px-3 text-slate-600 hover:text-blue-700 hover:bg-white/80 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+            >
+              <span>🏪</span>
+              <span>{language === 'mr' ? 'खरेदीदार पोर्टल' : 'Buyer Portal'}</span>
+            </button>
+          </div>
+
           {/* EMBLEM & WELCOME HEADING */}
           <div className="text-center space-y-3 pt-1">
-            {/* CIRCULAR WHEAT BADGE */}
-            <div className="h-16 w-16 rounded-full bg-emerald-50 border-2 border-emerald-200 mx-auto flex items-center justify-center shadow-md shadow-emerald-500/10">
-              <svg viewBox="0 0 100 100" className="w-10 h-10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <g transform="translate(18, 12)">
-                  <path d="M12 42C12 25 22 10 32 6C42 10 52 25 52 42" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
-                  <ellipse cx="32" cy="18" rx="4" ry="7" transform="rotate(-15 32 18)" fill="#EAB308" />
-                  <ellipse cx="32" cy="28" rx="4.5" ry="8" transform="rotate(15 32 28)" fill="#F59E0B" />
-                  <ellipse cx="32" cy="38" rx="5" ry="9" fill="#D97706" />
-                  <ellipse cx="20" cy="25" rx="3.5" ry="6.5" transform="rotate(-30 20 25)" fill="#EAB308" />
-                  <ellipse cx="18" cy="35" rx="4" ry="7" transform="rotate(-20 18 35)" fill="#F59E0B" />
-                  <ellipse cx="44" cy="25" rx="3.5" ry="6.5" transform="rotate(30 44 25)" fill="#EAB308" />
-                  <ellipse cx="46" cy="35" rx="4" ry="7" transform="rotate(20 46 35)" fill="#F59E0B" />
-                </g>
-                <path d="M10 58C30 52 60 48 90 62C80 72 50 82 10 70Z" fill="#008744" />
-                <path d="M14 66C38 60 65 58 86 70C74 80 44 86 14 74Z" fill="#10B981" />
-                <path d="M22 74C40 70 60 68 76 76C68 83 45 87 22 79Z" fill="#047857" />
-              </svg>
+            {/* CIRCULAR KRISHAK LOGO BADGE */}
+            <div className="h-20 w-20 rounded-full bg-white border-2 border-emerald-300 mx-auto flex items-center justify-center p-2 shadow-lg shadow-emerald-500/15">
+              <img
+                src="/krishak_logo.png"
+                alt="Krishak Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
 
             <div>

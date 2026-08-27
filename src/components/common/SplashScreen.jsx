@@ -1,0 +1,168 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+export const SplashScreen = ({ onComplete }) => {
+  const navigate = useNavigate();
+  const [fadingOut, setFadingOut] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 390));
+
+  // Responsive dynamic resize listener for mobile devices
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // 8 Topic-Related Agricultural Feature Nodes
+  const featureNodes = [
+    { id: 1, title: 'Soil Moisture', mrTitle: 'ओलावा', icon: '💧', angle: -90 },     // Top
+    { id: 2, title: 'Connectivity', mrTitle: 'कनेक्टिव्हिटी', icon: '📶', angle: -45 },
+    { id: 3, title: 'Weather & Temp', mrTitle: 'हवामान', icon: '🌡️', angle: 0 },      // Right
+    { id: 4, title: 'Farm Alerts', mrTitle: 'सतर्कता', icon: '⚠️', angle: 45 },
+    { id: 5, title: 'Crop Health', mrTitle: 'पीक आरोग्य', icon: '🌾', angle: 90 },    // Bottom
+    { id: 6, title: 'Live Mandi', mrTitle: 'बाजार भाव', icon: '📊', angle: 135 },
+    { id: 7, title: 'Direct Buyers', mrTitle: 'खरेदीदार', icon: '🏢', angle: 180 },   // Left
+    { id: 8, title: 'Profit Optimizer', mrTitle: 'नफा वाढवा', icon: '📈', angle: 225 },
+  ];
+
+  // Dynamically calculate orbit radius based on phone screen width
+  const isSmallMobile = windowWidth < 380;
+  const isMobile = windowWidth < 640;
+  const orbitRadius = isSmallMobile ? 96 : isMobile ? 112 : 140;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleFinish();
+    }, 2600);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const handleFinish = () => {
+    if (fadingOut) return;
+    setFadingOut(true);
+    setTimeout(() => {
+      if (onComplete) {
+        onComplete();
+      } else {
+        navigate('/login/farmer');
+      }
+    }, 750);
+  };
+
+  return (
+    <div
+      onClick={handleFinish}
+      className={`fixed inset-0 z-50 flex flex-col justify-between items-center bg-slate-950 text-white overflow-hidden transition-all duration-800 ease-in-out select-none cursor-pointer p-4 sm:p-6 ${
+        fadingOut ? 'opacity-0 scale-105 filter blur-[2px] pointer-events-none' : 'opacity-100 scale-100 filter blur-0'
+      }`}
+      title="Tap anywhere to continue"
+    >
+      {/* 1. CINEMATIC LUSH AGRICULTURE BACKGROUND */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        <img
+          src="/farmer_hero_bg.jpg"
+          alt="Lush green agricultural crop field"
+          className="w-full h-full object-cover object-center filter brightness-[0.62] contrast-[1.12] saturate-[1.3] scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-emerald-950/50 to-slate-950/95 mix-blend-multiply"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/80"></div>
+        
+        {/* Glowing Ambient Radial Auras */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[600px] h-[340px] sm:h-[600px] bg-emerald-500/20 rounded-full blur-[90px] pointer-events-none"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] bg-harvest-400/20 rounded-full blur-[70px] pointer-events-none"></div>
+      </div>
+
+      {/* 2. TOP HEADER BRANDING - OPTIMIZED FOR MOBILE */}
+      <div className="relative z-10 pt-4 sm:pt-10 text-center space-y-1.5 px-2 animate-fade-in-down">
+        <div className="inline-flex items-center space-x-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold text-emerald-300 shadow-md">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>Smart solutions for modern farming</span>
+        </div>
+        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-display font-black tracking-tight text-white drop-shadow-md leading-none">
+          <span className="text-emerald-400">KRISHAK</span>
+          <span className="text-harvest-400">-AI</span>
+        </h1>
+        <p className="text-[10px] sm:text-xs text-emerald-100/90 font-medium tracking-wide">
+          शेतकऱ्यांचा डिजिटल मित्र • भारत सरकार कृषी मंच
+        </p>
+      </div>
+
+      {/* 3. CENTER ORBITAL SPHERE - FULLY RESPONSIVE FOR ALL PHONES */}
+      <div className="relative z-10 my-auto flex items-center justify-center">
+        
+        {/* RADIAL CONNECTOR RINGS */}
+        <div
+          style={{
+            width: `${orbitRadius * 2}px`,
+            height: `${orbitRadius * 2}px`,
+          }}
+          className="absolute rounded-full border border-emerald-400/35 border-dashed animate-spin-slow pointer-events-none"
+        ></div>
+        <div
+          style={{
+            width: `${orbitRadius * 1.5}px`,
+            height: `${orbitRadius * 1.5}px`,
+          }}
+          className="absolute rounded-full border border-harvest-400/25 pointer-events-none"
+        ></div>
+
+        {/* 8 RADIAL AGRICULTURAL FEATURE NODES */}
+        {featureNodes.map((node) => {
+          const rad = (node.angle * Math.PI) / 180;
+          const x = Math.cos(rad) * orbitRadius;
+          const y = Math.sin(rad) * orbitRadius;
+
+          return (
+            <div
+              key={node.id}
+              style={{
+                transform: `translate(${x}px, ${y}px)`,
+              }}
+              className="absolute flex flex-col items-center justify-center transition-all duration-300 group"
+            >
+              {/* GLASSMORPHIC NODE BUBBLE */}
+              <div className="h-7 w-7 sm:h-11 sm:w-11 rounded-full bg-white/25 backdrop-blur-xl border border-white/40 text-white flex items-center justify-center text-xs sm:text-base shadow-lg shadow-emerald-950/40 group-hover:bg-emerald-500/40 transition-all">
+                <span>{node.icon}</span>
+              </div>
+              <span className="text-[7.5px] sm:text-[9px] font-extrabold text-white/95 bg-slate-900/85 backdrop-blur-md px-1.5 py-0.5 rounded mt-0.5 border border-white/10 whitespace-nowrap shadow-xs leading-none">
+                {node.title}
+              </span>
+            </div>
+          );
+        })}
+
+        {/* CENTRAL KRISHAK LOGO EMBLEM */}
+        <div className="relative h-24 w-24 sm:h-36 sm:w-36 rounded-full bg-white/95 backdrop-blur-2xl p-2.5 sm:p-4 border-3 sm:border-4 border-emerald-400/80 shadow-2xl shadow-emerald-500/30 flex flex-col items-center justify-center z-20 group hover:scale-105 transition-all duration-300">
+          <img
+            src="/krishak_logo.png"
+            alt="Krishak Logo"
+            className="w-full h-full object-contain filter drop-shadow-md"
+          />
+          <div className="absolute inset-0 rounded-full border-2 border-harvest-400/60 animate-ping opacity-30 pointer-events-none"></div>
+        </div>
+      </div>
+
+      {/* 4. BOTTOM SECTION: MOBILE-FRIENDLY WELCOME & VERSION */}
+      <div className="relative z-10 pb-4 sm:pb-8 text-center space-y-1.5 px-4 w-full max-w-sm">
+        <div className="space-y-0.5">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-wide leading-tight">
+            Welcome
+          </h2>
+          <p className="text-[11px] sm:text-xs text-emerald-200/90 font-medium">
+            स्वातंत्र्य आणि नफ्याची नवी सुरुवात
+          </p>
+        </div>
+
+        {/* VERSION & TAP HINT */}
+        <div className="text-[9px] sm:text-[10px] text-slate-400/90 font-mono pt-1">
+          <span>Version 2.1.4 • Govt. Agritech Certified</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SplashScreen;

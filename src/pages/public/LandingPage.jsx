@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { marketService } from '../../services/marketService';
 
 export const LandingPage = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { user, isAuthenticated, isFarmer, isBuyer } = useAuth();
 
   // Interactive Live Simulator on Landing Page
   const [simCrop, setSimCrop] = useState('onion');
@@ -58,10 +60,20 @@ export const LandingPage = () => {
             {/* LEFT HERO CONTENT */}
             <div className="lg:col-span-8 space-y-6 text-center lg:text-left">
               {/* TOP PILL BADGE */}
-              <div className="inline-flex items-center space-x-2.5 bg-white/95 backdrop-blur-md text-emerald-950 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm border border-emerald-300/80 animate-fade-in-up">
-                <span className="live-dot"></span>
-                <span className="text-[#0F382C] font-extrabold">Next-Gen Agricultural Intelligence & Market Engine</span>
-              </div>
+              {isAuthenticated ? (
+                <div className="inline-flex items-center space-x-2.5 bg-emerald-100/95 text-emerald-950 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm border border-emerald-300 animate-fade-in-up">
+                  <span className="live-dot"></span>
+                  <span>
+                    Welcome, {user?.name || user?.businessName || (isFarmer ? 'Rahul Jadhav' : 'AgroFresh')} •{' '}
+                    {isFarmer ? '🌾 Verified Farmer' : isBuyer ? '🏪 Verified Buyer' : '⚙️ SuperAdmin'}
+                  </span>
+                </div>
+              ) : (
+                <div className="inline-flex items-center space-x-2.5 bg-white/95 backdrop-blur-md text-emerald-950 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm border border-emerald-300/80 animate-fade-in-up">
+                  <span className="live-dot"></span>
+                  <span className="text-[#0F382C] font-extrabold">Next-Gen Agricultural Intelligence & Market Engine</span>
+                </div>
+              )}
 
               {/* HIGH-CONTRAST SOLID FOREST GREEN HEADLINE */}
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tight text-slate-900 leading-[1.06] animate-fade-in-up">
@@ -78,23 +90,63 @@ export const LandingPage = () => {
 
               {/* STANDARDIZED PRIMARY & SECONDARY ACTION BUTTONS */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2 animate-fade-in-up">
-                {/* PRIMARY FILLED GREEN BUTTON */}
-                <button
-                  onClick={() => navigate('/login/farmer')}
-                  className="px-6 sm:px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-xl font-bold text-sm sm:text-base shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-2 cursor-pointer"
-                >
-                  <span>Start Selling (Farmer)</span>
-                  <span className="text-emerald-200">→</span>
-                </button>
+                {!isAuthenticated ? (
+                  <>
+                    {/* PRIMARY FILLED GREEN BUTTON */}
+                    <button
+                      onClick={() => navigate('/login/farmer')}
+                      className="px-6 sm:px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-xl font-bold text-sm sm:text-base shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-2 cursor-pointer"
+                    >
+                      <span>Start Selling (Farmer)</span>
+                      <span className="text-emerald-200">→</span>
+                    </button>
 
-                {/* SECONDARY OUTLINE/GHOST BUTTON */}
-                <button
-                  onClick={() => navigate('/login/buyer')}
-                  className="px-6 sm:px-7 py-3.5 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 hover:text-slate-900 rounded-xl font-semibold text-sm sm:text-base shadow-2xs transition-all flex items-center space-x-2 border border-slate-300 hover:border-slate-400 cursor-pointer"
-                >
-                  <span>Buyer Procurement Desk</span>
-                  <span className="text-slate-400">→</span>
-                </button>
+                    {/* SECONDARY OUTLINE/GHOST BUTTON */}
+                    <button
+                      onClick={() => navigate('/login/buyer')}
+                      className="px-6 sm:px-7 py-3.5 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 hover:text-slate-900 rounded-xl font-semibold text-sm sm:text-base shadow-2xs transition-all flex items-center space-x-2 border border-slate-300 hover:border-slate-400 cursor-pointer"
+                    >
+                      <span>Buyer Procurement Desk</span>
+                      <span className="text-slate-400">→</span>
+                    </button>
+                  </>
+                ) : isFarmer ? (
+                  <>
+                    {/* AUTHENTICATED FARMER ACTIONS */}
+                    <button
+                      onClick={() => navigate('/farmer/dashboard')}
+                      className="btn-shimmer px-6 sm:px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-xl font-black text-sm sm:text-base shadow-md shadow-emerald-600/25 transition-all flex items-center space-x-2 cursor-pointer"
+                    >
+                      <span>🌾 Open Farmer Dashboard</span>
+                      <span className="text-emerald-200">→</span>
+                    </button>
+
+                    <button
+                      onClick={() => navigate('/farmer/list-produce')}
+                      className="px-6 sm:px-7 py-3.5 bg-white hover:bg-emerald-50 active:scale-[0.98] text-emerald-950 rounded-xl font-extrabold text-sm sm:text-base shadow-2xs transition-all flex items-center space-x-2 border border-emerald-300 hover:border-emerald-400 cursor-pointer"
+                    >
+                      <span>+ List New Harvest Lot</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* AUTHENTICATED BUYER ACTIONS */}
+                    <button
+                      onClick={() => navigate('/buyer/dashboard')}
+                      className="btn-shimmer px-6 sm:px-7 py-3.5 bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-800 text-white rounded-xl font-black text-sm sm:text-base shadow-md shadow-blue-700/25 transition-all flex items-center space-x-2 cursor-pointer"
+                    >
+                      <span>🏪 Open Buyer Dashboard</span>
+                      <span className="text-blue-200">→</span>
+                    </button>
+
+                    <button
+                      onClick={() => navigate('/buyer/post-requirement')}
+                      className="px-6 sm:px-7 py-3.5 bg-white hover:bg-blue-50 active:scale-[0.98] text-blue-950 rounded-xl font-extrabold text-sm sm:text-base shadow-2xs transition-all flex items-center space-x-2 border border-blue-300 hover:border-blue-400 cursor-pointer"
+                    >
+                      <span>+ Post Sourcing Tender</span>
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* KEY HIGHLIGHT CHIPS */}

@@ -87,7 +87,7 @@ export const BuyerLogin = () => {
         if (res.success) {
           const name = res.user?.ownerName || res.user?.shopName || 'Buyer';
           showToast(`Welcome, ${name}!`, 'success');
-          navigate('/buyer/dashboard');
+          navigate('/');
         } else {
           showToast(res.message || 'Authentication failed', 'error');
         }
@@ -126,7 +126,7 @@ export const BuyerLogin = () => {
       if (res.success) {
         const name = res.user?.ownerName || res.user?.shopName || 'Buyer';
         showToast(`Welcome, ${name}!`, 'success');
-        navigate('/buyer/dashboard');
+        navigate('/');
       } else {
         showToast(res.message || 'Invalid OTP. Demo: 123456', 'error');
       }
@@ -143,7 +143,7 @@ export const BuyerLogin = () => {
       const res = await loginBuyer({ mobile: '9822012345', otp: '123456' });
       if (res.success) {
         showToast('Buyer Login Successful!', 'success');
-        navigate('/buyer/dashboard');
+        navigate('/');
       }
     } finally {
       setLoading(false);
@@ -208,9 +208,32 @@ export const BuyerLogin = () => {
             <LanguageSwitcher />
           </div>
 
+          {/* DUAL ROLE SWITCHER: FARMER vs BUYER */}
+          <div className="p-1 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => navigate('/login/farmer')}
+              className="flex-1 py-2 px-3 text-slate-600 hover:text-emerald-700 hover:bg-white/80 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+            >
+              <span>🌾</span>
+              <span>{language === 'mr' ? 'शेतकरी लॉगिन' : 'Farmer Login'}</span>
+            </button>
+            <button
+              type="button"
+              className="flex-1 py-2 px-3 bg-blue-600 text-white rounded-xl text-xs sm:text-sm font-extrabold shadow-md shadow-blue-700/25 flex items-center justify-center space-x-1.5"
+            >
+              <span>🏪</span>
+              <span>{language === 'mr' ? 'खरेदीदार पोर्टल' : 'Buyer Portal'}</span>
+            </button>
+          </div>
+
           <div className="text-center space-y-3 pt-1">
-            <div className="h-16 w-16 rounded-full bg-blue-50 border-2 border-blue-200 mx-auto flex items-center justify-center shadow-md shadow-blue-500/10">
-              <span className="text-2xl">🏪</span>
+            <div className="h-20 w-20 rounded-full bg-white border-2 border-blue-300 mx-auto flex items-center justify-center p-2 shadow-lg shadow-blue-500/15">
+              <img
+                src="/krishak_logo.png"
+                alt="Krishak Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
 
             <div>

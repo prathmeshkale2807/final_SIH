@@ -32,7 +32,7 @@ export const validateFarmerUser = async (req, res) => {
       if (!farmer) {
         farmer = await Farmer.findOne({ mobile });
       }
-    } catch (err) {}
+    } catch (err) { }
   }
 
   if (!farmer && (farmerId === 'FARM-2026-MH01' || mobile === '9876543210')) {
@@ -68,7 +68,7 @@ export const validateBuyerUser = async (req, res) => {
       if (!buyer) {
         buyer = await Buyer.findOne({ mobile });
       }
-    } catch (err) {}
+    } catch (err) { }
   }
 
   if (!buyer && (shopId === 'BUY-2026-PN08' || mobile === '9822012345')) {
@@ -124,46 +124,37 @@ export const verifyFarmerOTP = async (req, res) => {
         await farmer.save();
       }
       if (!farmer) {
-        farmer = await Farmer.create({
-          farmerId: farmerId || 'FARM-2026-MH01',
-          firebaseUid: firebaseUid || '',
-          name: 'Rahul Jadhav',
-          mobile,
-          location: {
-            village: 'Ausa',
-            taluka: 'Ausa',
-            district: 'Latur',
-            state: 'Maharashtra',
-          },
-          crops: {
-            primaryCrop: 'Onion',
-            otherCrops: 'Tomato, Soybean',
-          },
-          landArea: '8.5',
-        });
+        if (mobile === '9876543210' || farmerId === 'FARM-2026-MH01') {
+          farmer = await Farmer.create({
+            farmerId: farmerId || 'FARM-2026-MH01',
+            firebaseUid: firebaseUid || '',
+            name: 'Rahul Jadhav',
+            mobile,
+            location: { village: 'Ausa', taluka: 'Ausa', district: 'Latur', state: 'Maharashtra' },
+            crops: { primaryCrop: 'Onion', otherCrops: 'Tomato, Soybean' },
+            landArea: '8.5',
+          });
+        }
       }
-    } catch (err) {}
+    } catch (err) { }
   }
 
   if (!farmer) {
-    farmer = {
-      farmerId: farmerId || 'FARM-2026-MH01',
-      id: farmerId || 'FARM-2026-MH01',
-      firebaseUid: firebaseUid || '',
-      name: 'Rahul Jadhav',
-      mobile,
-      location: {
-        village: 'Ausa',
-        taluka: 'Ausa',
-        district: 'Latur',
-        state: 'Maharashtra',
-      },
-      crops: {
-        primaryCrop: 'Onion',
-      },
-      landArea: '8.5',
-      role: 'farmer',
-    };
+    if (mobile === '9876543210' || farmerId === 'FARM-2026-MH01') {
+      farmer = {
+        farmerId: 'FARM-2026-MH01',
+        id: 'FARM-2026-MH01',
+        firebaseUid: firebaseUid || '',
+        name: 'Rahul Jadhav',
+        mobile: '9876543210',
+        location: { village: 'Ausa', taluka: 'Ausa', district: 'Latur', state: 'Maharashtra' },
+        crops: { primaryCrop: 'Onion' },
+        landArea: '8.5',
+        role: 'farmer',
+      };
+    } else {
+      return res.status(404).json({ success: false, message: 'Farmer account not found. Please register.' });
+    }
   }
 
   const token = generateToken({
@@ -239,47 +230,44 @@ export const verifyBuyerOTP = async (req, res) => {
         await buyer.save();
       }
       if (!buyer) {
-        buyer = await Buyer.create({
-          shopId: shopId || 'BUY-2026-PN08',
-          firebaseUid: firebaseUid || '',
-          shopName: 'AgroFresh Food Processors Ltd.',
-          ownerName: 'Vikram Mehta',
-          mobile,
-          businessType: 'Food Processor & Bulk Buyer',
-          location: {
-            address: 'Pune APMC Yard',
-            city: 'Pune',
-            district: 'Pune',
-            state: 'Maharashtra',
-          },
-          productsOfInterest: ['Onion', 'Tomato', 'Soybean'],
-          trustScore: 96,
-          verified: true,
-        });
+        if (mobile === '9822012345' || shopId === 'BUY-2026-PN08') {
+          buyer = await Buyer.create({
+            shopId: shopId || 'BUY-2026-PN08',
+            firebaseUid: firebaseUid || '',
+            shopName: 'AgroFresh Food Processors Ltd.',
+            ownerName: 'Vikram Mehta',
+            mobile,
+            businessType: 'Food Processor & Bulk Buyer',
+            location: { address: 'Pune APMC Yard', city: 'Pune', district: 'Pune', state: 'Maharashtra' },
+            productsOfInterest: ['Onion', 'Tomato', 'Soybean'],
+            trustScore: 96,
+            verified: true,
+          });
+        }
       }
-    } catch (err) {}
+    } catch (err) { }
   }
 
   if (!buyer) {
-    buyer = {
-      shopId: shopId || 'BUY-2026-PN08',
-      id: shopId || 'BUY-2026-PN08',
-      firebaseUid: firebaseUid || '',
-      shopName: 'AgroFresh Food Processors Ltd.',
-      ownerName: 'Vikram Mehta',
-      mobile,
-      businessType: 'Food Processor & Bulk Buyer',
-      location: {
-        city: 'Pune',
-        district: 'Pune',
-        state: 'Maharashtra',
-      },
-      productsOfInterest: ['Onion', 'Tomato', 'Soybean'],
-      monthlyRequirement: 200,
-      trustScore: 96,
-      verified: true,
-      role: 'buyer',
-    };
+    if (mobile === '9822012345' || shopId === 'BUY-2026-PN08') {
+      buyer = {
+        shopId: 'BUY-2026-PN08',
+        id: 'BUY-2026-PN08',
+        firebaseUid: firebaseUid || '',
+        shopName: 'AgroFresh Food Processors Ltd.',
+        ownerName: 'Vikram Mehta',
+        mobile: '9822012345',
+        businessType: 'Food Processor & Bulk Buyer',
+        location: { city: 'Pune', district: 'Pune', state: 'Maharashtra' },
+        productsOfInterest: ['Onion', 'Tomato', 'Soybean'],
+        monthlyRequirement: 200,
+        trustScore: 96,
+        verified: true,
+        role: 'buyer',
+      };
+    } else {
+      return res.status(404).json({ success: false, message: 'Buyer account not found. Please register.' });
+    }
   }
 
   const token = generateToken({
@@ -366,28 +354,34 @@ export const firebaseLogin = async (req, res) => {
           farmer.firebaseUid = decodedUid;
           await farmer.save();
         } else if (!farmer) {
-          farmer = await Farmer.create({
-            farmerId: farmerId || `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-            firebaseUid: decodedUid,
-            name: name || 'Rahul Jadhav',
-            mobile: decodedPhone || '9876543210',
-            location: { village: 'Dindori', district: 'Nashik', state: 'Maharashtra' },
-            crops: { primaryCrop: 'Onion' },
-            landArea: '5 Acres',
-          });
+          if (decodedPhone === '9876543210' || farmerId === 'FARM-2026-MH01') {
+            farmer = await Farmer.create({
+              farmerId: farmerId || `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+              firebaseUid: decodedUid,
+              name: name || 'Rahul Jadhav',
+              mobile: decodedPhone || '9876543210',
+              location: { village: 'Dindori', district: 'Nashik', state: 'Maharashtra' },
+              crops: { primaryCrop: 'Onion' },
+              landArea: '5 Acres',
+            });
+          }
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     if (!farmer) {
-      farmer = {
-        farmerId: farmerId || 'FARM-2026-MH01',
-        id: farmerId || 'FARM-2026-MH01',
-        firebaseUid: decodedUid,
-        name: name || 'Rahul Jadhav',
-        mobile: decodedPhone || '9876543210',
-        role: 'farmer',
-      };
+      if (decodedPhone === '9876543210' || farmerId === 'FARM-2026-MH01') {
+        farmer = {
+          farmerId: farmerId || 'FARM-2026-MH01',
+          id: farmerId || 'FARM-2026-MH01',
+          firebaseUid: decodedUid,
+          name: name || 'Rahul Jadhav',
+          mobile: decodedPhone || '9876543210',
+          role: 'farmer',
+        };
+      } else {
+        return res.status(404).json({ success: false, message: 'Farmer account not found for this Firebase user. Please register.' });
+      }
     }
 
     const token = generateToken({
@@ -427,30 +421,36 @@ export const firebaseLogin = async (req, res) => {
           buyer.firebaseUid = decodedUid;
           await buyer.save();
         } else if (!buyer) {
-          buyer = await Buyer.create({
-            shopId: shopId || `BUY-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-            firebaseUid: decodedUid,
-            shopName: 'AgroFresh Food Processors Ltd.',
-            ownerName: name || 'Vikram Mehta',
-            mobile: decodedPhone || '9822012345',
-            businessType: 'Food Processor & Bulk Buyer',
-            location: { city: 'Pune', district: 'Pune', state: 'Maharashtra' },
-            productsOfInterest: ['Onion', 'Tomato'],
-          });
+          if (decodedPhone === '9822012345' || shopId === 'BUY-2026-PN08') {
+            buyer = await Buyer.create({
+              shopId: shopId || `BUY-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+              firebaseUid: decodedUid,
+              shopName: 'AgroFresh Food Processors Ltd.',
+              ownerName: name || 'Vikram Mehta',
+              mobile: decodedPhone || '9822012345',
+              businessType: 'Food Processor & Bulk Buyer',
+              location: { city: 'Pune', district: 'Pune', state: 'Maharashtra' },
+              productsOfInterest: ['Onion', 'Tomato'],
+            });
+          }
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     if (!buyer) {
-      buyer = {
-        shopId: shopId || 'BUY-2026-PN08',
-        id: shopId || 'BUY-2026-PN08',
-        firebaseUid: decodedUid,
-        shopName: 'AgroFresh Food Processors Ltd.',
-        ownerName: name || 'Vikram Mehta',
-        mobile: decodedPhone || '9822012345',
-        role: 'buyer',
-      };
+      if (decodedPhone === '9822012345' || shopId === 'BUY-2026-PN08') {
+        buyer = {
+          shopId: shopId || 'BUY-2026-PN08',
+          id: shopId || 'BUY-2026-PN08',
+          firebaseUid: decodedUid,
+          shopName: 'AgroFresh Food Processors Ltd.',
+          ownerName: name || 'Vikram Mehta',
+          mobile: decodedPhone || '9822012345',
+          role: 'buyer',
+        };
+      } else {
+        return res.status(404).json({ success: false, message: 'Buyer account not found for this Firebase user. Please register.' });
+      }
     }
 
     const token = generateToken({
@@ -491,6 +491,11 @@ export const registerFarmer = async (req, res) => {
 
   if (isDBConnected()) {
     try {
+      const existing = await Farmer.findOne({ mobile });
+      if (existing) {
+        return res.status(409).json({ success: false, message: 'This mobile number is already registered. Please Sign In.' });
+      }
+
       await Farmer.create({
         farmerId,
         firebaseUid: firebaseUid || '',
@@ -510,7 +515,7 @@ export const registerFarmer = async (req, res) => {
         },
         landArea: `${landArea || 5}`,
       });
-    } catch (err) {}
+    } catch (err) { }
   }
 
   const token = generateToken({
@@ -578,8 +583,8 @@ export const registerBuyer = async (req, res) => {
   const chosenProducts = Array.isArray(productsOfInterest)
     ? productsOfInterest
     : Array.isArray(cropInterests)
-    ? cropInterests
-    : ['Onion', 'Tomato'];
+      ? cropInterests
+      : ['Onion', 'Tomato'];
 
   const locCity = location?.city || city || 'Pune';
   const locDistrict = location?.district || district || locCity;
@@ -617,8 +622,13 @@ export const registerBuyer = async (req, res) => {
 
   if (isDBConnected()) {
     try {
+      const existing = await Buyer.findOne({ mobile });
+      if (existing) {
+        return res.status(409).json({ success: false, message: 'This mobile number is already registered. Please Sign In.' });
+      }
+
       await Buyer.create(newBuyerDoc);
-    } catch (err) {}
+    } catch (err) { }
   }
 
   registerBuyerInMemory(newBuyerDoc);

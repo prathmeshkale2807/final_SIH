@@ -17,6 +17,7 @@ export const createProduce = async (req, res) => {
     // Authenticated farmer ID from JWT
     const farmerId = req.user?.id || req.user?.farmerId || 'FARM-2026-MH01';
     const farmerName = req.user?.name || 'Rahul Jadhav';
+    const farmerMobile = req.user?.mobile || '9876543210';
 
     const {
       cropName,
@@ -70,6 +71,7 @@ export const createProduce = async (req, res) => {
       produceId,
       id: produceId,
       farmerId,
+      farmerMobile,
       farmerName,
       crop: chosenCrop,
       variety: variety || 'Standard Variety',
@@ -105,7 +107,7 @@ export const createProduce = async (req, res) => {
           message: 'Produce listed successfully',
           produce: created,
         });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     produceMemoryStore.unshift(newProduceData);
@@ -122,15 +124,17 @@ export const createProduce = async (req, res) => {
 export const getMyProduce = async (req, res) => {
   try {
     const farmerId = req.user?.id || req.user?.farmerId || 'FARM-2026-MH01';
+    const mobile = req.user?.mobile;
 
     if (isDBConnected()) {
       try {
-        const list = await Produce.find({ farmerId }).sort({ createdAt: -1 });
+        const query = mobile ? { farmerMobile: mobile } : { farmerId };
+        const list = await Produce.find(query).sort({ createdAt: -1 });
         return res.json({ success: true, count: list.length, produces: list });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
-    const list = produceMemoryStore.filter((p) => p.farmerId === farmerId);
+    const list = produceMemoryStore.filter((p) => (mobile && p.farmerMobile === mobile) || p.farmerId === farmerId);
     return res.json({ success: true, count: list.length, produces: list });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -143,7 +147,7 @@ export const getAllProduce = async (req, res) => {
       try {
         const list = await Produce.find({ status: 'ACTIVE' }).sort({ createdAt: -1 });
         return res.json({ success: true, count: list.length, produces: list });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     const activeList = produceMemoryStore.filter((p) => (p.status || 'ACTIVE').toUpperCase() === 'ACTIVE');
@@ -160,7 +164,7 @@ export const getProduceById = async (req, res) => {
       try {
         const item = await Produce.findOne({ $or: [{ produceId: id }, { _id: id }] });
         if (item) return res.json({ success: true, produce: item });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     const item = produceMemoryStore.find((p) => p.produceId === id || p.id === id);
@@ -188,7 +192,7 @@ export const updateProduce = async (req, res) => {
           await item.save();
           return res.json({ success: true, message: 'Produce updated successfully', produce: item });
         }
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     const idx = produceMemoryStore.findIndex((p) => p.produceId === id || p.id === id);
@@ -220,7 +224,7 @@ export const toggleProduceStatus = async (req, res) => {
           await item.save();
           return res.json({ success: true, message: `Produce status updated to ${item.status}`, produce: item });
         }
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     const idx = produceMemoryStore.findIndex((p) => p.produceId === id || p.id === id);
@@ -249,7 +253,7 @@ export const deleteProduce = async (req, res) => {
           return res.status(403).json({ success: false, message: 'Unauthorized: Only the lot owner can delete this produce' });
         }
         await Produce.deleteOne({ $or: [{ produceId: id }, { _id: id }] });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     produceMemoryStore = produceMemoryStore.filter((p) => p.produceId !== id && p.id !== id);

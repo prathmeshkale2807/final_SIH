@@ -323,30 +323,104 @@ export const MAHARASHTRA_OFFICIAL_TOLLS = [
 
 /**
  * Calculates whether a specific road polyline crosses any authentic NHAI/MSRDC Toll Plaza.
- * Checks haversine distance against each toll plaza. Threshold: within 2.5 km.
+ * Uses point-to-segment distance and corridor search so no toll is missed.
  */
-export function getTollPlazaAlongPolyline(latLngs) {
-  if (!latLngs || latLngs.length === 0) return null;
+export function getTollPlazaAlongPolyline(latLngs, originCoords = null, destCoords = null) {
+  if (!latLngs || latLngs.length === 0) {
+    if (originCoords && destCoords) {
+      return getTollBetweenEndpoints(originCoords, destCoords);
+    }
+    return null;
+  }
 
+  // 1. Check all points along polyline
   for (const toll of MAHARASHTRA_OFFICIAL_TOLLS) {
-    for (let i = 0; i < latLngs.length; i += 2) {
+    // Check distance to each waypoint
+    for (let i = 0; i < latLngs.length; i++) {
       const [pLat, pLng] = latLngs[i];
-      const dLat = (pLat - toll.lat) * (Math.PI / 180);
-      const dLng = (pLng - toll.lng) * (Math.PI / 180);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toll.lat * (Math.PI / 180)) *
-          Math.cos(pLat * (Math.PI / 180)) *
-          Math.sin(dLng / 2) *
-          Math.sin(dLng / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const distanceKm = 6371 * c;
+      const dist = haversineKm(pLat, pLng, toll.lat, toll.lng);
+      if (dist <= 4.5) {
+        return toll;
+      }
+    }
 
-      if (distanceKm <= 2.8) {
-        return toll; // Route physically passes through this genuine NHAI toll gate
+    // Check distance to line segments along the route
+    for (let i = 0; i < latLngs.length - 1; i++) {
+      const [lat1, lng1] = latLngs[i];
+      const [lat2, lng2] = latLngs[i + 1];
+      const segDist = distToSegment(toll.lat, toll.lng, lat1, lng1, lat2, lng2);
+      if (segDist <= 4.5) {
+        return toll;
       }
     }
   }
 
-  return null; // Route is 100% Toll-Free
+  // 2. Fallback: check if toll lies within origin-destination bounding box corridor
+  if (latLngs.length >= 2) {
+    const origin = latLngs[0];
+    const dest = latLngs[latLngs.length - 1];
+    return getTollBetweenEndpoints({ lat: origin[0], lng: origin[1] }, { lat: dest[0], lng: dest[1] });
+  }
+
+  return null;
 }
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function distToSegment(pLat, pLng, lat1, lng1, lat2, lng2) {
+  const x = pLng, y = pLat;
+  const x1 = lng1, y1 = lat1;
+  const x2 = lng2, y2 = lat2;
+  const A = x - x1;
+  const B = y - y1;
+  const C = x2 - x1;
+  const D = y2 - y1;
+
+  const dot = A * C + B * D;
+  const lenSq = C * C + D * D;
+  let param = -1;
+  if (lenSq !== 0) param = dot / lenSq;
+
+  let xx, yy;
+  if (param < 0) {
+    xx = x1;
+    yy = y1;
+  } else if (param > 1) {
+    xx = x2;
+    yy = y2;
+  } else {
+    xx = x1 + param * C;
+    yy = y1 + param * D;
+  }
+
+  return haversineKm(pLat, pLng, yy, xx);
+}
+
+function getTollBetweenEndpoints(origin, dest) {
+  if (!origin || !dest) return null;
+  const totalDist = haversineKm(origin.lat, origin.lng, dest.lat, dest.lng);
+  if (totalDist < 18) return null; // Very local journeys within 18 km rarely cross highway toll plazas
+
+  for (const toll of MAHARASHTRA_OFFICIAL_TOLLS) {
+    const d1 = haversineKm(origin.lat, origin.lng, toll.lat, toll.lng);
+    const d2 = haversineKm(toll.lat, toll.lng, dest.lat, dest.lng);
+    // If toll is along the corridor between origin and dest (triangle inequality buffer < 15%)
+    if (d1 + d2 <= totalDist * 1.25 && d1 > 3 && d2 > 3) {
+      return toll;
+    }
+  }
+  return null;
+}
+

@@ -190,9 +190,11 @@ export const RouteMapModal = ({
       const district = activeMandiObj.district || 'Maharashtra';
 
       // ── Detect authentic NHAI/MSRDC Toll Plaza crossed along each route polyline ──
-      const authenticToll1 = getTollPlazaAlongPolyline(res1.latLngs);
-      const authenticToll2 = getTollPlazaAlongPolyline(res2.latLngs);
-      const authenticToll3 = getTollPlazaAlongPolyline(res3.latLngs);
+      const originPoint = { lat: oLat, lng: oLng };
+      const destPoint = { lat: dLat, lng: dLng };
+      const authenticToll1 = getTollPlazaAlongPolyline(res1.latLngs, originPoint, destPoint);
+      const authenticToll2 = getTollPlazaAlongPolyline(res2.latLngs, originPoint, destPoint);
+      const authenticToll3 = getTollPlazaAlongPolyline(res3.latLngs, originPoint, destPoint);
 
       const compiledRoutes = [
         {
@@ -334,7 +336,7 @@ export const RouteMapModal = ({
       console.warn('Route generation fallback triggered:', err);
       const basePrice = activeMandiObj.pricePerQuintal || 2150;
       const baseDist = Math.max(3.2, activeMandiObj.distanceKm || 12);
-      const authenticToll = getTollPlazaAlongPolyline(fallbacks[0]);
+      const authenticToll = getTollPlazaAlongPolyline(fallbacks[0], { lat: oLat, lng: oLng }, { lat: dLat, lng: dLng });
 
       setRoutes([
         {
@@ -466,19 +468,26 @@ export const RouteMapModal = ({
     });
 
     // 1. Custom Origin Pin (🏡 Farm Gate)
+    const originVillageName = userLocationLabel ? userLocationLabel.split(',')[0].trim() : 'Your Village';
     const oIcon = L.divIcon({
       className: 'custom-leaflet-marker',
       html: `
         <div style="display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #064e3b, #022c22); color: #ffffff; padding: 6px 14px; border-radius: 9999px; border: 2px solid #34d399; box-shadow: 0 12px 28px -4px rgba(0,0,0,0.6); font-family: system-ui, sans-serif; font-size: 11.5px; font-weight: 800; white-space: nowrap;">
           <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #34d399; box-shadow: 0 0 8px #34d399;"></span>
-          <span>🏡 ${userLocationLabel.split(',')[0]} (Origin)</span>
+          <span>🏡 ${originVillageName} (Farm Origin)</span>
         </div>
       `,
-      iconSize: [170, 32],
-      iconAnchor: [85, 16],
+      iconSize: [180, 32],
+      iconAnchor: [90, 16],
     });
     const oMarker = L.marker([userCoords.lat, userCoords.lng], { icon: oIcon }).addTo(map);
-    oMarker.bindPopup(`<strong>Origin Farm Gate:</strong> ${userLocationLabel}`);
+    oMarker.bindPopup(`
+      <div style="font-family: system-ui, sans-serif; font-size: 12px; line-height: 1.45;">
+        <strong style="color: #059669; font-size: 13px;">🏡 Origin Farm Gate</strong><br/>
+        <span>📍 ${userLocationLabel}</span><br/>
+        <span style="color: #64748b; font-size: 10.5px; display: block; margin-top: 3px;">GPS: ${userCoords.lat.toFixed(4)}°N, ${userCoords.lng.toFixed(4)}°E</span>
+      </div>
+    `);
     markersRef.current.push(oMarker);
 
     // 2. Custom Destination Pin (🏪 APMC Mandi)
@@ -598,9 +607,9 @@ export const RouteMapModal = ({
               </span>
             </div>
             <p className="text-[11px] text-slate-400 truncate mt-0.5">
-              Origin: <strong className="text-emerald-300 font-bold">{userLocationLabel}</strong>
-              {' '}➔ Target APMC:{' '}
-              <strong className="text-white font-bold">{activeMandiObj.name}</strong>
+              🏡 Farm Origin: <strong className="text-emerald-300 font-bold">{userLocationLabel}</strong>
+              {' '}➔ 🏪 Target APMC:{' '}
+              <strong className="text-white font-bold">{activeMandiObj.name} ({activeMandiObj.location})</strong>
             </p>
           </div>
         </div>
@@ -676,6 +685,19 @@ export const RouteMapModal = ({
                 <span className="text-[11px] text-slate-300 font-bold bg-slate-900/90 px-2 py-0.5 rounded-full border border-white/10 inline-block mt-0.5">
                   ₹{(activeMandiObj.pricePerQuintal / 100).toFixed(1)}/kg
                 </span>
+              </div>
+            </div>
+
+            {/* ROUTE CORRIDOR FROM VILLAGE */}
+            <div className="bg-slate-950/80 p-2.5 rounded-xl border border-white/10 mt-3 text-xs flex items-center justify-between gap-2 shadow-inner">
+              <div className="min-w-0">
+                <span className="text-[9px] uppercase font-black tracking-wider text-emerald-400 block">Loading Origin</span>
+                <span className="font-extrabold text-white truncate text-[11px] block">🏡 {userLocationLabel}</span>
+              </div>
+              <span className="text-emerald-400 font-black flex-shrink-0">➔</span>
+              <div className="min-w-0 text-right">
+                <span className="text-[9px] uppercase font-black tracking-wider text-emerald-400 block">Target Mandi</span>
+                <span className="font-extrabold text-white truncate text-[11px] block">🏪 {activeMandiObj.name}</span>
               </div>
             </div>
 

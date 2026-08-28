@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { marketService } from '../../services/marketService';
+import { TrendingMarketPricesWidget } from '../../components/farmer/TrendingMarketPricesWidget';
 
 export const MarketIntelligencePage = () => {
   const navigate = useNavigate();
@@ -461,6 +462,9 @@ export const MarketIntelligencePage = () => {
           ● Live Stream Active
         </span>
       </div>
+
+      {/* ── TRENDING MARKET PRICES WIDGET (tabbed APMC / Processor / Institutional / Digital) ── */}
+      <TrendingMarketPricesWidget />
 
       {/* 2. CROP SELECTOR PILL TABS */}
       <div className="bg-white rounded-3xl p-3 sm:p-4 shadow-xs border border-slate-200/80">

@@ -55,10 +55,10 @@ export const SplashScreen = ({ onComplete }) => {
   return (
     <div
       onClick={handleFinish}
-      className={`fixed inset-0 z-[99999] flex flex-col justify-between items-center bg-slate-950 text-white overflow-hidden transition-all duration-800 ease-in-out select-none cursor-pointer p-4 sm:p-6 ${
+      className={`fixed inset-0 z-[99999] flex flex-col justify-between items-center text-slate-900 overflow-hidden transition-all duration-800 ease-in-out select-none cursor-pointer p-4 sm:p-6 ${
         fadingOut ? 'opacity-0 scale-105 filter blur-[2px] pointer-events-none' : 'opacity-100 scale-100 filter blur-0'
       }`}
-      style={{ backgroundColor: '#020617' }}
+      style={{ backgroundColor: '#064e3b' }}
       title="Tap anywhere to continue"
     >
       {/* 1. CINEMATIC LUSH AGRICULTURE BACKGROUND */}
@@ -66,27 +66,27 @@ export const SplashScreen = ({ onComplete }) => {
         <img
           src="/farmer_hero_bg.jpg"
           alt="Lush green agricultural crop field"
-          className="w-full h-full object-cover object-center filter brightness-[0.62] contrast-[1.12] saturate-[1.3] scale-105"
+          className="w-full h-full object-cover object-center filter brightness-[0.95] contrast-[1.08] saturate-[1.25] scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-emerald-950/50 to-slate-950/95 mix-blend-multiply"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-emerald-950/70 via-emerald-900/40 to-emerald-950/80 mix-blend-multiply"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/90 via-transparent to-emerald-900/40"></div>
         
         {/* Glowing Ambient Radial Auras */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[600px] h-[340px] sm:h-[600px] bg-emerald-500/20 rounded-full blur-[90px] pointer-events-none"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] bg-harvest-400/20 rounded-full blur-[70px] pointer-events-none"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[600px] h-[340px] sm:h-[600px] bg-emerald-400/25 rounded-full blur-[90px] pointer-events-none"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] bg-amber-400/25 rounded-full blur-[70px] pointer-events-none"></div>
       </div>
 
-      {/* 2. TOP HEADER BRANDING - OPTIMIZED FOR MOBILE */}
+      {/* 2. TOP HEADER BRANDING */}
       <div className="relative z-10 pt-4 sm:pt-10 text-center space-y-1.5 px-2 animate-fade-in-down">
-        <div className="inline-flex items-center space-x-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold text-emerald-300 shadow-md">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-          <span>Smart solutions for modern farming</span>
+        <div className="inline-flex items-center space-x-2 bg-white/90 backdrop-blur-md border border-emerald-300 px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-black text-emerald-950 shadow-md">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span>Smart Solutions for Indian Farmers</span>
         </div>
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-display font-black tracking-tight text-white drop-shadow-md leading-none">
-          <span className="text-emerald-400">KRISHAK</span>
-          <span className="text-harvest-400">-AI</span>
+        <h1 className="text-3xl sm:text-5xl font-display font-black tracking-tight text-white drop-shadow-lg leading-none">
+          <span className="text-white">KRISHAK</span>
+          <span className="text-amber-300">-AI</span>
         </h1>
-        <p className="text-[10px] sm:text-xs text-emerald-100/90 font-medium tracking-wide">
+        <p className="text-xs sm:text-sm text-emerald-100 font-bold tracking-wide drop-shadow-sm">
           शेतकऱ्यांचा डिजिटल मित्र • भारत सरकार कृषी मंच
         </p>
       </div>

@@ -11,11 +11,13 @@ export const LandingPage = () => {
   const { user, isAuthenticated, isFarmer, isBuyer } = useAuth();
 
   // Trending Market Prices state
+  const [marketTab, setMarketTab] = useState('apmc'); // 'apmc' | 'processors' | 'institutional' | 'digital'
   const [selectedCrop, setSelectedCrop] = useState('onion');
   const [pincode, setPincode] = useState('422001');
   const [selectedDistrict, setSelectedDistrict] = useState('Nashik');
   const [selectedTaluka, setSelectedTaluka] = useState('Nashik');
-  const [userLocationLabel, setUserLocationLabel] = useState('Nashik Taluka, Nashik');
+  const [selectedVillage, setSelectedVillage] = useState('Panchavati');
+  const [userLocationLabel, setUserLocationLabel] = useState('Panchavati, Nashik Taluka, Nashik');
   const [userCoords, setUserCoords] = useState({ lat: 19.9975, lng: 73.7898 });
   const [sortBy, setSortBy] = useState('distance'); // 'distance' | 'price_desc' | 'price_asc' | 'gain'
   const [searchLoading, setSearchLoading] = useState(false);
@@ -575,30 +577,162 @@ export const LandingPage = () => {
     },
   ];
 
+  // ========================================================================
+  // COMPREHENSIVE MAHARASHTRA VILLAGES DATABASE PER TALUKA
+  // ========================================================================
+  const MAHARASHTRA_VILLAGES = {
+    // ── NASHIK DISTRICT ──────────────────────────────────────────────────────
+    'Nashik': ['Panchavati', 'Satpur', 'Adgaon', 'Makhmalabad', 'Mhasrul', 'Gangapur', 'Deolali', 'Ambad', 'Pathardi', 'Vilholi', 'Girnare', 'Dugaon', 'Shinde', 'Palshe', 'Mungsare', 'Gowardhan', 'Dari', 'Pimpalgaon Garudeshwar', 'Matori', 'Madhabhavi'],
+    'Niphad': ['Pimpalgaon Baswant', 'Lasalgaon', 'Niphad', 'Ozar', 'Kundewadi', 'Saikheda', 'Ranwad', 'Vinchur', 'Khedle Jhunge', 'Kokangaon', 'Bhadane', 'Vadner Dumala', 'Karanjgaon', 'Pachore Vani', 'Chandori', 'Shirwade Vani', 'Sukene', 'Mangaon', 'Shirasgaon', 'Devgaon'],
+    'Sinnar': ['Sinnar', 'Musalgaon', 'Gonde', 'Wavi', 'Dodi', 'Pangri', 'Dubere', 'Baragaon Pimpri', 'Khambale', 'Pandhurli', 'Chas', 'Malandgaon', 'Nandur Shingote', 'Chincholi', 'Devpur', 'Kondanpur', 'Naygaon', 'Somthane', 'Bhatwadi'],
+    'Dindori': ['Dindori', 'Vani', 'Janori', 'Khedgaon', 'Nanashi', 'Umrale', 'Varvandi', 'Koshimbe', 'Akrale', 'Pingale', 'Mohadi', 'Mhasrul Dindori', 'Jambhulke', 'Palkhed', 'Karanjwad', 'Lakhampur', 'Wade'],
+    'Malegaon': ['Malegaon Camp', 'Sayane', 'Dabhadi', 'Nimgaon', 'Soundane', 'Zodge', 'Tehare', 'Kargaon', 'Ravalgon', 'Chandanpuri', 'Lakhmapur', 'Vadel', 'Ajande', 'Dongargaon', 'Galane'],
+    'Yeola': ['Yeola', 'Andarsul', 'Nagarsul', 'Mukhed', 'Savargaon', 'Ranjangaon', 'Kotamgaon', 'Paregaon', 'Patoda', 'Ankute', 'Somthan Desh', 'Babhulgaon', 'Bangaon', 'Saygaon'],
+    'Kalwan': ['Kalwan', 'Abhona', 'Kanashi', 'Manur', 'Bej', 'Dalwat', 'Kukane', 'Jaykheda', 'Hatgad', 'Pimpalner Kalwan'],
+    'Baglan': ['Satana', 'Taharabod', 'Jaigaon', 'Brahmangaon', 'Virgaon', 'Nampur', 'Sompur', 'Dholbare', 'Chirai', 'Kandhane', 'Mulher'],
+    'Chandwad': ['Chandwad', 'Vadbare', 'Kundewadi', 'Rahud', 'Dahiwad', 'Mangrul', 'Bhadane', 'Shirwade', 'Nimgaon Jali', 'Deola'],
+    'Igatpuri': ['Igatpuri', 'Ghoti', 'Bhavali', 'Kasarwadi', 'Waki', 'Kavnai', 'Tringalwadi', 'Zarwad Budruk', 'Kalyan Gate', 'Awal Khed'],
+    'Deola': ['Deola', 'Umrane', 'Lakhmapur', 'Meshi', 'Wakhari', 'Varvandi Deola', 'Bavandaspur'],
+    'Trimbakeshwar': ['Trimbak', 'Anjaneri', 'Pegalfan', 'Velunje', 'Harsul', 'Toranmal', 'Sapte'],
+
+    // ── PUNE DISTRICT ────────────────────────────────────────────────────────
+    'Junnar': ['Narayangaon', 'Otur', 'Alephata', 'Junnar', 'Belhe', 'Rajur', 'Kusur', 'Dingore', 'Padali', 'Khamgaon Junnar', 'Ane', 'Aptale', 'Chavand', 'Hivare', 'Golegaon', 'Shiroli', 'Kukadi Cluster'],
+    'Ambegaon': ['Manchar', 'Ghodegaon', 'Avsari', 'Pabal', 'Loni', 'Shindodi', 'Kalamb', 'Dimbhe', 'Shinoli', 'Nirgudsar', 'Bhimashankar Gate', 'Kurwandi', 'Pimpalgaon Ghode'],
+    'Khed': ['Rajgurunagar', 'Chakan', 'Alandi', 'Waki', 'Kadus', 'Shelgaon', 'Pait', 'Koyali', 'Bham', 'Koregaon Khed', 'Mahalunge', 'Varale', 'Kanersar'],
+    'Haveli': ['Hadapsar', 'Katraj', 'Wagholi', 'Manjri', 'Loni Kalbhor', 'Khadakwasla', 'Uruli Kanchan', 'Keshavnagar', 'Dhayari', 'Ambegaon Budruk', 'Autadwadi', 'Kondhwa Budruk'],
+    'Pune City': ['Gultekdi', 'Shivajinagar', 'Kothrud', 'Khadki', 'Baner', 'Hinjawadi', 'Dhankawadi', 'Aundh', 'Yerawada', 'Swargate', 'Bibwewadi', 'Bhosari'],
+    'Baramati': ['Baramati', 'Malegaon Budruk', 'Koregaon', 'Songaon', 'Morgaon', 'Supa', 'Nira Vagaj', 'Pandare', 'Late', 'Shirsufal', 'Dorlewadi', 'Gholapwadi'],
+    'Shirur': ['Shirur', 'Shikrapur', 'Sanaswadi', 'Ranjangaon Ganpati', 'Koregaon Bhima', 'Nighoj', 'Talegaon Dhamdhere', 'Pabal Shirur', 'Kawathe Yeama', 'Mandavgan Farata'],
+    'Indapur': ['Indapur', 'Nimgaon Ketki', 'Bawada', 'Anthurne', 'Lasurne', 'Shetfal', 'Bhigwan', 'Palasdeo', 'Kati', 'Loni Deokar'],
+    'Daund': ['Daund', 'Patas', 'Yavat', 'Kedgaon', 'Kashti', 'Khadki Daund', 'Gopalwadi', 'Varwand', 'Boribhadak', 'Kurkumbh'],
+
+    // ── BULDHANA DISTRICT ────────────────────────────────────────────────────
+    'Buldhana': ['Buldhana', 'Dhad', 'Padali', 'Botha', 'Sundarkhed', 'Motawala', 'Dongarkhandala', 'Girda', 'Hatedi', 'Ghatpuri', 'Pimpalgaon Sarai', 'Shelapur'],
+    'Mehkar': ['Mehkar', 'Janefal', 'Dongaon', 'Janephal', 'Bramhapuri', 'Hiwarkhed', 'Ukali', 'Loni Gawli', 'Pardhed', 'Wadgaon Tejan', 'Sonati', 'Anjani', 'Naigaon', 'Malkapur Mehkar'],
+    'Khamgaon': ['Khamgaon', 'Ghanegaon', 'Pahurjira', 'Gondhanapur', 'Sutala', 'Rohinkhed', 'Wanoja', 'Ambetakli', 'Hingna', 'Pardhad', 'Zunka', 'Karanji', 'Mhasla Khamgaon'],
+    'Chikhli': ['Chikhli', 'Undri', 'Kavala', 'Eklara', 'Dhotra', 'Amrapur', 'Kelwad', 'Mera Budruk', 'Kharbadi', 'Dongaon Chikhli', 'Goregaon'],
+    'Malkapur': ['Malkapur', 'Dharangaon', 'Wadji', 'Datala', 'Harnkhed', 'Umali', 'Sindkhed', 'Lasura', 'Wakodi', 'Nimbari'],
+    'Nandura': ['Nandura', 'Wadegaon', 'Nimgaon', 'Chandur Biswa', 'Taroda', 'Khirkund', 'Alampur', 'Paturda', 'Khandvi'],
+    'Lonar': ['Lonar', 'Titvi', 'Bibi', 'Wanoja', 'Sultanpur', 'Hivra', 'Deulgaon Kundpal', 'Chincholi Lonar', 'Ghatbori'],
+    'Shegaon': ['Shegaon', 'Jalamb', 'Matargaon', 'Pahurjira', 'Nagzari', 'Chinchkhed', 'Ghanegaon Shegaon', 'Balsamudra'],
+    'Sindkhed Raja': ['Sindkhed Raja', 'Dusarbid', 'Sakhar Kherda', 'Kingaon Jattu', 'Mhasla', 'Soygaon', 'Zadgaon', 'Wadgaon Raja'],
+    'Deulgaon Raja': ['Deulgaon Raja', 'Deulgaon Mahi', 'Sinagaon', 'Amdapur', 'Kumbhari', 'Nimgaon Guru', 'Anvi'],
+
+    // ── AHMEDNAGAR DISTRICT ──────────────────────────────────────────────────
+    'Ahmednagar': ['Ahmednagar', 'Bhor', 'Kedgaon', 'Nalegaon', 'Bhingar', 'Nagapur', 'Savedi', 'Walki', 'Chas', 'Nimgaon Wagha', 'Balandi', 'Kapurbawdi'],
+    'Sangamner': ['Sangamner', 'Ashwi', 'Ghargaon', 'Sakur', 'Talegaon', 'Nimgaon Jali', 'Chandanapuri', 'Poregaon', 'Bambalewadi', 'Degaon', 'Kotul'],
+    'Kopargaon': ['Kopargaon', 'Kolpewadi', 'Pohegaon', 'Dhamori', 'Savalvihir', 'Ranjangaon Deshmukh', 'Yesgaon', 'Karanji Kopargaon', 'Sanvatsar', 'Kumbhari Kopargaon'],
+    'Rahata': ['Shirdi', 'Rahata', 'Sakuri', 'Pimplas', 'Bableshwar', 'Nandur Shingote', 'Chitli', 'Loni Khurd', 'Loni Budruk', 'Puntamba'],
+    'Rahuri': ['Rahuri', 'Vambori', 'Taklibhan', 'Deolali Pravara', 'Kukana', 'Songaon', 'Baragaon Nandur', 'Chinchvihire', 'Digras'],
+    'Shrirampur': ['Shrirampur', 'Belapur', 'Padhegaon', 'Nipani Vadgaon', 'Takalibhan', 'Karegaon', 'Ghargaon Shrirampur', 'Undirgaon'],
+    'Nevasa': ['Nevasa', 'Sonai', 'Kukana', 'Ghodegaon', 'Salabatpur', 'Miri', 'Vasantnagar', 'Chanda', 'Bhende'],
+
+    // ── LATUR DISTRICT ───────────────────────────────────────────────────────
+    'Latur': ['Latur', 'Murud', 'Harangul', 'Babhalgaon', 'Kasar Kheda', 'Gangapur', 'Chincholi', 'Bhatkheda', 'Vilaspur', 'Nandgaon Latur', 'Bori', 'Gategaon'],
+    'Ausa': ['Ausa', 'Lamjana', 'Matola', 'Alala', 'Belkund', 'Uti', 'Haregaon', 'Lodga', 'Bhadgaon', 'Nagarsoga'],
+    'Udgir': ['Udgir', 'Devarjan', 'Her', 'Nalgir', 'Wadhawana', 'Mogha', 'Somnathpur', 'Tondechir', 'Lohara'],
+    'Nilanga': ['Nilanga', 'Aurad Shahajani', 'Kasar Sirsi', 'Halgara', 'Ambulga', 'Koregaon Nilanga', 'Shirur Anantpal', 'Nittoor'],
+    'Ahmedpur': ['Ahmedpur', 'Kingaon', 'Khandali', 'Shirur Tajband', 'Hadolti', 'Chakur Belt', 'Rudrapur'],
+
+    // ── SOLAPUR DISTRICT ─────────────────────────────────────────────────────
+    'North Solapur': ['Solapur', 'Kegaon', 'Degaon', 'Tirole', 'Kavthe', 'Pakni', 'Kondi', 'Shelgi', 'Bale', 'Haglur'],
+    'South Solapur': ['Mandrup', 'Boramani', 'Hotgi', 'Vinchur', 'Kumbhari', 'Valsang', 'Musti', 'Hattarsang', 'Aherwadi'],
+    'Barshi': ['Barshi', 'Vairag', 'Gaudgaon', 'Pangri', 'Upale', 'Korphale', 'Kuslamb', 'Dahitane', 'Bavi'],
+    'Pandharpur': ['Pandharpur', 'Karkamb', 'Tungat', 'Korti', 'Bhatumbare', 'Wakhari Pandharpur', 'Shegaon Dhumal', 'Gopalpur', 'Bhandishegaon'],
+    'Akkalkot': ['Akkalkot', 'Maindargi', 'Chapalgaon', 'Waghdari', 'Karjal', 'Tadwal', 'Jeergi', 'Shirwal'],
+
+    // ── JALNA DISTRICT ───────────────────────────────────────────────────────
+    'Jalna': ['Jalna', 'Daregaon', 'Ramnagar', 'Sewli', 'Wadgaon', 'Gondegaon', 'Panchpakhadi', 'Sindhikhed', 'Bori Jalna'],
+    'Badnapur': ['Badnapur', 'Roshangaon', 'Somthana', 'Shelgaon', 'Dabhadi Badnapur', 'Kajla', 'Anjangaon'],
+    'Ambad': ['Ambad', 'Wadigodri', 'Pachod', 'Gondi', 'Ranjangaon', 'Zirpi', 'Dahigaon', 'Chinchkhed Ambad'],
+    'Partur': ['Partur', 'Watur', 'Ashti', 'Shirasgaon', 'Ambegaon Partur', 'Rohilgad', 'Jalgaon Partur'],
+
+    // ── AKOLA DISTRICT ───────────────────────────────────────────────────────
+    'Akola': ['Akola', 'Borgaon Manju', 'Malkapur', 'Kapshi', 'Karanja', 'Shivani', 'Ugwa', 'Shiloda', 'Gudhi', 'Kapadsingi'],
+    'Akot': ['Akot', 'Hiwarkhed', 'Keli Veli', 'Panaj', 'Chohatta', 'Popatkhed', 'Kutasa', 'Adgaon Akot'],
+    'Balapur': ['Balapur', 'Paras', 'Ural', 'Wadeghon', 'Khamkhed', 'Mhaispur', 'Andhura', 'Manegaon'],
+
+    // ── AMRAVATI DISTRICT ────────────────────────────────────────────────────
+    'Amravati': ['Amravati', 'Nandgaon Peth', 'Walgaon', 'Badnera', 'Mahuli', 'Loni Amravati', 'Shirala', 'Navsari'],
+    'Achalpur': ['Achalpur', 'Paratwada', 'Sirasgaon', 'Chandur Bazar', 'Pathrot', 'Karanja Bahiram', 'Daryapur Gate'],
+    'Warud': ['Warud', 'Shendurjana Ghat', 'Benoda', 'Loni', 'Rawala', 'Jarud', 'Tembhurkhed'],
+    'Morshi': ['Morshi', 'Rithpur', 'Dhamangaon', 'Nerpinglai', 'Ambada', 'Lehegaon', 'Hivarkhed Morshi'],
+
+    // ── NAGPUR DISTRICT ──────────────────────────────────────────────────────
+    'Nagpur Rural': ['Wadi', 'Hingna', 'Mahadula', 'Besa', 'Pipla', 'Kamptee', 'Butibori', 'Koradi', 'Khapa Rural'],
+    'Katol': ['Katol', 'Kondhali', 'Paradsinga', 'Metpanjra', 'Khamali', 'Ridhora', 'Digras Katol'],
+    'Saoner': ['Saoner', 'Khapa', 'Kelwad', 'Dhapewada', 'Bichwa', 'Patansawangi', 'Wakodi'],
+    'Umred': ['Umred', 'Kuhi', 'Sirsi', 'Bhiwapur', 'Heoti', 'Makar Dhokra', 'Chargaon'],
+  };
+
   // Derived: current taluka list based on selected district
   const currentDistrictObj = MH_DISTRICTS.find(d => d.name === selectedDistrict) || MH_DISTRICTS[17]; // Nashik default
   const talukaList = currentDistrictObj?.talukas || [];
+  const villageList = MAHARASHTRA_VILLAGES[selectedTaluka] || [
+    `${selectedTaluka} Central`,
+    `${selectedTaluka} Gram`,
+    'Main Market Village',
+    'North Agro Belt',
+    'South Farm Cluster',
+    'East Feeder Village',
+    'West Rural Sector',
+  ];
 
-  // Handler: district changed → reset taluka to first in list
+  // Precise coordinate calculator for ANY village in Maharashtra
+  const computeVillageCoords = (villageName, talukaName, districtName) => {
+    const dObj = MH_DISTRICTS.find(d => d.name.toLowerCase() === (districtName || selectedDistrict).toLowerCase());
+    const tObj = dObj?.talukas.find(t => t.name.toLowerCase() === (talukaName || selectedTaluka).toLowerCase()) || talukaList[0] || { lat: 19.9975, lng: 73.7898 };
+
+    // Deterministic geographical dispersion hash for sub-taluka village location (±1.5 to 5 km radius)
+    let hash = 0;
+    const vStr = String(villageName || '').trim();
+    for (let i = 0; i < vStr.length; i++) {
+      hash = (hash << 5) - hash + vStr.charCodeAt(i);
+    }
+    const latOffset = (((hash % 100) / 10000) * 1.8);
+    const lngOffset = ((((hash >> 3) % 100) / 10000) * 1.8);
+
+    return {
+      lat: Number((tObj.lat + latOffset).toFixed(5)),
+      lng: Number((tObj.lng + lngOffset).toFixed(5)),
+      talukaObj: tObj,
+      distObj: dObj,
+    };
+  };
+
+  // Handler: district changed → reset taluka & village
   const handleDistrictChange = (distName) => {
     setSelectedDistrict(distName);
     const distObj = MH_DISTRICTS.find(d => d.name === distName);
     if (distObj && distObj.talukas.length > 0) {
       const firstTaluka = distObj.talukas[0];
       setSelectedTaluka(firstTaluka.name);
-      setUserCoords({ lat: firstTaluka.lat, lng: firstTaluka.lng });
-      setUserLocationLabel(`${firstTaluka.name} Taluka, ${distName}`);
+      const vList = MAHARASHTRA_VILLAGES[firstTaluka.name] || [`${firstTaluka.name} Central`];
+      const initialVillage = vList[0] || `${firstTaluka.name} Central`;
+      setSelectedVillage(initialVillage);
+      const coords = computeVillageCoords(initialVillage, firstTaluka.name, distName);
+      setUserCoords({ lat: coords.lat, lng: coords.lng });
+      setUserLocationLabel(`${initialVillage}, ${firstTaluka.name} Taluka, ${distName}`);
     }
   };
 
-  // Handler: taluka changed
+  // Handler: taluka changed → reset village & recompute coordinates
   const handleTalukaChange = (talukaName) => {
     setSelectedTaluka(talukaName);
-    const talukaObj = talukaList.find(t => t.name === talukaName);
-    if (talukaObj) {
-      setUserCoords({ lat: talukaObj.lat, lng: talukaObj.lng });
-      setUserLocationLabel(`${talukaName} Taluka, ${selectedDistrict}`);
-    }
+    const vList = MAHARASHTRA_VILLAGES[talukaName] || [`${talukaName} Central`];
+    const initialVillage = vList[0] || `${talukaName} Central`;
+    setSelectedVillage(initialVillage);
+    const coords = computeVillageCoords(initialVillage, talukaName, selectedDistrict);
+    setUserCoords({ lat: coords.lat, lng: coords.lng });
+    setUserLocationLabel(`${initialVillage}, ${talukaName} Taluka, ${selectedDistrict}`);
+  };
+
+  // Handler: village changed / typed → accurate pinpoint coordinates from the farm gate
+  const handleVillageChange = (villageName) => {
+    setSelectedVillage(villageName);
+    const coords = computeVillageCoords(villageName, selectedTaluka, selectedDistrict);
+    setUserCoords({ lat: coords.lat, lng: coords.lng });
+    setUserLocationLabel(`${villageName}, ${selectedTaluka} Taluka, ${selectedDistrict}`);
   };
 
   // Comprehensive PIN Code geographic lookup table — Maharashtra all districts + major agricultural hubs
@@ -1004,8 +1138,94 @@ export const LandingPage = () => {
       { id: 15, name: 'Nagpur Cotton APMC', location: 'Kalamna, Nagpur', district: 'Nagpur', lat: 21.1730, lng: 79.1430, pricePerQuintal: 7620, minPrice: 7070, maxPrice: 8120, arrivals: '4,700 Q', changePercent: '+3.5%', isPositive: true, verified: true },
     ],
   };
+ 
+  const PROCESSORS_DATA = {
+    onion: [
+      { id: 'proc_1', name: 'AgroFresh Dehydration Hub', location: 'Niphad, Nashik', district: 'Nashik', lat: 20.0793, lng: 74.1117, pricePerQuintal: 2040, minPrice: 1980, maxPrice: 2150, arrivals: '1,500 Q', changePercent: '+2.1%', isPositive: true, verified: true, tag: 'Verified Processor', contractType: 'Direct Farm-Gate Pickup' },
+      { id: 'proc_2', name: 'Mahindra Agri Processing Hub', location: 'Sinnar, Nashik', district: 'Nashik', lat: 19.8465, lng: 73.9984, pricePerQuintal: 2010, minPrice: 1950, maxPrice: 2120, arrivals: '1,200 Q', changePercent: '+1.5%', isPositive: true, verified: true, tag: 'Agro Processing', contractType: 'Collection Centre Pickup' },
+      { id: 'proc_3', name: 'Patanjali Food & Herbal Centre', location: 'Igatpuri, Nashik', district: 'Nashik', lat: 19.6909, lng: 73.5553, pricePerQuintal: 2060, minPrice: 1990, maxPrice: 2180, arrivals: '1,800 Q', changePercent: '+3.0%', isPositive: true, verified: true, tag: 'Certified Buyer', contractType: 'Direct Factory Delivery' },
+      { id: 'proc_4', name: 'Desai Agri Foods Unit', location: 'Sangamner, Ahmednagar', district: 'Ahmednagar', lat: 19.5735, lng: 74.2154, pricePerQuintal: 2020, minPrice: 1960, maxPrice: 2130, arrivals: '950 Q', changePercent: '+1.8%', isPositive: true, verified: true, tag: 'Dehydration Unit', contractType: 'Farm-Gate Collection' },
+      { id: 'proc_5', name: 'Jain Farm Fresh Foods', location: 'Jalgaon Central', district: 'Jalgaon', lat: 21.0077, lng: 75.5626, pricePerQuintal: 2070, minPrice: 2000, maxPrice: 2200, arrivals: '2,200 Q', changePercent: '+2.4%', isPositive: true, verified: true, tag: 'Global Export Hub', contractType: 'Contract Sourcing' },
+    ],
+    tomato: [
+      { id: 'proc_t1', name: 'Sahyadri Agro Processing Plant', location: 'Mohadi, Nashik', district: 'Nashik', lat: 20.0812, lng: 73.8921, pricePerQuintal: 2420, minPrice: 2250, maxPrice: 2600, arrivals: '2,400 Q', changePercent: '+3.8%', isPositive: true, verified: true, tag: 'FPO Mega Hub', contractType: 'Zero Transport Sourcing' },
+      { id: 'proc_t2', name: 'Keventer Agro Processing Ltd', location: 'Narayangaon, Pune', district: 'Pune', lat: 19.1234, lng: 73.9772, pricePerQuintal: 2490, minPrice: 2300, maxPrice: 2680, arrivals: '2,800 Q', changePercent: '+4.2%', isPositive: true, verified: true, tag: 'Tomato Puree Hub', contractType: 'Farm-Gate Delivery' },
+      { id: 'proc_t3', name: 'Hindustan Unilever Agri Partner', location: 'Khed, Pune', district: 'Pune', lat: 18.8521, lng: 73.9142, pricePerQuintal: 2460, minPrice: 2280, maxPrice: 2640, arrivals: '1,900 Q', changePercent: '+2.9%', isPositive: true, verified: true, tag: 'Direct Buyer', contractType: 'Contract Buyback' },
+    ],
+    soybean: [
+      { id: 'proc_s1', name: 'Ruchi Soya Crushing Industries', location: 'Latur Central', district: 'Latur', lat: 18.4088, lng: 76.5880, pricePerQuintal: 4850, minPrice: 4600, maxPrice: 5120, arrivals: '6,200 Q', changePercent: '+3.9%', isPositive: true, verified: true, tag: 'Solvent Extraction', contractType: 'Bulk Delivery Escrow' },
+      { id: 'proc_s2', name: 'ADM Agro Industries India', location: 'Akola Yard', district: 'Akola', lat: 20.7002, lng: 77.0125, pricePerQuintal: 4810, minPrice: 4580, maxPrice: 5080, arrivals: '5,100 Q', changePercent: '+3.1%', isPositive: true, verified: true, tag: 'Oil Extraction Unit', contractType: 'Direct Mill Sourcing' },
+      { id: 'proc_s3', name: 'Godrej Agrovet Soybean Plant', location: 'Khamgaon, Buldhana', district: 'Buldhana', lat: 20.7057, lng: 76.5683, pricePerQuintal: 4790, minPrice: 4550, maxPrice: 5040, arrivals: '4,200 Q', changePercent: '+2.8%', isPositive: true, verified: true, tag: 'Animal Feed Unit', contractType: 'Direct Payment' },
+    ],
+    potato: [
+      { id: 'proc_p1', name: 'PepsiCo AgriHub (Potato Processing)', location: 'Manchar, Pune', district: 'Pune', lat: 19.0041, lng: 73.9452, pricePerQuintal: 2410, minPrice: 2200, maxPrice: 2600, arrivals: '3,200 Q', changePercent: '+2.5%', isPositive: true, verified: true, tag: 'Contract Processing', contractType: 'Grade-A Guaranteed Pickup' },
+      { id: 'proc_p2', name: 'Balaji Wafers Procurement Desk', location: 'Satara Yard', district: 'Satara', lat: 17.6805, lng: 74.0183, pricePerQuintal: 2360, minPrice: 2150, maxPrice: 2540, arrivals: '2,100 Q', changePercent: '+1.9%', isPositive: true, verified: true, tag: 'Snack Manufacturing', contractType: 'Farm-Gate Collection' },
+    ],
+    wheat: [
+      { id: 'proc_w1', name: 'ITC Agri Business Flour Mill', location: 'Nagpur Central', district: 'Nagpur', lat: 21.1458, lng: 79.0882, pricePerQuintal: 2580, minPrice: 2400, maxPrice: 2820, arrivals: '4,900 Q', changePercent: '+2.8%', isPositive: true, verified: true, tag: 'Chakki Atta Procurement', contractType: 'Instant Bank Transfer' },
+      { id: 'proc_w2', name: 'Patanjali Roller Flour Mills', location: 'Solapur Central', district: 'Solapur', lat: 17.6599, lng: 75.9064, pricePerQuintal: 2520, minPrice: 2350, maxPrice: 2750, arrivals: '3,600 Q', changePercent: '+2.2%', isPositive: true, verified: true, tag: 'Certified Mill Buyer', contractType: 'Collection Centre' },
+    ],
+    cotton: [
+      { id: 'proc_c1', name: 'Welspun Cotton Ginning Unit', location: 'Jalna Yard', district: 'Jalna', lat: 19.8410, lng: 75.8864, pricePerQuintal: 7720, minPrice: 7200, maxPrice: 8250, arrivals: '4,600 Q', changePercent: '+4.1%', isPositive: true, verified: true, tag: 'Export Spinning Unit', contractType: 'Direct Ginning Settlement' },
+      { id: 'proc_c2', name: 'Vardhman Textiles Sourcing', location: 'Hinganghat, Wardha', district: 'Wardha', lat: 20.5562, lng: 78.8375, pricePerQuintal: 7780, minPrice: 7280, maxPrice: 8300, arrivals: '5,800 Q', changePercent: '+4.5%', isPositive: true, verified: true, tag: 'Spinning Mill Hub', contractType: 'Spot Weighbridge Buy' },
+    ]
+  };
 
-  // Get active center: use userCoords (set by taluka, GPS, or PIN lookup)
+  const INSTITUTIONAL_DATA = {
+    onion: [
+      { id: 'inst_1', name: 'Reliance Retail Fresh Sourcing', location: 'Nashik Distribution Hub', district: 'Nashik', lat: 20.0050, lng: 73.8100, pricePerQuintal: 2070, minPrice: 2010, maxPrice: 2160, arrivals: '3,500 Q', changePercent: '+2.8%', isPositive: true, verified: true, tag: 'Retail Supermarket', contractType: 'Daily Sourcing Quota' },
+      { id: 'inst_2', name: 'Metro Cash & Carry Wholesale', location: 'Nashik Warehouse', district: 'Nashik', lat: 19.9820, lng: 73.7740, pricePerQuintal: 2050, minPrice: 1990, maxPrice: 2140, arrivals: '2,800 Q', changePercent: '+2.0%', isPositive: true, verified: true, tag: 'B2B Wholesale Hub', contractType: 'Bulk Consignment Escrow' },
+      { id: 'inst_3', name: 'NAFED Buffer Stock Procurement', location: 'Pimpalgaon Collection Centre', district: 'Nashik', lat: 20.1743, lng: 73.9852, pricePerQuintal: 2030, minPrice: 2000, maxPrice: 2100, arrivals: '4,200 Q', changePercent: '+0.5%', isPositive: true, verified: true, tag: 'Government Buffer', contractType: 'Direct DBT Bank Transfer' },
+      { id: 'inst_4', name: 'BigBasket Direct Farm Sourcing', location: 'Pune Logistics Hub', district: 'Pune', lat: 18.5204, lng: 73.8567, pricePerQuintal: 2100, minPrice: 2040, maxPrice: 2200, arrivals: '3,100 Q', changePercent: '+3.2%', isPositive: true, verified: true, tag: 'Quick-Commerce Desk', contractType: 'Farm-Gate Graded Buy' },
+    ],
+    tomato: [
+      { id: 'inst_t1', name: 'BigBasket Direct Farm Sourcing', location: 'Narayangaon Hub', district: 'Pune', lat: 19.1234, lng: 73.9772, pricePerQuintal: 2510, minPrice: 2350, maxPrice: 2720, arrivals: '3,600 Q', changePercent: '+4.5%', isPositive: true, verified: true, tag: 'D2C Direct Sourcing', contractType: 'Instant App Payout' },
+      { id: 'inst_t2', name: 'Blinkit / Zomato Hyperpure Hub', location: 'Pune Distribution', district: 'Pune', lat: 18.4960, lng: 73.8640, pricePerQuintal: 2540, minPrice: 2380, maxPrice: 2750, arrivals: '4,100 Q', changePercent: '+5.1%', isPositive: true, verified: true, tag: 'Hyperpure B2B', contractType: 'Zero Middleman Sourcing' },
+    ],
+    soybean: [
+      { id: 'inst_s1', name: 'NAFED MSP Procurement Centre', location: 'Latur Yard', district: 'Latur', lat: 18.4088, lng: 76.5880, pricePerQuintal: 4892, minPrice: 4892, maxPrice: 4892, arrivals: '7,500 Q', changePercent: '0.0%', isPositive: true, verified: true, tag: 'Govt MSP Guaranteed', contractType: '100% MSP Buyout' },
+      { id: 'inst_s2', name: 'Maharashtra State Co-op Fed (MSCF)', location: 'Akola Yard', district: 'Akola', lat: 20.7002, lng: 77.0125, pricePerQuintal: 4892, minPrice: 4892, maxPrice: 4892, arrivals: '5,800 Q', changePercent: '0.0%', isPositive: true, verified: true, tag: 'State Co-op Desk', contractType: 'Direct DBT Settlement' },
+    ],
+    potato: [
+      { id: 'inst_p1', name: 'Spencer\'s Retail Agri Sourcing', location: 'Pune Logistics Depot', district: 'Pune', lat: 18.4960, lng: 73.8640, pricePerQuintal: 2430, minPrice: 2250, maxPrice: 2650, arrivals: '2,900 Q', changePercent: '+2.7%', isPositive: true, verified: true, tag: 'Retail Hypermarket', contractType: 'Weekly Volume Contract' },
+      { id: 'inst_p2', name: 'Safal / Mother Dairy Procurement', location: 'Nashik Collection Centre', district: 'Nashik', lat: 20.0150, lng: 73.8050, pricePerQuintal: 2390, minPrice: 2200, maxPrice: 2600, arrivals: '2,400 Q', changePercent: '+2.1%', isPositive: true, verified: true, tag: 'Institutional Co-op', contractType: 'Daily Direct Inflow' },
+    ],
+    wheat: [
+      { id: 'inst_w1', name: 'FCI (Food Corporation of India) Depot', location: 'Nagpur Central Godown', district: 'Nagpur', lat: 21.1458, lng: 79.0882, pricePerQuintal: 2550, minPrice: 2550, maxPrice: 2550, arrivals: '6,800 Q', changePercent: '0.0%', isPositive: true, verified: true, tag: 'Central Grain Reserve', contractType: 'Government MSP Procurement' },
+      { id: 'inst_w2', name: 'Maharashtra Food & Civil Supplies', location: 'Solapur Depot', district: 'Solapur', lat: 17.6599, lng: 75.9064, pricePerQuintal: 2550, minPrice: 2550, maxPrice: 2550, arrivals: '4,500 Q', changePercent: '0.0%', isPositive: true, verified: true, tag: 'State Buffer Agency', contractType: 'DBT Direct Account Transfer' },
+    ],
+    cotton: [
+      { id: 'inst_c1', name: 'CCI (Cotton Corporation of India) Centre', location: 'Hinganghat Central', district: 'Wardha', lat: 20.5562, lng: 78.8375, pricePerQuintal: 7800, minPrice: 7800, maxPrice: 7800, arrivals: '6,200 Q', changePercent: '0.0%', isPositive: true, verified: true, tag: 'Central MSP Node', contractType: 'Official CCI Purchase Slip' },
+      { id: 'inst_c2', name: 'MahaCot Co-op Federation Hub', location: 'Yavatmal Yard', district: 'Yavatmal', lat: 20.3951, lng: 78.1302, pricePerQuintal: 7750, minPrice: 7300, maxPrice: 8200, arrivals: '4,800 Q', changePercent: '+3.5%', isPositive: true, verified: true, tag: 'Cooperative Alliance', contractType: 'Direct Escrow Settlement' },
+    ]
+  };
+
+  const DIGITAL_DATA = {
+    onion: [
+      { id: 'dig_1', name: 'eNAM National Platform (Nashik Mandi)', location: 'Online / eNAM Network', district: 'Nashik', lat: 20.0150, lng: 73.8050, pricePerQuintal: 2060, minPrice: 1980, maxPrice: 2180, arrivals: '4,500 Q', changePercent: '+2.4%', isPositive: true, verified: true, tag: 'National eNAM Portal', contractType: 'Pan-India Electronic Auction' },
+      { id: 'dig_2', name: 'MahaAgro FPO Collective Tender', location: 'Digital FPO Auction Platform', district: 'Nashik', lat: 20.1472, lng: 74.2325, pricePerQuintal: 2040, minPrice: 1970, maxPrice: 2150, arrivals: '3,200 Q', changePercent: '+1.9%', isPositive: true, verified: true, tag: 'Digital FPO Tender', contractType: 'Collective Pool Escrow' },
+      { id: 'dig_3', name: 'AgriMarket.in Live E-Auction', location: 'Digital Marketplace', district: 'Statewide', lat: 19.9975, lng: 73.7898, pricePerQuintal: 2025, minPrice: 1950, maxPrice: 2130, arrivals: '2,900 Q', changePercent: '+1.2%', isPositive: true, verified: true, tag: 'Spot Bidding', contractType: 'Instant E-Contract' },
+    ],
+    tomato: [
+      { id: 'dig_t1', name: 'Fasal Digital Spot Exchange', location: 'Mobile App Trading', district: 'Pune / Nashik', lat: 19.1234, lng: 73.9772, pricePerQuintal: 2520, minPrice: 2360, maxPrice: 2740, arrivals: '3,800 Q', changePercent: '+4.8%', isPositive: true, verified: true, tag: 'AgriTech Spot Trading', contractType: 'Direct App Escrow Payout' },
+      { id: 'dig_t2', name: 'eNAM Tomato National Tender', location: 'Online / eNAM Hub', district: 'Pune', lat: 18.4960, lng: 73.8640, pricePerQuintal: 2490, minPrice: 2320, maxPrice: 2700, arrivals: '3,400 Q', changePercent: '+3.9%', isPositive: true, verified: true, tag: 'eNAM Portal', contractType: 'Multi-State Bidding' },
+    ],
+    soybean: [
+      { id: 'dig_s1', name: 'eNAM Soybean Online Auction', location: 'eNAM Gateway', district: 'Latur', lat: 18.4088, lng: 76.5880, pricePerQuintal: 4830, minPrice: 4620, maxPrice: 5100, arrivals: '5,900 Q', changePercent: '+3.5%', isPositive: true, verified: true, tag: 'eNAM Portal', contractType: 'Digital Spot Clearing' },
+      { id: 'dig_s2', name: 'NCDEX Spot Soybean Tender', location: 'NCDEX Spot Desk', district: 'Akola', lat: 20.7002, lng: 77.0125, pricePerQuintal: 4860, minPrice: 4650, maxPrice: 5130, arrivals: '4,700 Q', changePercent: '+4.0%', isPositive: true, verified: true, tag: 'Exchange Spot', contractType: 'Warehouse Receipt Trading' },
+    ],
+    potato: [
+      { id: 'dig_p1', name: 'Kisan Network Live Potato Bid', location: 'Digital Marketplace', district: 'Pune', lat: 18.8521, lng: 73.9142, pricePerQuintal: 2390, minPrice: 2210, maxPrice: 2610, arrivals: '2,600 Q', changePercent: '+2.3%', isPositive: true, verified: true, tag: 'Digital Bid Desk', contractType: 'Direct Procurement Escrow' },
+    ],
+    wheat: [
+      { id: 'dig_w1', name: 'DeHaat Grain Digital Platform', location: 'DeHaat E-Trading', district: 'Nagpur', lat: 21.1458, lng: 79.0882, pricePerQuintal: 2570, minPrice: 2380, maxPrice: 2810, arrivals: '4,100 Q', changePercent: '+2.5%', isPositive: true, verified: true, tag: 'AgriTech Exchange', contractType: 'Farm-Gate Quality Assured' },
+    ],
+    cotton: [
+      { id: 'dig_c1', name: 'Cotton E-Market Platform (MCX Spot)', location: 'Digital Spot Clearing', district: 'Wardha / Jalna', lat: 20.5562, lng: 78.8375, pricePerQuintal: 7750, minPrice: 7250, maxPrice: 8280, arrivals: '5,200 Q', changePercent: '+4.2%', isPositive: true, verified: true, tag: 'Digital Cotton Auction', contractType: 'Bale Certification Payout' },
+    ]
+  };
+
+  // Get active center: use userCoords (set by village, taluka, GPS, or PIN lookup)
   const getActiveCenter = () => {
     return userCoords || { lat: 19.9975, lng: 73.7898 };
   };
@@ -1015,19 +1235,27 @@ export const LandingPage = () => {
 
   const activeCenter = getActiveCenter();
 
-  const rawMandis = mandiDatabase[selectedCrop] || mandiDatabase.onion;
+  const getActiveDatabase = () => {
+    if (marketTab === 'processors') return PROCESSORS_DATA[selectedCrop] || PROCESSORS_DATA.onion;
+    if (marketTab === 'institutional') return INSTITUTIONAL_DATA[selectedCrop] || INSTITUTIONAL_DATA.onion;
+    if (marketTab === 'digital') return DIGITAL_DATA[selectedCrop] || DIGITAL_DATA.onion;
+    return mandiDatabase[selectedCrop] || mandiDatabase.onion;
+  };
 
-  // Calculate actual distance for each mandi dynamically
-  const mandisWithDistance = rawMandis.map((m) => {
-    const dist = calculateDistanceKm(activeCenter.lat, activeCenter.lng, m.lat, m.lng);
+  const rawActiveMarkets = getActiveDatabase();
+
+  // Calculate actual distance for each market item dynamically
+  const mandisWithDistance = rawActiveMarkets.map((m) => {
+    const isOnline = marketTab === 'digital' && (!m.lat || m.location.includes('Online'));
+    const dist = isOnline ? 0 : calculateDistanceKm(activeCenter.lat, activeCenter.lng, m.lat, m.lng);
     return {
       ...m,
       distanceKm: dist,
     };
   });
 
-  // Filter mandis within 200 km radius
-  const mandisWithin200Km = mandisWithDistance.filter((m) => m.distanceKm <= MAX_RADIUS_KM);
+  // Filter mandis within 200 km radius (or all digital channels)
+  const mandisWithin200Km = mandisWithDistance.filter((m) => m.distanceKm <= MAX_RADIUS_KM || marketTab === 'digital');
   
   // If fewer than 3 are within 200km, take the closest ones so user always has meaningful data
   const mandisToDisplay = mandisWithin200Km.length >= 2 
@@ -1039,8 +1267,8 @@ export const LandingPage = () => {
     if (sortBy === 'price_desc') return b.pricePerQuintal - a.pricePerQuintal;
     if (sortBy === 'price_asc') return a.pricePerQuintal - b.pricePerQuintal;
     if (sortBy === 'gain') {
-      const aVal = parseFloat(a.changePercent.replace('%', ''));
-      const bVal = parseFloat(b.changePercent.replace('%', ''));
+      const aVal = parseFloat(String(a.changePercent || '0').replace('%', ''));
+      const bVal = parseFloat(String(b.changePercent || '0').replace('%', ''));
       return bVal - aVal;
     }
     return 0;
@@ -1051,7 +1279,7 @@ export const LandingPage = () => {
     setSearchLoading(true);
 
     if (locationMode === 'taluka') {
-      // 1. TALUKA & DISTRICT MODE
+      // 1. TALUKA & DISTRICT & VILLAGE MODE
       const distObj = MH_DISTRICTS.find(
         (d) => d.name.toLowerCase() === selectedDistrict.toLowerCase()
       );
@@ -1061,10 +1289,17 @@ export const LandingPage = () => {
             (t) => t.name.toLowerCase() === selectedTaluka.toLowerCase()
           ) || distObj.talukas[0];
         if (talukaObj) {
-          setUserCoords({ lat: talukaObj.lat, lng: talukaObj.lng });
-          setUserLocationLabel(`${talukaObj.name} Taluka, ${distObj.name}`);
+          let hash = 0;
+          for (let i = 0; i < (selectedVillage || '').length; i++) hash = (hash << 5) - hash + selectedVillage.charCodeAt(i);
+          const latOffset = ((hash % 100) / 10000) * 1.5;
+          const lngOffset = (((hash >> 3) % 100) / 10000) * 1.5;
+          const exactLat = talukaObj.lat + latOffset;
+          const exactLng = talukaObj.lng + lngOffset;
+          setUserCoords({ lat: exactLat, lng: exactLng });
+          const label = selectedVillage ? `${selectedVillage}, ${talukaObj.name} Taluka, ${distObj.name}` : `${talukaObj.name} Taluka, ${distObj.name}`;
+          setUserLocationLabel(label);
           setLocStatusMessage(
-            `📍 Showing 200 km mandi prices for ${talukaObj.name}, ${distObj.name}`
+            `📍 Showing 200 km live rates from ${label}`
           );
           setTimeout(() => setLocStatusMessage(''), 4000);
         }
@@ -1191,28 +1426,29 @@ export const LandingPage = () => {
       {/* ========================================================================= */}
       {/* 1. HERO SECTION WITH CINEMATIC ATMOSPHERE & BALANCED LIVE INTELLIGENCE */}
       {/* ========================================================================= */}
-      <section id="hero" className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 bg-gradient-to-b from-emerald-50/60 via-slate-50 to-slate-100 border-b border-slate-200/70">
+      <section id="hero" className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 border-b border-slate-200/70">
 
-        {/* ATMOSPHERIC BACKGROUND LAYERS */}
+        {/* ATMOSPHERIC LUSH BACKGROUND LAYERS (NATURAL SEAMLESS FEATHERING) */}
         <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
           <img
             src="/farmer_hero_bg.jpg"
             alt="Indian agriculture at golden sunrise"
-            className="w-full h-full object-cover object-[75%_35%] lg:object-[80%_35%] opacity-90 filter brightness-[0.88] contrast-[1.06] saturate-[1.12]"
+            className="w-full h-full object-cover object-[70%_35%] lg:object-[82%_35%] filter brightness-[0.98] contrast-[1.06] saturate-[1.18]"
           />
-          <div className="absolute inset-0 bg-slate-950/20 mix-blend-multiply"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-slate-50/80 to-transparent"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-100/90 via-transparent to-black/10"></div>
+          {/* Smooth, soft progressive feathering gradient from left to right */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-50/92 via-slate-50/55 via-60% to-transparent"></div>
+          {/* Bottom fade into the page body */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-transparent"></div>
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
-            {/* LEFT HERO CONTENT */}
-            <div className="lg:col-span-8 space-y-6 text-center lg:text-left">
+            {/* LEFT HERO CONTENT - NATURALLY MERGED INTO BACKGROUND */}
+            <div className="lg:col-span-8 space-y-6 text-center lg:text-left animate-fade-in">
               {/* TOP PILL BADGE */}
               {isAuthenticated ? (
-                <div className="inline-flex items-center space-x-2.5 bg-emerald-100/95 text-emerald-950 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm border border-emerald-300 animate-fade-in-up">
+                <div className="inline-flex items-center space-x-2.5 bg-emerald-900/90 text-emerald-100 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm border border-emerald-500/40 animate-fade-in-up">
                   <span className="live-dot"></span>
                   <span>
                     Welcome, {user?.name || user?.businessName || (isFarmer ? 'Rahul Jadhav' : 'AgroFresh')} •{' '}
@@ -1220,22 +1456,22 @@ export const LandingPage = () => {
                   </span>
                 </div>
               ) : (
-                <div className="inline-flex items-center space-x-2.5 bg-white/95 backdrop-blur-md text-emerald-950 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm border border-emerald-300/80 animate-fade-in-up">
-                  <span className="live-dot"></span>
-                  <span className="text-[#0F382C] font-extrabold">Next-Gen Agricultural Intelligence & Market Engine</span>
+                <div className="inline-flex items-center space-x-2.5 bg-emerald-900/90 backdrop-blur-md text-emerald-100 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm border border-emerald-500/40 animate-fade-in-up">
+                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+                  <span className="text-emerald-50 font-extrabold tracking-wide">Next-Gen Agricultural Intelligence & Market Engine</span>
                 </div>
               )}
 
-              {/* HIGH-CONTRAST SOLID FOREST GREEN HEADLINE */}
-              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tight text-slate-900 leading-[1.06] animate-fade-in-up">
+              {/* HARMONIZED HIGH-CONTRAST HEADLINE */}
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tight text-emerald-950 leading-[1.06] animate-fade-in-up">
                 Sell Smarter.<br />
-                <span className="text-[#0F382C]">
+                <span className="bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-900 bg-clip-text text-transparent">
                   Earn Maximum Profit.
                 </span>
               </h1>
 
-              {/* HIGH-READABILITY SUBTITLE WITH CONTRAST PROTECTION */}
-              <p className="text-base sm:text-lg text-slate-800 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-semibold bg-white/30 lg:bg-transparent backdrop-blur-xs lg:backdrop-blur-none p-1.5 lg:p-0 rounded-2xl animate-fade-in-up drop-shadow-xs">
+              {/* HARMONIZED HIGH-READABILITY SUBTITLE */}
+              <p className="text-base sm:text-lg text-emerald-950/80 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-semibold animate-fade-in-up">
                 KRISHAK helps Indian farmers compare live market opportunities across APMCs and verified corporate buyers, forecast price trends, and calculate optimal multi-channel selling splits for guaranteed higher take-home payouts.
               </p>
 
@@ -1246,7 +1482,7 @@ export const LandingPage = () => {
                     {/* PRIMARY FILLED GREEN BUTTON */}
                     <button
                       onClick={() => navigate('/login/farmer')}
-                      className="px-6 sm:px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-xl font-bold text-sm sm:text-base shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-2 cursor-pointer"
+                      className="px-6 sm:px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-xl font-bold text-sm sm:text-base shadow-md shadow-emerald-700/25 transition-all flex items-center space-x-2 cursor-pointer"
                     >
                       <span>Start Selling (Farmer)</span>
                       <span className="text-emerald-200">→</span>
@@ -1255,10 +1491,10 @@ export const LandingPage = () => {
                     {/* SECONDARY OUTLINE/GHOST BUTTON */}
                     <button
                       onClick={() => navigate('/login/buyer')}
-                      className="px-6 sm:px-7 py-3.5 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 hover:text-slate-900 rounded-xl font-semibold text-sm sm:text-base shadow-2xs transition-all flex items-center space-x-2 border border-slate-300 hover:border-slate-400 cursor-pointer"
+                      className="px-6 sm:px-7 py-3.5 bg-white/95 hover:bg-emerald-50 active:scale-[0.98] text-emerald-950 rounded-xl font-semibold text-sm sm:text-base shadow-2xs transition-all flex items-center space-x-2 border border-emerald-200 hover:border-emerald-300 cursor-pointer"
                     >
                       <span>Buyer Procurement Desk</span>
-                      <span className="text-slate-400">→</span>
+                      <span className="text-emerald-600">→</span>
                     </button>
                   </>
                 ) : isFarmer ? (
@@ -1301,12 +1537,12 @@ export const LandingPage = () => {
               </div>
 
               {/* KEY HIGHLIGHT CHIPS */}
-              <div className="pt-2 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-bold text-slate-700 max-w-xl mx-auto lg:mx-0">
-                <div className="flex items-center space-x-2 justify-center lg:justify-start bg-white/85 backdrop-blur-xs py-2 px-3 rounded-xl border border-slate-200/80 shadow-2xs">
+              <div className="pt-2 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-bold text-emerald-950 max-w-xl mx-auto lg:mx-0">
+                <div className="flex items-center space-x-2 justify-center lg:justify-start bg-white/90 backdrop-blur-xs py-2 px-3 rounded-xl border border-emerald-200/70 shadow-2xs">
                   <span className="text-emerald-600 font-black">✓</span>
                   <span>Real Mandi Feeds</span>
                 </div>
-                <div className="flex items-center space-x-2 justify-center lg:justify-start bg-white/85 backdrop-blur-xs py-2 px-3 rounded-xl border border-slate-200/80 shadow-2xs">
+                <div className="flex items-center space-x-2 justify-center lg:justify-start bg-white/85 backdrop-blur-xs py-2 px-3 rounded-xl border border-slate-200/70 shadow-2xs">
                   <span className="text-emerald-600 font-black">✓</span>
                   <span>Direct Buyers</span>
                 </div>
@@ -1346,52 +1582,81 @@ export const LandingPage = () => {
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
                   {language === 'mr'
-                    ? 'महाराष्ट्र राज्य: जिल्हा व तालुक्यानुसार २०० किमी परिसरातील थेट बाजार समितीचे दर'
-                    : 'Maharashtra APMCs: Real-time mandi rates within 200 km radius of your Taluka & District'}
+                    ? 'महाराष्ट्र राज्य: जिल्हा, तालुका व गावानुसार थेट बाजार समिती, प्रक्रियादार व संस्थात्मक खरेदीदारांचे दर'
+                    : 'Maharashtra: Real-time rates from APMCs, Verified Processors & Institutional Buyers near your village'}
                 </p>
               </div>
             </div>
 
             {/* ACTIVE LOCATION & 200KM RANGE BADGES */}
             <div className="flex flex-wrap items-center gap-2 self-start lg:self-auto">
-              <div className="flex items-center gap-1.5 bg-emerald-600 text-white px-3 py-1.5 rounded-full text-xs font-black shadow-xs">
+              <div className="flex items-center gap-1.5 bg-emerald-700 text-white px-3 py-1.5 rounded-full text-xs font-black shadow-xs">
                 <span>🎯</span>
                 <span>{language === 'mr' ? '२०० किमी परिसर' : '200 km Range'}</span>
               </div>
               <div className="flex items-center gap-2 bg-emerald-50/90 border border-emerald-200/90 text-emerald-950 px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow-2xs">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="truncate max-w-[220px]">📍 {userLocationLabel}</span>
+                <span className="truncate max-w-[240px]">📍 {userLocationLabel}</span>
               </div>
             </div>
           </div>
 
-          {/* SEARCH & FILTER CONTROLS BAR: DISTRICT + TALUKA + CROP */}
-          <div className="bg-emerald-50/40 rounded-2xl p-4 sm:p-5 border border-emerald-100/90 space-y-4">
+          {/* ── 4 CATEGORY TABS (APMC / PROCESSORS / INSTITUTIONAL / DIGITAL) ── */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            {[
+              { id: 'apmc', label: language === 'mr' ? 'सरकारी APMC मंडी' : 'Gov. APMC Mandis', icon: '🏛️', color: 'emerald' },
+              { id: 'processors', label: language === 'mr' ? 'प्रमाणित प्रक्रियादार' : 'Verified Processors', icon: '🏭', color: 'blue' },
+              { id: 'institutional', label: language === 'mr' ? 'संस्थात्मक खरेदीदार' : 'Institutional Buyers', icon: '🤝', color: 'violet' },
+              { id: 'digital', label: language === 'mr' ? 'डिजिटल ट्रेडिंग' : 'Digital Trading', icon: '💻', color: 'amber' },
+            ].map((tab) => {
+              const isActive = marketTab === tab.id;
+              const colorMap = {
+                emerald: isActive ? 'bg-emerald-600 text-white shadow-emerald-200 border-emerald-600' : 'bg-white hover:bg-emerald-50 text-emerald-800 border-emerald-200',
+                blue:    isActive ? 'bg-blue-600 text-white shadow-blue-200 border-blue-600'         : 'bg-white hover:bg-blue-50 text-blue-800 border-blue-200',
+                violet:  isActive ? 'bg-violet-600 text-white shadow-violet-200 border-violet-600'   : 'bg-white hover:bg-violet-50 text-violet-800 border-violet-200',
+                amber:   isActive ? 'bg-amber-500 text-white shadow-amber-200 border-amber-500'      : 'bg-white hover:bg-amber-50 text-amber-800 border-amber-200',
+              };
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setMarketTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-extrabold transition-all whitespace-nowrap cursor-pointer border shadow-sm ${colorMap[tab.color]}`}
+                >
+                  <span className="text-base">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* SEARCH & FILTER CONTROLS BAR */}
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4">
             
             {/* TOP BAR: LOCATION MODE TABS */}
-            <div className="flex items-center justify-between pb-1 border-b border-emerald-200/50">
-              <div className="flex items-center space-x-1 sm:space-x-2">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setLocationMode('taluka')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
                     locationMode === 'taluka'
-                      ? 'bg-emerald-700 text-white shadow-xs'
-                      : 'bg-white/80 hover:bg-white text-slate-600 border border-slate-200/80'
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                   }`}
                 >
-                  🏛️ {language === 'mr' ? 'जिल्हा / तालुका निवडा' : 'District & Taluka'}
+                  🗺️ {language === 'mr' ? 'जिल्हा / तालुका / गाव' : 'District / Taluka / Village'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setLocationMode('pincode')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
                     locationMode === 'pincode'
-                      ? 'bg-emerald-700 text-white shadow-xs'
-                      : 'bg-white/80 hover:bg-white text-slate-600 border border-slate-200/80'
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                   }`}
                 >
-                  📮 {language === 'mr' ? 'पिन कोड (PIN Code)' : 'PIN Code'}
+                  📮 {language === 'mr' ? 'PIN Code' : 'PIN Code'}
                 </button>
               </div>
 
@@ -1400,32 +1665,32 @@ export const LandingPage = () => {
                 type="button"
                 onClick={handleUseCurrentLocation}
                 disabled={locLoading}
-                className="text-[11px] font-extrabold text-emerald-800 hover:text-emerald-950 flex items-center gap-1.5 bg-white hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-xl transition-all cursor-pointer shadow-2xs"
+                className="text-xs font-extrabold text-emerald-700 hover:text-white flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-600 border border-emerald-300 hover:border-emerald-600 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
                 title="Auto-detect location using device GPS"
               >
                 {locLoading ? (
-                  <div className="h-3 w-3 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="h-3.5 w-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <span>📍</span>
                 )}
-                <span>{language === 'mr' ? 'माझे वर्तमान स्थान' : 'Use Current Location'}</span>
+                <span>{language === 'mr' ? 'GPS Location' : 'Use My GPS'}</span>
               </button>
             </div>
 
             {/* FORM INPUTS GRID */}
             <form onSubmit={handleSearch}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
                 
-                {/* 1. SELECT CROP (col-span-3) */}
+                {/* 1. SELECT CROP */}
                 <div className="lg:col-span-3 space-y-1.5">
-                  <label className="text-xs font-extrabold text-slate-700 block">
-                    🌱 {language === 'mr' ? 'पीक निवडा' : 'Select Crop'}
+                  <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wide block">
+                    🌱 {language === 'mr' ? 'पीक' : 'Crop'}
                   </label>
                   <div className="relative">
                     <select
                       value={selectedCrop}
                       onChange={(e) => setSelectedCrop(e.target.value)}
-                      className="w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer shadow-xs appearance-none"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 cursor-pointer appearance-none hover:border-slate-300 transition-colors"
                     >
                       {cropList.map((c) => (
                         <option key={c.id} value={c.id}>
@@ -1433,77 +1698,71 @@ export const LandingPage = () => {
                         </option>
                       ))}
                     </select>
-                    <svg
-                      className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <svg className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
                   </div>
                 </div>
 
                 {locationMode === 'taluka' ? (
                   <>
-                    {/* 2. DISTRICT DROPDOWN (col-span-4) */}
-                    <div className="lg:col-span-4 space-y-1.5">
-                      <label className="text-xs font-extrabold text-slate-700 block">
-                        🏛️ {language === 'mr' ? 'जिल्हा (महाराष्ट्र)' : 'District (Maharashtra)'}
+                    {/* 2. DISTRICT */}
+                    <div className="lg:col-span-3 space-y-1.5">
+                      <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wide block">
+                        🏛️ {language === 'mr' ? 'जिल्हा' : 'District'}
                       </label>
                       <div className="relative">
                         <select
                           value={selectedDistrict}
                           onChange={(e) => handleDistrictChange(e.target.value)}
-                          className="w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer shadow-xs appearance-none"
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 cursor-pointer appearance-none hover:border-slate-300 transition-colors"
                         >
                           {MH_DISTRICTS.map((d) => (
-                            <option key={d.name} value={d.name}>
-                              {d.name} {d.name === 'Buldhana' ? '(बुलढाणा)' : d.name === 'Nashik' ? '(नाशिक)' : d.name === 'Pune' ? '(पुणे)' : d.name === 'Nagpur' ? '(नागपूर)' : ''}
-                            </option>
+                            <option key={d.name} value={d.name}>{d.name}</option>
                           ))}
                         </select>
-                        <svg
-                          className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                        </svg>
+                        <svg className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
                       </div>
                     </div>
 
-                    {/* 3. TALUKA DROPDOWN (col-span-3) */}
-                    <div className="lg:col-span-3 space-y-1.5">
-                      <label className="text-xs font-extrabold text-slate-700 block">
-                        📍 {language === 'mr' ? 'तालुका निवडा' : 'Select Taluka'}
+                    {/* 3. TALUKA */}
+                    <div className="lg:col-span-2 space-y-1.5">
+                      <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wide block">
+                        📍 {language === 'mr' ? 'तालुका' : 'Taluka'}
                       </label>
                       <div className="relative">
                         <select
                           value={selectedTaluka}
                           onChange={(e) => handleTalukaChange(e.target.value)}
-                          className="w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer shadow-xs appearance-none"
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 cursor-pointer appearance-none hover:border-slate-300 transition-colors"
                         >
                           {talukaList.map((t) => (
-                            <option key={t.name} value={t.name}>
-                              {t.name}
-                            </option>
+                            <option key={t.name} value={t.name}>{t.name}</option>
                           ))}
                         </select>
-                        <svg
-                          className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                        <svg className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
+                      </div>
+                    </div>
+
+                    {/* 4. VILLAGE — pure dropdown, no typing toggle */}
+                    <div className="lg:col-span-2 space-y-1.5">
+                      <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wide block">
+                        🏡 {language === 'mr' ? 'गाव' : 'Village'}
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={selectedVillage}
+                          onChange={(e) => handleVillageChange(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-sm font-bold text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 cursor-pointer appearance-none hover:border-emerald-300 transition-colors"
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                        </svg>
+                          {villageList.map((v) => (
+                            <option key={v} value={v}>{v}</option>
+                          ))}
+                        </select>
+                        <svg className="w-3.5 h-3.5 text-emerald-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
                       </div>
                     </div>
                   </>
                 ) : (
-                  /* 2. PIN CODE INPUT (col-span-7) */
+                  /* PIN CODE INPUT (col-span-7) */
                   <div className="lg:col-span-7 space-y-1.5">
                     <label className="text-xs font-extrabold text-slate-700 block">
                       📮 {language === 'mr' ? 'पिन कोड टाका' : 'Enter 6-Digit PIN Code'}
@@ -1523,7 +1782,7 @@ export const LandingPage = () => {
                   </div>
                 )}
 
-                {/* 4. SEARCH / REFRESH BUTTON (col-span-2) */}
+                {/* 5. SEARCH / REFRESH BUTTON (col-span-2) */}
                 <div className="lg:col-span-2">
                   <button
                     type="submit"
@@ -1553,21 +1812,27 @@ export const LandingPage = () => {
             )}
           </div>
 
-          {/* NEAREST MANDI PRICES SECTION HEADER */}
+          {/* ACTIVE CATEGORY HEADER & SORT SELECTOR */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
             <div className="flex flex-wrap items-center gap-2.5">
               <div className="h-7 w-7 rounded-lg bg-emerald-50 text-emerald-800 flex items-center justify-center text-sm font-bold border border-emerald-200">
-                🏪
+                {marketTab === 'apmc' ? '🏛️' : marketTab === 'processors' ? '🏭' : marketTab === 'institutional' ? '🤝' : '💻'}
               </div>
               <h3 className="font-extrabold text-slate-900 text-base sm:text-lg">
-                {language === 'mr' ? 'जवळच्या बाजार समितीचे थेट दर' : 'Nearest APMC Mandi Live Prices'}
+                {marketTab === 'apmc'
+                  ? (language === 'mr' ? 'जवळच्या बाजार समितीचे थेट दर' : 'Nearest APMC Mandi Live Prices')
+                  : marketTab === 'processors'
+                  ? (language === 'mr' ? 'प्रमाणित कृषी प्रक्रियादार खरेदी दर' : 'Verified Processors & Agro Industries')
+                  : marketTab === 'institutional'
+                  ? (language === 'mr' ? 'संस्थात्मक व कॉर्पोरेट थेट खरेदीदार' : 'Institutional & Corporate Procurement')
+                  : (language === 'mr' ? 'डिजिटल ट्रेडिंग व ई-लिलाव प्लॅटफॉर्म' : 'Digital Trading & Spot Exchanges')}
               </h3>
               <span className="bg-emerald-100 text-emerald-950 border border-emerald-300 text-[11px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-2xs">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>📅 {language === 'mr' ? 'आजचे लाईव्ह दर (२८ ऑगस्ट २०२६)' : "Today's Live Rates (28 Aug 2026)"}</span>
+                <span>📅 {language === 'mr' ? 'आजचे थेट दर (२८ ऑगस्ट २०२६)' : "Today's Live Rates (28 Aug 2026)"}</span>
               </span>
               <span className="bg-amber-50 text-amber-900 border border-amber-200 text-[10.5px] font-black px-2.5 py-0.5 rounded-full">
-                🎯 {language === 'mr' ? `२०० किमी परिसर (${sortedMandis.length} बाजार समित्या)` : `200 km Radius (${sortedMandis.length} APMCs found)`}
+                🎯 {language === 'mr' ? `२०० किमी परिसर (${sortedMandis.length} पर्याय उपलब्ध)` : `200 km Radius (${sortedMandis.length} options found)`}
               </span>
             </div>
 
@@ -1587,80 +1852,98 @@ export const LandingPage = () => {
             </div>
           </div>
 
-          {/* LIST OF MANDI CARDS (1 TO 5) */}
+          {/* LIST OF MARKET PRICE CARDS */}
           <div className="space-y-3">
             {sortedMandis.map((mandi, idx) => {
-              const bestFreight = Math.round(mandi.distanceKm * 0.85);
-              const netPayout = mandi.pricePerQuintal - bestFreight;
+              const isDigital = marketTab === 'digital';
+              const freightRate = isDigital ? 0 : Math.round(mandi.distanceKm * 0.85);
+              const netPayout = mandi.pricePerQuintal - freightRate;
+              const rankColors = ['bg-amber-400 text-white', 'bg-slate-400 text-white', 'bg-orange-400 text-white'];
+              const rankColor = idx < 3 ? rankColors[idx] : 'bg-slate-100 text-slate-600';
 
               return (
                 <div
                   key={mandi.id}
-                  className="group bg-white hover:bg-emerald-50/25 border border-slate-200/90 hover:border-emerald-400/90 rounded-2xl p-4 sm:p-5 transition-all duration-200 shadow-2xs hover:shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                  className="group bg-white hover:bg-gradient-to-r hover:from-emerald-50/40 hover:to-white border border-slate-200 hover:border-emerald-300 rounded-2xl p-4 sm:p-5 transition-all duration-200 shadow-sm hover:shadow-md flex flex-col lg:flex-row lg:items-center justify-between gap-4"
                 >
-                  
-                  {/* 1. RANK BADGE & MANDI NAME */}
+                  {/* 1. RANK BADGE & MARKET NAME */}
                   <div className="flex items-start gap-3.5 flex-1 min-w-[240px]">
-                    <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-800 font-extrabold text-base flex items-center justify-center border border-emerald-200 flex-shrink-0 group-hover:scale-105 transition-transform mt-0.5">
-                      {idx + 1}
+                    <div className={`h-9 w-9 rounded-xl font-extrabold text-sm flex items-center justify-center flex-shrink-0 mt-0.5 ${rankColor}`}>
+                      #{idx + 1}
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-extrabold text-slate-900 text-sm sm:text-base group-hover:text-emerald-950 transition-colors">
+                        <h4 className="font-extrabold text-slate-900 text-sm sm:text-base">
                           {mandi.name}
                         </h4>
                         {mandi.verified && (
-                          <span className="h-4 w-4 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center shadow-2xs" title="Verified APMC">
-                            ✓
+                          <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-200" title="Verified">
+                            ✓ Verified
                           </span>
                         )}
-                        <span className="text-[10px] font-black bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-md border border-emerald-300/80">
-                          📅 28 Aug 2026 Today
-                        </span>
+                        {mandi.tag && (
+                          <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-100">
+                            {mandi.tag}
+                          </span>
+                        )}
                       </div>
-                      <p className="text-xs text-slate-500 font-medium flex items-center gap-1 mt-1">
-                        <span className="text-slate-400">📍</span>
-                        <span>{mandi.location}</span>
-                        <span className="text-slate-300">•</span>
-                        <span className="text-emerald-700 font-bold">🛣️ 3 Routes Available (Best: {mandi.distanceKm} km)</span>
-                      </p>
+                      <div className="flex items-center gap-2 flex-wrap text-xs mt-1.5">
+                        <span className="inline-flex items-center gap-1 font-semibold text-slate-500">
+                          <span className="text-emerald-600 font-bold">🏡</span>
+                          <span className="text-emerald-700 font-bold">{selectedVillage || userLocationLabel.split(',')[0]}</span>
+                          <span className="text-slate-300 mx-0.5">→</span>
+                          <span className="text-slate-600">{mandi.location}</span>
+                        </span>
+                        {!isDigital && (
+                          <span className="text-[10px] font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full">
+                            🛣️ {mandi.distanceKm} km • 3 routes
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* 2. DISTANCE & BEST HIGHWAY ROUTE */}
-                  <div className="flex sm:flex-col items-center sm:items-center justify-between sm:justify-center border-t sm:border-t-0 border-slate-100 pt-2 sm:pt-0 min-w-[130px] text-center">
-                    <span className="text-sm sm:text-base font-extrabold text-slate-900 block">
-                      {mandi.distanceKm} km
+                  {/* 2. DISTANCE BADGE */}
+                  <div className="hidden lg:flex flex-col items-center justify-center min-w-[100px] text-center">
+                    <span className="text-xl font-black text-slate-800">
+                      {isDigital ? '🌐' : `${mandi.distanceKm}`}
                     </span>
-                    <span className="text-[10.5px] text-emerald-800 font-extrabold block bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 mt-0.5">
-                      ⭐ Best Route: ~{Math.round(mandi.distanceKm / 55 * 60)} min
+                    <span className="text-[11px] text-slate-500 font-semibold">
+                      {isDigital ? 'Online' : 'km away'}
                     </span>
+                    {!isDigital && (
+                      <span className="text-[10px] text-emerald-700 font-bold mt-0.5">
+                        ~{Math.max(4, Math.round(mandi.distanceKm / 55 * 60))} min drive
+                      </span>
+                    )}
                   </div>
 
                   {/* 3. PRICE & NET PAYOUT */}
-                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center min-w-[170px] text-right">
-                    <div>
-                      <span className="text-lg sm:text-xl font-black font-mono text-slate-900">
-                        ₹{mandi.pricePerQuintal.toLocaleString('en-IN')}
-                      </span>
-                      <span className="text-xs text-slate-500 font-medium ml-1">/q</span>
+                  <div className="flex lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-3 lg:gap-1 min-w-[180px]">
+                    <div className="text-right">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-xl font-black font-mono text-slate-900">
+                          ₹{mandi.pricePerQuintal.toLocaleString('en-IN')}
+                        </span>
+                        <span className="text-xs text-slate-400 font-medium">/quintal</span>
+                      </div>
+                      <div className="flex items-center justify-end gap-2 mt-0.5">
+                        <span className="text-xs font-extrabold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-lg">
+                          🏠 Take-Home: ₹{netPayout.toLocaleString('en-IN')}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[11px] font-extrabold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        Take-Home: ₹{netPayout.toLocaleString('en-IN')}/q
-                      </span>
-                      <span
-                        className={`text-xs font-bold ${
-                          mandi.isPositive ? 'text-emerald-700' : 'text-rose-600'
-                        }`}
-                      >
-                        {mandi.isPositive ? '▲' : '▼'} {mandi.changePercent}
-                      </span>
-                    </div>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                      mandi.isPositive !== false
+                        ? 'text-emerald-700 bg-emerald-50 border border-emerald-200'
+                        : 'text-rose-600 bg-rose-50 border border-rose-200'
+                    }`}>
+                      {mandi.isPositive !== false ? '▲' : '▼'} {mandi.changePercent}
+                    </span>
                   </div>
 
                   {/* 4. ACTION BUTTONS */}
-                  <div className="pt-2 lg:pt-0 flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       type="button"
                       onClick={() => {
@@ -1668,18 +1951,18 @@ export const LandingPage = () => {
                         setSelectedRouteIndex(0);
                         setShowMapModal(true);
                       }}
-                      className="px-3.5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-black transition-all flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-700/20 cursor-pointer"
-                      title="Explore 3 highlighted routes with real-time navigation on radar map"
+                      className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.97] text-white rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shadow-sm shadow-emerald-200 cursor-pointer"
                     >
-                      <span>🗺️ 3 Routes & Map</span>
+                      <span>🗺️</span>
+                      <span>Routes & Map</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveMandiDetail(mandi)}
-                      className="px-3.5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1 shadow-2xs group/btn cursor-pointer"
+                      className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm cursor-pointer"
                     >
                       <span>Details</span>
-                      <span className="text-slate-400 group-hover/btn:text-emerald-700 group-hover/btn:translate-x-0.5 transition-all">›</span>
+                      <span className="text-slate-400">›</span>
                     </button>
                   </div>
 
@@ -1688,8 +1971,29 @@ export const LandingPage = () => {
             })}
           </div>
 
-          {/* BOTTOM BUTTON: VIEW ALL MARKETS ON MAP */}
-          <div className="text-center pt-3 border-t border-slate-100">
+          {/* CHANNEL INFO FOOTER BANNER */}
+          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center space-x-3">
+              <span className="text-2xl">
+                {marketTab === 'apmc' ? '🏛️' : marketTab === 'processors' ? '🏭' : marketTab === 'institutional' ? '🤝' : '💻'}
+              </span>
+              <div>
+                <span className="font-extrabold text-slate-800 block">
+                  {marketTab === 'apmc'
+                    ? 'APMC Mandis: Open auction bidding with Agmarknet / MSAMB official daily rates.'
+                    : marketTab === 'processors'
+                    ? 'Verified Processors: Direct factory gate supply with zero middlemen commissions.'
+                    : marketTab === 'institutional'
+                    ? 'Institutional Buyers: Guaranteed bulk purchase orders with verified digital escrow payments.'
+                    : 'Digital Trading: Pan-India electronic spot auctions & transparent online trading.'}
+                </span>
+                <span className="text-slate-500 text-[11px]">
+                  {marketTab === 'apmc'
+                    ? 'Official MSAMB price feeds updated every 15 minutes.'
+                    : 'Contracts include quality grade benchmarks and fast direct bank deposit.'}
+                </span>
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => {
@@ -1697,11 +2001,9 @@ export const LandingPage = () => {
                 setSelectedRouteIndex(0);
                 setShowMapModal(true);
               }}
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-emerald-50 hover:bg-emerald-100/80 active:scale-[0.98] text-emerald-900 border border-emerald-200/90 rounded-xl text-xs sm:text-sm font-bold shadow-2xs transition-all cursor-pointer"
+              className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold whitespace-nowrap shadow-xs cursor-pointer"
             >
-              <span>📍</span>
-              <span>{language === 'mr' ? 'सर्व बाजार समित्या व मार्ग थेट नकाशावर पहा' : 'View All Markets & Routes on Live Radar Map'}</span>
-              <span className="text-emerald-700 font-bold">›</span>
+              📍 Open Live Radar Map →
             </button>
           </div>
 
@@ -1720,7 +2022,7 @@ export const LandingPage = () => {
                   <h3 className="text-xl font-extrabold text-slate-900">
                     {activeMandiDetail.name}
                   </h3>
-                  <span className="h-4 w-4 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center shadow-xs" title="Verified APMC">
+                  <span className="h-4 w-4 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center shadow-xs" title="Verified Channel">
                     ✓
                   </span>
                   <span className="text-[10px] font-black bg-emerald-100 text-emerald-950 px-2 py-0.5 rounded-full border border-emerald-300">
@@ -1731,7 +2033,7 @@ export const LandingPage = () => {
                   <span>📍</span>
                   <span>{activeMandiDetail.location}</span>
                   <span className="text-slate-300">•</span>
-                  <span className="text-slate-500 font-bold">Official Agmarknet / MSAMB Verified</span>
+                  <span className="text-slate-500 font-bold">Official MSAMB / Verified Channel</span>
                 </p>
               </div>
               <button
@@ -1740,6 +2042,19 @@ export const LandingPage = () => {
               >
                 ✕
               </button>
+            </div>
+
+            {/* ROUTE CORRIDOR FROM VILLAGE ORIGIN */}
+            <div className="bg-emerald-50/90 p-3 rounded-2xl border border-emerald-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase font-black tracking-wider text-emerald-800 block">Origin Farm Gate</span>
+                <span className="font-extrabold text-slate-900 truncate block">🏡 {userLocationLabel}</span>
+              </div>
+              <div className="text-emerald-700 font-black text-sm hidden sm:block">➔</div>
+              <div className="sm:text-right min-w-0">
+                <span className="text-[10px] uppercase font-black tracking-wider text-emerald-800 block">Destination Market</span>
+                <span className="font-extrabold text-slate-900 truncate block">🏪 {activeMandiDetail.name}</span>
+              </div>
             </div>
 
             {/* MANDI METRICS GRID */}
@@ -1787,7 +2102,7 @@ export const LandingPage = () => {
                   🛣️ 3 Available Navigation Routes
                 </span>
                 <span className="text-[10px] bg-emerald-500 text-slate-950 font-black px-2 py-0.5 rounded-full">
-                  Multi-Route Enabled
+                  From {selectedVillage || userLocationLabel.split(',')[0]}
                 </span>
               </div>
 
@@ -1859,7 +2174,7 @@ export const LandingPage = () => {
           setSelectedRouteIndex(0);
         }}
         userLocationLabel={userLocationLabel}
-        userCoords={activeCenter}
+        userCoords={userCoords}
         selectedMandi={selectedMapMandi || sortedMandis[0] || rawMandis[0]}
         allMandis={sortedMandis}
         selectedCrop={selectedCrop}

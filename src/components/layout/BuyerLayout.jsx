@@ -31,7 +31,6 @@ export const BuyerLayout = () => {
     { label: t('nav_post', 'Post Procurement Tender'), path: '/buyer/post-requirement', icon: 'ri-add-circle-line', primary: true },
     { label: t('nav_search', 'Find Farmers Lots'), path: '/buyer/find-farmers', icon: 'ri-user-search-line' },
     { label: t('nav_orders', 'Orders & Escrow'), path: '/buyer/shipments', icon: 'ri-truck-line' },
-    { label: 'FPO Collective Sourcing', path: '/fpo', icon: 'ri-community-line' },
     { label: t('nav_profile', 'Enterprise Profile'), path: '/buyer/profile', icon: 'ri-store-2-line' },
   ];
 

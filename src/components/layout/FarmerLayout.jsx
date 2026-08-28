@@ -1,11 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
-import { KrishakLogo } from '../common/KrishakLogo';
-import { LanguageSwitcher } from '../common/LanguageSwitcher';
-
 import { NotificationDropdown } from '../common/NotificationDropdown';
 
 export const FarmerLayout = () => {
@@ -14,6 +11,7 @@ export const FarmerLayout = () => {
   const { showToast } = useApp ? useApp() : { showToast: () => {} };
   const location = useLocation();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -27,235 +25,246 @@ export const FarmerLayout = () => {
   };
 
   const navItems = [
-    { label: t('nav_home', 'Dashboard'), path: '/farmer/dashboard', icon: 'ri-dashboard-line' },
-    { label: t('nav_sell', 'Sell My Produce'), path: '/farmer/list-produce', icon: 'ri-add-circle-line', primary: true },
-    { label: t('nav_deals', 'Best Deal (Profit)'), path: '/farmer/best-deal', icon: 'ri-trophy-line', badge: 'PROFIT' },
-    { label: t('nav_markets', 'Market Intelligence'), path: '/farmer/markets', icon: 'ri-line-chart-line' },
-    { label: t('nav_lots', 'My Produce Lots'), path: '/farmer/lots', icon: 'ri-archive-line' },
-    { label: t('nav_offers', 'Buyer Offers'), path: '/farmer/offers', icon: 'ri-hand-heart-line' },
-    { label: t('nav_escrow', 'Escrow & Payouts'), path: '/farmer/transactions', icon: 'ri-shield-check-line' },
-    { label: 'FPO Hub', path: '/fpo', icon: 'ri-community-line' },
-    { label: t('nav_profile', 'Farmer Profile'), path: '/farmer/profile', icon: 'ri-user-3-line' },
+    { label: 'Dashboard', path: '/farmer/dashboard', icon: 'ri-home-4-line', activeIcon: 'ri-home-4-fill' },
+    { label: 'Market Intelligence', path: '/farmer/markets', icon: 'ri-line-chart-line' },
+    { label: 'My Crops', path: '/farmer/crops', icon: 'ri-plant-line' },
+    { label: 'Sell Your Produce', path: '/farmer/list-produce', icon: 'ri-store-2-line' },
+    { label: 'Contracts', path: '/farmer/contracts', icon: 'ri-file-list-3-line' },
+    { label: 'Orders & Sales', path: '/farmer/orders', icon: 'ri-shopping-cart-line' },
+    { label: 'Payments & Wallet', path: '/farmer/wallet', icon: 'ri-wallet-3-line' },
+    { label: 'Weather Forecast', path: '/farmer/weather', icon: 'ri-cloud-windy-line' },
+    { label: 'Best Deal', path: '/farmer/best-deal', icon: 'ri-trophy-line', badge: 'New' },
+    { label: 'Resources', path: '/farmer/resources', icon: 'ri-box-3-line' },
+    { label: 'Support', path: '/farmer/support', icon: 'ri-questionnaire-line' },
   ];
 
   const currentPath = location.pathname;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col md:flex-row antialiased">
+    <div className="min-h-screen bg-[#f4f7f6] text-slate-900 flex antialiased font-sans">
       
-      {/* ========================================================================= */}
-      {/* DESKTOP FIXED LEFT SIDEBAR */}
-      {/* ========================================================================= */}
-      <aside className="hidden md:flex flex-col w-64 lg:w-72 bg-white/95 backdrop-blur-xl border-r border-slate-200/80 fixed inset-y-0 left-0 z-30 shadow-xs">
-        {/* LOGO AT TOP OF SIDEBAR */}
-        <div className="h-20 px-6 flex items-center justify-between border-b border-slate-100/90">
-          <Link to="/" className="flex items-center" title="KRISHAK - Return to Landing Page">
-            <KrishakLogo size="normal" showTagline={true} />
-          </Link>
-        </div>
-
-        {/* RETURN TO LANDING PAGE CHIP */}
-        <div className="px-4 pt-3 pb-1">
-          <Link
-            to="/"
-            className="flex items-center justify-between px-3 py-2 bg-emerald-50/70 hover:bg-emerald-100/80 text-emerald-900 border border-emerald-200/80 rounded-xl text-xs font-black transition-all group"
-            title="Return to Public Landing Page"
-          >
-            <div className="flex items-center space-x-2">
-              <span className="text-emerald-700 font-black group-hover:-translate-x-0.5 transition-transform">←</span>
-              <span>{language === 'mr' ? 'मुख्य पानावर जा' : 'Landing Page'}</span>
-            </div>
-            <span className="text-[9px] font-mono font-bold bg-white/90 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-300 shadow-2xs">
-              HOME
-            </span>
-          </Link>
-        </div>
-
-        {/* SIDEBAR NAVIGATION ITEMS */}
-        <div className="flex-1 px-4 py-3 space-y-1.5 overflow-y-auto">
-          <div className="px-3 pb-2 text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider flex items-center justify-between">
-            <span>Farmer Portal</span>
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+      {/* ─── DESKTOP FIXED LEFT SIDEBAR (EXACT MATCH TO REFERENCE) ─── */}
+      <aside className="hidden lg:flex flex-col w-64 xl:w-72 bg-[#062d1f] text-white fixed inset-y-0 left-0 z-30 shadow-2xl overflow-y-auto">
+        
+        {/* BRAND LOGO & TITLE */}
+        <div className="p-6 pb-4 flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 text-2xl flex-shrink-0">
+            🌱
           </div>
+          <div>
+            <div className="font-black text-lg tracking-wider text-white leading-none">
+              KRISHI SETU
+            </div>
+            <div className="text-[10.5px] font-medium text-emerald-300/80 tracking-wide mt-1">
+              Farmer Command Center
+            </div>
+          </div>
+        </div>
 
+        {/* SIDEBAR NAVIGATION LIST */}
+        <nav className="flex-1 px-3.5 py-2 space-y-1 overflow-y-auto">
           {navItems.map((item, idx) => {
-            const isActive = currentPath === item.path;
+            const isActive = currentPath === item.path || (item.path === '/farmer/crops' && currentPath === '/farmer/lots') || (item.path === '/farmer/wallet' && currentPath === '/farmer/transactions');
             return (
               <Link
                 key={idx}
                 to={item.path}
-                className={`group flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 ${
-                  item.primary
-                    ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-md shadow-emerald-600/25 font-black hover:scale-[1.01] active:scale-95'
-                    : isActive
-                    ? 'bg-emerald-50 text-emerald-950 border border-emerald-200/90 font-black shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  isActive
+                    ? 'bg-[#008253] text-white shadow-md shadow-emerald-950/40 font-black'
+                    : 'text-emerald-100/80 hover:text-white hover:bg-white/10 font-medium'
                 }`}
               >
-                <div className="flex items-center space-x-3">
-                  <i className={`${item.icon} text-lg transition-transform group-hover:scale-110 ${
-                    item.primary ? 'text-white' : isActive ? 'text-emerald-700' : 'text-slate-400 group-hover:text-emerald-600'
-                  }`}></i>
-                  <span>{item.label}</span>
-                </div>
+                <i className={`${isActive && item.activeIcon ? item.activeIcon : item.icon} text-lg ${isActive ? 'text-white' : 'text-emerald-300/70'}`}></i>
+                <span className="flex-1">{item.label}</span>
                 {item.badge && (
-                  <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 bg-gradient-to-r from-harvest-400 to-harvest-500 text-slate-950 rounded-md shadow-xs animate-badge-pop">
+                  <span className="text-[9px] font-black bg-amber-400 text-amber-950 px-1.5 py-0.5 rounded-full leading-none">
                     {item.badge}
                   </span>
                 )}
               </Link>
             );
           })}
-        </div>
+        </nav>
 
-        {/* USER PROFILE & LOGOUT CHIP AT BOTTOM */}
-        <div className="p-3.5 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between">
-          <div className="flex items-center space-x-2.5 overflow-hidden">
-            <div className="h-9 w-9 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-xs">
-              🌾
-            </div>
-            <div className="overflow-hidden text-left leading-tight">
-              <div className="text-xs font-black text-slate-900 truncate">{user?.name || user?.farmerName || 'Farmer'}</div>
-              <div className="text-[10px] text-emerald-700 font-mono font-bold truncate">{user?.farmerId || user?.id || user?.mobile || 'Farmer Account'}</div>
-            </div>
-          </div>
-          
-          {/* LOGOUT BUTTON WITH ICON */}
-          <button
-            onClick={handleLogout}
-            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-xl transition-all flex-shrink-0 active:scale-90"
-            title="Logout of Farmer Account"
-            aria-label="Logout"
+        {/* BOOST YOUR PROFITS PROMO CARD (EXACT REPLICA) */}
+        <div className="p-3.5 pt-1">
+          <div 
+            className="rounded-3xl p-5 text-slate-900 relative overflow-hidden shadow-md bg-cover bg-bottom border border-emerald-300/30"
+            style={{
+              backgroundImage: "url('/boost_profit_sprout.jpg')",
+              backgroundColor: '#f8faf9',
+            }}
           >
-            <i className="ri-logout-box-r-line text-lg"></i>
-          </button>
-        </div>
-      </aside>
+            <div className="relative z-10 max-w-[170px]">
+              <h4 className="font-black text-base text-[#0d3b22] leading-tight tracking-tight">
+                Boost Your Profits
+              </h4>
+              <p className="text-xs text-[#1e462d] mt-1.5 leading-snug font-medium">
+                Use our AI insights and market intelligence to increase your earnings.
+              </p>
+            </div>
 
-      {/* ========================================================================= */}
-      {/* MAIN DESKTOP / MOBILE CONTENT CONTAINER */}
-      {/* ========================================================================= */}
-      <div className="flex-1 md:pl-64 lg:pl-72 flex flex-col min-w-0">
-        
-        {/* TOP HEADER */}
-        <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 h-16 sm:h-20 px-4 sm:px-8 flex items-center justify-between shadow-xs">
-          
-          {/* MOBILE HEADER LEFT: COMPACT LOGO + LANDING LINK */}
-          <div className="flex items-center space-x-2 md:hidden">
-            <Link to="/" className="flex items-center" title="Return to Landing Page">
-              <KrishakLogo size="small" showTagline={false} />
-            </Link>
-          </div>
-
-          {/* DESKTOP HEADER LEFT: PAGE TITLE / BREADCRUMB + RETURN TO LANDING LINK */}
-          <div className="hidden md:flex items-center space-x-3 text-xs text-slate-500 font-medium">
-            <Link
-              to="/"
-              className="flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-200/90 rounded-xl font-extrabold transition-all shadow-2xs group"
-              title="Return to Public Landing Page"
-            >
-              <span className="text-emerald-700 font-black group-hover:-translate-x-0.5 transition-transform">←</span>
-              <span>{language === 'mr' ? 'मुख्य पान' : 'Landing Page'}</span>
-            </Link>
-            <span>/</span>
-            <span className="font-bold text-slate-700">KRISHAK</span>
-            <span>/</span>
-            <span className="text-emerald-700 font-black capitalize bg-emerald-50/60 px-2.5 py-1 rounded-lg border border-emerald-200/60">
-              {currentPath.replace('/farmer/', '').replace('/', '').replace('-', ' ') || 'Dashboard'}
-            </span>
-          </div>
-
-          {/* HEADER RIGHT: LANDING BUTTON, LANGUAGE, NOTIFICATIONS, LOGOUT BUTTON */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            {/* RETURN TO LANDING PAGE HEADER BUTTON */}
-            <Link
-              to="/"
-              className="flex items-center space-x-1.5 px-3 py-2 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-900 border border-slate-200/90 rounded-xl text-xs font-black text-slate-700 transition-all duration-200 active:scale-95 shadow-2xs"
-              title="Return to Public Landing Page"
-            >
-              <span>🏠</span>
-              <span className="hidden sm:inline">{language === 'mr' ? 'मुख्य पान' : 'Landing Page'}</span>
-            </Link>
-
-            <LanguageSwitcher />
-
-            <NotificationDropdown />
-
-            {/* UPGRADED LOGOUT BUTTON WITH ICON */}
             <button
-              onClick={handleLogout}
-              className="flex items-center space-x-1.5 px-3.5 py-2 bg-slate-100/90 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 border border-slate-200/90 rounded-xl text-xs font-black text-slate-600 transition-all duration-200 active:scale-95 shadow-xs"
-              title="Logout"
-              aria-label="Logout"
+              onClick={() => navigate('/farmer/advisory')}
+              className="mt-4 relative z-10 w-full py-2.5 bg-[#0e5c36] hover:bg-[#094728] active:scale-95 text-white font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <i className="ri-logout-box-r-line text-sm sm:text-base text-slate-500 hover:text-rose-600"></i>
-              <span className="hidden sm:inline">{t('logout', 'Logout')}</span>
+              <span>Explore Insights</span>
+              <span>→</span>
             </button>
           </div>
+        </div>
+
+        {/* USER PROFILE PILL AT BOTTOM (EXACT REPLICA) */}
+        <div className="p-3.5 border-t border-emerald-900/60 bg-[#042016]/90">
+          <div 
+            className="flex items-center justify-between p-2.5 rounded-2xl bg-[#063321] border border-emerald-800/60 hover:border-emerald-600/60 transition-all cursor-pointer group" 
+            onClick={() => navigate('/farmer/profile')}
+          >
+            <div className="flex items-center gap-3 overflow-hidden">
+              <img
+                src="/farmer_avatar.jpg"
+                alt="Rahul Jadhav"
+                className="h-10 w-10 rounded-full object-cover border-2 border-emerald-400/80 shadow-sm flex-shrink-0"
+                onError={(e) => { e.target.src = '/krishak_logo.png'; }}
+              />
+              <div className="overflow-hidden leading-tight">
+                <div className="text-xs font-black text-white truncate">
+                  {user?.name || user?.farmerName || 'Rahul Jadhav'}
+                </div>
+                <div className="text-[11px] text-emerald-300/90 font-medium truncate mt-0.5">
+                  Premium Farmer
+                </div>
+              </div>
+            </div>
+            
+            <i className="ri-arrow-down-s-line text-emerald-300 text-lg group-hover:translate-y-0.5 transition-transform"></i>
+          </div>
+        </div>
+
+      </aside>
+
+      {/* ─── MAIN CONTENT VIEW (TOP BAR + PAGE CONTENT) ─── */}
+      <div className="flex-1 lg:pl-64 xl:pl-72 flex flex-col min-w-0 min-h-screen">
+        
+        {/* TOP BAR / DESKTOP & MOBILE HEADER */}
+        <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-xl border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-2xs">
+          
+          {/* Header Left: Hamburger + Greeting */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-lg"
+            >
+              <i className={mobileMenuOpen ? 'ri-close-line' : 'ri-menu-line'}></i>
+            </button>
+
+            <div>
+              <h2 className="text-base sm:text-xl font-black text-slate-900 tracking-tight leading-tight flex items-center gap-1.5">
+                <span>Welcome back, {user?.name || user?.farmerName || 'Rahul Jadhav'}</span>
+                <span className="text-lg">👋</span>
+              </h2>
+              <div className="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-0.5 flex-wrap">
+                <span>{user?.village ? `${user.village}, ` : ''}{user?.district || 'Ausa, Latur'}</span>
+                <span>•</span>
+                <span>{user?.landArea ? `${user.landArea} Acres` : '8.5 Acres'}</span>
+                <span>•</span>
+                <span className="text-emerald-700 font-bold flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Live Market Intelligence Active
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Header Right: Search, Notifications, Leaf Icon */}
+          <div className="flex items-center gap-2.5 self-end sm:self-auto">
+            
+            {/* Search Input */}
+            <div className="relative hidden md:block w-52 lg:w-64">
+              <input
+                type="text"
+                placeholder="Search market, crop, buyers..."
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200/90 rounded-full text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-2xs"
+              />
+              <i className="ri-search-line absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+            </div>
+
+            {/* Notification Bell */}
+            <div className="relative">
+              <NotificationDropdown />
+            </div>
+
+            {/* Green Eco Leaf Action Icon */}
+            <button
+              onClick={() => navigate('/farmer/best-deal')}
+              className="h-10 w-10 rounded-full bg-emerald-100/80 hover:bg-emerald-200 text-emerald-800 flex items-center justify-center text-lg shadow-2xs transition-transform active:scale-95 cursor-pointer"
+              title="Best Deal"
+            >
+              🏆
+            </button>
+          </div>
+
         </header>
 
-        {/* MAIN APPLICATION OUTLET */}
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 md:pb-10">
+        {/* MOBILE SLIDEOUT DRAWER */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex">
+            <div className="w-72 bg-[#062d1f] text-white h-full flex flex-col p-4 shadow-2xl overflow-y-auto">
+              <div className="flex justify-between items-center pb-4 border-b border-emerald-900/60">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🌱</span>
+                  <div className="font-black text-base text-white">KRISHI SETU</div>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <nav className="flex-1 py-4 space-y-1">
+                {navItems.map((item, idx) => {
+                  const isActive = currentPath === item.path;
+                  return (
+                    <Link
+                      key={idx}
+                      to={item.path}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold ${
+                        isActive
+                          ? 'bg-[#008253] text-white font-black'
+                          : 'text-emerald-100/80 hover:bg-white/10'
+                      }`}
+                    >
+                      <i className={`${item.icon} text-lg`}></i>
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <button
+                onClick={handleLogout}
+                className="w-full py-2.5 bg-rose-950/60 border border-rose-800/60 text-rose-200 rounded-xl text-xs font-bold mt-2"
+              >
+                Logout
+              </button>
+            </div>
+            <div className="flex-1" onClick={() => setMobileMenuOpen(false)}></div>
+          </div>
+        )}
+
+        {/* PAGE CONTENT OUTLET */}
+        <main className="flex-1 p-4 sm:p-7 max-w-7xl w-full mx-auto">
           <Outlet />
         </main>
+
       </div>
-
-      {/* ========================================================================= */}
-      {/* MOBILE APP FIXED BOTTOM NAVIGATION (FARMER ONLY) */}
-      {/* ========================================================================= */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 px-3 py-1.5 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.06)] safe-bottom">
-        <Link
-          to="/farmer/dashboard"
-          className={`flex flex-col items-center flex-1 py-1 transition-all ${
-            currentPath === '/farmer/dashboard' ? 'text-emerald-700 font-black scale-105' : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <i className="ri-home-4-line text-xl"></i>
-          <span className="text-[10px] mt-0.5">{t('nav_home', 'Home')}</span>
-        </Link>
-
-        <Link
-          to="/farmer/markets"
-          className={`flex flex-col items-center flex-1 py-1 transition-all ${
-            currentPath === '/farmer/markets' ? 'text-emerald-700 font-black scale-105' : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <i className="ri-line-chart-line text-xl"></i>
-          <span className="text-[10px] mt-0.5">{t('nav_markets', 'Markets')}</span>
-        </Link>
-
-        {/* CENTRAL PROMINENT SELL ACTION WITH PULSING RING */}
-        <Link
-          to="/farmer/list-produce"
-          className="flex flex-col items-center flex-1 py-0.5 text-emerald-800 font-black relative group"
-        >
-          <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-emerald-700 to-emerald-500 text-white scale-110 shadow-lg shadow-emerald-600/35 transition-transform group-hover:scale-125 group-active:scale-95">
-            <i className="ri-add-line text-2xl font-bold"></i>
-          </div>
-          <span className="text-[10px] mt-1 font-black text-emerald-800">Sell</span>
-        </Link>
-
-        <Link
-          to="/farmer/best-deal"
-          className={`flex flex-col items-center flex-1 py-1 transition-all ${
-            currentPath === '/farmer/best-deal' ? 'text-harvest-700 font-black scale-105' : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <i className="ri-trophy-line text-xl"></i>
-          <span className="text-[10px] mt-0.5">{t('nav_deals', 'Deals')}</span>
-        </Link>
-
-        <Link
-          to="/farmer/profile"
-          className={`flex flex-col items-center flex-1 py-1 transition-all ${
-            currentPath === '/farmer/profile' ? 'text-emerald-700 font-black scale-105' : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <i className="ri-user-3-line text-xl"></i>
-          <span className="text-[10px] mt-0.5">{t('nav_profile', 'Profile')}</span>
-        </Link>
-      </nav>
 
     </div>
   );
 };
+
+export default FarmerLayout;

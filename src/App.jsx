@@ -16,6 +16,14 @@ import { ListProducePage } from './pages/farmer/ListProducePage';
 import { BestDealPage } from './pages/farmer/BestDealPage';
 import { MarketIntelligencePage } from './pages/farmer/MarketIntelligencePage';
 import { MyLotsPage } from './pages/farmer/MyLotsPage';
+import { MyCropsPage } from './pages/farmer/MyCropsPage';
+import { ContractsPage } from './pages/farmer/ContractsPage';
+import { OrdersSalesPage } from './pages/farmer/OrdersSalesPage';
+import { PaymentsWalletPage } from './pages/farmer/PaymentsWalletPage';
+import { WeatherForecastPage } from './pages/farmer/WeatherForecastPage';
+import { AdvisoryInsightsPage } from './pages/farmer/AdvisoryInsightsPage';
+import { ResourcesPage } from './pages/farmer/ResourcesPage';
+import { SupportPage } from './pages/farmer/SupportPage';
 import { BuyerOffersPage } from './pages/farmer/BuyerOffersPage';
 import { TransactionsPage } from './pages/farmer/TransactionsPage';
 import { FarmerProfilePage } from './pages/farmer/FarmerProfilePage';
@@ -44,54 +52,46 @@ export const App = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Startup Splash Screen: Always shown every time website is opened
+  // Show splash screen on first visit or startup
   const [showSplash, setShowSplash] = useState(true);
 
-  const handleSplashComplete = () => {
-    setShowSplash(false);
-    if (!isAuthenticated) {
-      navigate('/login/farmer');
-    }
-  };
-
-  // Pure Full-Screen Splash Screen without Navbar
+  // If splash is active, isolate and render SplashScreen exclusively
   if (showSplash) {
-    return <SplashScreen onComplete={handleSplashComplete} />;
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
+        <SplashScreen onComplete={() => setShowSplash(false)} />
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
       <ScrollToTop />
 
-      {/* 2. GLOBAL TOAST NOTIFICATION - SOLID OPAQUE */}
+      {/* Global Toast Notification System */}
       {toast && (
-        <div className="fixed top-20 right-4 z-[100] bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl shadow-slate-950/40 flex items-center space-x-3 text-xs font-bold border-2 border-slate-700 animate-fade-in-up">
-          <span className="text-base">🔔</span>
-          <span className="font-semibold">{toast.message}</span>
-          <button onClick={clearToast} className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer">
+        <div className="fixed top-5 right-5 z-[99999] flex items-center space-x-3 bg-slate-900/95 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-800 backdrop-blur-xl animate-fade-in-down max-w-md">
+          <span className="text-xl">
+            {toast.type === 'success' ? '🌱' : toast.type === 'error' ? '⚠️' : 'ℹ️'}
+          </span>
+          <p className="text-xs font-semibold flex-1 leading-snug">{toast.message}</p>
+          <button
+            onClick={clearToast}
+            className="text-slate-400 hover:text-white transition-colors text-base font-bold ml-2"
+          >
             ✕
           </button>
         </div>
       )}
 
       <Routes>
-        {/* DEDICATED SPLASH ROUTE */}
-        <Route path="/splash" element={<SplashScreen onComplete={() => navigate('/login/farmer')} />} />
-
-        {/* PUBLIC WEBSITE (FULL-WIDTH MODERN LANDING EXPERIENCE AT /) */}
-        <Route path="/" element={<><Navbar /><div className="animate-fade-in"><LandingPage /></div></>} />
-        <Route path="/welcome" element={<Navigate to="/" replace />} />
-
-        {/* AUTHENTICATION ROUTES */}
-        <Route path="/login" element={<Navigate to="/login/farmer" replace />} />
-        <Route path="/login/farmer" element={<div className="animate-fade-in"><FarmerLogin /></div>} />
-        <Route path="/register/farmer" element={<div className="animate-fade-in"><FarmerRegister /></div>} />
-        <Route path="/login/buyer" element={<div className="animate-fade-in"><BuyerLogin /></div>} />
-        <Route path="/register/buyer" element={<div className="animate-fade-in"><BuyerRegister /></div>} />
-        <Route path="/login/admin" element={<div className="animate-fade-in"><AdminLogin /></div>} />
-
-        {/* FPO HUB (PUBLIC / COMMUNITY) */}
-        <Route path="/fpo" element={<><Navbar /><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in"><FpoDashboard /></div></>} />
+        {/* PUBLIC ACCESS ROUTES */}
+        <Route path="/" element={<><Navbar /><LandingPage /></>} />
+        <Route path="/login/farmer" element={<FarmerLogin />} />
+        <Route path="/register/farmer" element={<FarmerRegister />} />
+        <Route path="/login/buyer" element={<BuyerLogin />} />
+        <Route path="/register/buyer" element={<BuyerRegister />} />
+        <Route path="/login/admin" element={<AdminLogin />} />
 
         {/* AUTHENTICATED ADMIN PORTAL */}
         <Route element={<ProtectedRoute allowedRole="admin" />}>
@@ -102,12 +102,22 @@ export const App = () => {
         <Route element={<ProtectedRoute allowedRole="farmer" />}>
           <Route path="/farmer" element={<FarmerLayout />}>
             <Route path="dashboard" element={<div className="animate-fade-in"><FarmerDashboard /></div>} />
-            <Route path="list-produce" element={<div className="animate-fade-in"><ListProducePage /></div>} />
-            <Route path="best-deal" element={<div className="animate-fade-in"><BestDealPage /></div>} />
             <Route path="markets" element={<div className="animate-fade-in"><MarketIntelligencePage /></div>} />
+            <Route path="crops" element={<div className="animate-fade-in"><MyCropsPage /></div>} />
             <Route path="lots" element={<div className="animate-fade-in"><MyLotsPage /></div>} />
+            <Route path="list-produce" element={<div className="animate-fade-in"><ListProducePage /></div>} />
+            <Route path="sell" element={<div className="animate-fade-in"><ListProducePage /></div>} />
+            <Route path="contracts" element={<div className="animate-fade-in"><ContractsPage /></div>} />
+            <Route path="orders" element={<div className="animate-fade-in"><OrdersSalesPage /></div>} />
+            <Route path="orders-sales" element={<div className="animate-fade-in"><OrdersSalesPage /></div>} />
             <Route path="offers" element={<div className="animate-fade-in"><BuyerOffersPage /></div>} />
-            <Route path="transactions" element={<div className="animate-fade-in"><TransactionsPage /></div>} />
+            <Route path="wallet" element={<div className="animate-fade-in"><PaymentsWalletPage /></div>} />
+            <Route path="transactions" element={<div className="animate-fade-in"><PaymentsWalletPage /></div>} />
+            <Route path="weather" element={<div className="animate-fade-in"><WeatherForecastPage /></div>} />
+            <Route path="advisory" element={<div className="animate-fade-in"><AdvisoryInsightsPage /></div>} />
+            <Route path="best-deal" element={<div className="animate-fade-in"><BestDealPage /></div>} />
+            <Route path="resources" element={<div className="animate-fade-in"><ResourcesPage /></div>} />
+            <Route path="support" element={<div className="animate-fade-in"><SupportPage /></div>} />
             <Route path="profile" element={<div className="animate-fade-in"><FarmerProfilePage /></div>} />
           </Route>
         </Route>

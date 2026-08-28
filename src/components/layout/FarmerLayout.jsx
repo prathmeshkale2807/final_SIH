@@ -10,7 +10,7 @@ import { NotificationDropdown } from '../common/NotificationDropdown';
 
 export const FarmerLayout = () => {
   const { user, logout } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { showToast } = useApp ? useApp() : { showToast: () => {} };
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,14 +48,31 @@ export const FarmerLayout = () => {
       {/* ========================================================================= */}
       <aside className="hidden md:flex flex-col w-64 lg:w-72 bg-white/95 backdrop-blur-xl border-r border-slate-200/80 fixed inset-y-0 left-0 z-30 shadow-xs">
         {/* LOGO AT TOP OF SIDEBAR */}
-        <div className="h-20 px-6 flex items-center border-b border-slate-100/90">
-          <Link to="/farmer/dashboard" className="flex items-center">
+        <div className="h-20 px-6 flex items-center justify-between border-b border-slate-100/90">
+          <Link to="/" className="flex items-center" title="KRISHAK - Return to Landing Page">
             <KrishakLogo size="normal" showTagline={true} />
           </Link>
         </div>
 
+        {/* RETURN TO LANDING PAGE CHIP */}
+        <div className="px-4 pt-3 pb-1">
+          <Link
+            to="/"
+            className="flex items-center justify-between px-3 py-2 bg-emerald-50/70 hover:bg-emerald-100/80 text-emerald-900 border border-emerald-200/80 rounded-xl text-xs font-black transition-all group"
+            title="Return to Public Landing Page"
+          >
+            <div className="flex items-center space-x-2">
+              <span className="text-emerald-700 font-black group-hover:-translate-x-0.5 transition-transform">←</span>
+              <span>{language === 'mr' ? 'मुख्य पानावर जा' : 'Landing Page'}</span>
+            </div>
+            <span className="text-[9px] font-mono font-bold bg-white/90 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-300 shadow-2xs">
+              HOME
+            </span>
+          </Link>
+        </div>
+
         {/* SIDEBAR NAVIGATION ITEMS */}
-        <div className="flex-1 px-4 py-5 space-y-1.5 overflow-y-auto">
+        <div className="flex-1 px-4 py-3 space-y-1.5 overflow-y-auto">
           <div className="px-3 pb-2 text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider flex items-center justify-between">
             <span>Farmer Portal</span>
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -123,24 +140,43 @@ export const FarmerLayout = () => {
         {/* TOP HEADER */}
         <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 h-16 sm:h-20 px-4 sm:px-8 flex items-center justify-between shadow-xs">
           
-          {/* MOBILE HEADER LEFT: COMPACT LOGO */}
+          {/* MOBILE HEADER LEFT: COMPACT LOGO + LANDING LINK */}
           <div className="flex items-center space-x-2 md:hidden">
-            <Link to="/farmer/dashboard">
+            <Link to="/" className="flex items-center" title="Return to Landing Page">
               <KrishakLogo size="small" showTagline={false} />
             </Link>
           </div>
 
-          {/* DESKTOP HEADER LEFT: PAGE TITLE / BREADCRUMB */}
-          <div className="hidden md:flex items-center space-x-2 text-xs text-slate-500 font-medium">
+          {/* DESKTOP HEADER LEFT: PAGE TITLE / BREADCRUMB + RETURN TO LANDING LINK */}
+          <div className="hidden md:flex items-center space-x-3 text-xs text-slate-500 font-medium">
+            <Link
+              to="/"
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-200/90 rounded-xl font-extrabold transition-all shadow-2xs group"
+              title="Return to Public Landing Page"
+            >
+              <span className="text-emerald-700 font-black group-hover:-translate-x-0.5 transition-transform">←</span>
+              <span>{language === 'mr' ? 'मुख्य पान' : 'Landing Page'}</span>
+            </Link>
+            <span>/</span>
             <span className="font-bold text-slate-700">KRISHAK</span>
             <span>/</span>
-            <span className="text-emerald-700 font-black capitalize bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/60">
+            <span className="text-emerald-700 font-black capitalize bg-emerald-50/60 px-2.5 py-1 rounded-lg border border-emerald-200/60">
               {currentPath.replace('/farmer/', '').replace('/', '').replace('-', ' ') || 'Dashboard'}
             </span>
           </div>
 
-          {/* HEADER RIGHT: LANGUAGE, NOTIFICATIONS, LOGOUT BUTTON */}
-          <div className="flex items-center space-x-2.5 sm:space-x-3.5">
+          {/* HEADER RIGHT: LANDING BUTTON, LANGUAGE, NOTIFICATIONS, LOGOUT BUTTON */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* RETURN TO LANDING PAGE HEADER BUTTON */}
+            <Link
+              to="/"
+              className="flex items-center space-x-1.5 px-3 py-2 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-900 border border-slate-200/90 rounded-xl text-xs font-black text-slate-700 transition-all duration-200 active:scale-95 shadow-2xs"
+              title="Return to Public Landing Page"
+            >
+              <span>🏠</span>
+              <span className="hidden sm:inline">{language === 'mr' ? 'मुख्य पान' : 'Landing Page'}</span>
+            </Link>
+
             <LanguageSwitcher />
 
             <NotificationDropdown />

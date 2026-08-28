@@ -57,6 +57,40 @@ app.get('/api/health', (req, res) => {
 // 5. Mount all API routes
 app.use('/api', apiRoutes);
 
+// 5b. ORS Routing Proxy — avoids browser CORS restrictions
+app.post('/api/ors/directions/:profile', async (req, res) => {
+  const { profile } = req.params;
+  const ORS_KEY = process.env.ORS_API_KEY || '';
+  const validProfiles = ['driving-hgv', 'driving-car', 'cycling-road', 'foot-walking'];
+
+  if (!validProfiles.includes(profile)) {
+    return res.status(400).json({ error: 'Invalid ORS profile' });
+  }
+
+  try {
+    const orsRes = await fetch(
+      `https://api.openrouteservice.org/v2/directions/${profile}/geojson`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: ORS_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(req.body),
+      }
+    );
+
+    const data = await orsRes.json();
+    if (!orsRes.ok) {
+      return res.status(orsRes.status).json({ error: data.error || 'ORS error' });
+    }
+    return res.json(data);
+  } catch (err) {
+    console.error('[ORS Proxy] Error:', err.message);
+    return res.status(502).json({ error: 'ORS proxy failed', detail: err.message });
+  }
+});
+
 // 6. Fallback Error Handling
 app.use(notFound);
 app.use(errorHandler);

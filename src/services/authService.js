@@ -6,6 +6,20 @@ const AUTH_STORAGE_KEY = 'krishak_auth_user';
 const TOKEN_KEY = 'token';
 const ROLE_KEY = 'role';
 
+// Helper to save session strictly in sessionStorage (clears on browser close)
+const saveSession = (userObj, token, role) => {
+  try {
+    sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
+    sessionStorage.setItem(TOKEN_KEY, token || userObj.token);
+    sessionStorage.setItem(ROLE_KEY, role || userObj.role);
+    // Purge old persistent localStorage auth
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem('dhanya_auth_user');
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(ROLE_KEY);
+  } catch (e) {}
+};
+
 export const authService = {
   /**
    * Pre-validates farmer credentials against backend
@@ -33,8 +47,6 @@ export const authService = {
 
   /**
    * Send OTP for Farmer
-   * In 'firebase' mode: validates user with backend, then triggers real Firebase Phone Auth SMS OTP.
-   * In 'mock' mode: uses fast development OTP (123456).
    */
   sendFarmerOTP: async (farmerIdOrMobile, mobileOrFarmerId = '', containerId = 'recaptcha-container') => {
     try {
@@ -61,7 +73,6 @@ export const authService = {
         validation.authMode === 'firebase' || import.meta.env.VITE_AUTH_MODE === 'firebase';
 
       if (isFirebaseMode) {
-        // 2. Trigger Firebase Phone Auth SMS OTP
         const fbRes = await firebaseAuthService.sendOTP(mobile, containerId);
         return {
           ...fbRes,
@@ -106,11 +117,7 @@ export const authService = {
         otp = maybeOtp || '123456';
       }
 
-      if (!mobile || !otp) {
-        return { success: false, message: 'Mobile number and OTP are required' };
-      }
-
-      // Check if active Firebase confirmation session exists
+      // If a real Firebase confirmation is waiting, verify with Firebase first
       if (firebaseAuthService.getActiveConfirmationResult()) {
         const fbLoginRes = await firebaseAuthService.verifyOTPAndLogin({
           otp,
@@ -119,6 +126,7 @@ export const authService = {
           mobile,
         });
         if (fbLoginRes.success && fbLoginRes.user) {
+          saveSession(fbLoginRes.user, fbLoginRes.user.token, 'farmer');
           return fbLoginRes;
         }
         if (!fbLoginRes.success && otp !== '123456') {
@@ -126,6 +134,7 @@ export const authService = {
         }
       }
 
+      // Verification with backend API / mock
       const res = await api.post('/auth/farmer/verify-otp', { mobile, otp, farmerId, firebaseUid });
       if (res.success && res.user) {
         const userObj = {
@@ -133,9 +142,7 @@ export const authService = {
           token: res.token,
           role: res.role || 'farmer',
         };
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
-        localStorage.setItem(TOKEN_KEY, res.token);
-        localStorage.setItem(ROLE_KEY, res.role || 'farmer');
+        saveSession(userObj, res.token, res.role || 'farmer');
       }
       return res;
     } catch (err) {
@@ -213,6 +220,7 @@ export const authService = {
           mobile,
         });
         if (fbLoginRes.success && fbLoginRes.user) {
+          saveSession(fbLoginRes.user, fbLoginRes.user.token, 'buyer');
           return fbLoginRes;
         }
         if (!fbLoginRes.success && otp !== '123456') {
@@ -227,9 +235,7 @@ export const authService = {
           token: res.token,
           role: res.role || 'buyer',
         };
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
-        localStorage.setItem(TOKEN_KEY, res.token);
-        localStorage.setItem(ROLE_KEY, res.role || 'buyer');
+        saveSession(userObj, res.token, res.role || 'buyer');
       }
       return res;
     } catch (err) {
@@ -257,9 +263,7 @@ export const authService = {
           token: res.token,
           role: res.role || role,
         };
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
-        localStorage.setItem(TOKEN_KEY, res.token);
-        localStorage.setItem(ROLE_KEY, res.role || role);
+        saveSession(userObj, res.token, res.role || role);
       }
       return res;
     } catch (err) {
@@ -284,13 +288,10 @@ export const authService = {
 
       if (res.success && res.user) {
         const userObj = { ...res.user, token: res.token, role: 'admin' };
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
-        localStorage.setItem(TOKEN_KEY, res.token);
-        localStorage.setItem(ROLE_KEY, 'admin');
+        saveSession(userObj, res.token, 'admin');
       }
       return res;
     } catch (err) {
-      // Fallback offline mock admin authentication if backend is offline
       const id = adminId || 'ADMIN-KRISHAK-01';
       const userObj = {
         id,
@@ -303,30 +304,21 @@ export const authService = {
         location: 'Central Control HQ, Pune',
         token: 'admin_session_token_' + Date.now(),
       };
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
-      localStorage.setItem(TOKEN_KEY, userObj.token);
-      localStorage.setItem(ROLE_KEY, 'admin');
+      saveSession(userObj, userObj.token, 'admin');
       return { success: true, user: userObj, token: userObj.token, role: 'admin' };
     }
   },
 
-
   registerFarmer: async (data) => {
     try {
-      // 1. Direct Cloud Firestore Persistence to Firebase
       await firestoreService.saveFarmer(data);
-
-      // 2. Server API registration
       const res = await api.post('/auth/farmer/register', data);
       if (res.success && res.user) {
         const userObj = { ...res.user, token: res.token, role: 'farmer' };
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
-        localStorage.setItem(TOKEN_KEY, res.token);
-        localStorage.setItem(ROLE_KEY, 'farmer');
+        saveSession(userObj, res.token, 'farmer');
       }
       return res;
     } catch (err) {
-      // Fallback: save to Firestore and create local session
       const farmerId = data.farmerId || `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`;
       const userObj = {
         id: farmerId,
@@ -339,25 +331,18 @@ export const authService = {
         district: data.district || '',
         token: `session_${Date.now()}`,
       };
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
-      localStorage.setItem(TOKEN_KEY, userObj.token);
-      localStorage.setItem(ROLE_KEY, 'farmer');
+      saveSession(userObj, userObj.token, 'farmer');
       return { success: true, user: userObj, token: userObj.token };
     }
   },
 
   registerBuyer: async (data) => {
     try {
-      // 1. Direct Cloud Firestore Persistence to Firebase
       await firestoreService.saveBuyer(data);
-
-      // 2. Server API registration
       const res = await api.post('/auth/buyer/register', data);
       if (res.success && res.user) {
         const userObj = { ...res.user, token: res.token, role: 'buyer' };
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
-        localStorage.setItem(TOKEN_KEY, res.token);
-        localStorage.setItem(ROLE_KEY, 'buyer');
+        saveSession(userObj, res.token, 'buyer');
       }
       return res;
     } catch (err) {
@@ -371,16 +356,17 @@ export const authService = {
         mobile: data.mobile || '',
         token: `session_${Date.now()}`,
       };
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userObj));
-      localStorage.setItem(TOKEN_KEY, userObj.token);
-      localStorage.setItem(ROLE_KEY, 'buyer');
+      saveSession(userObj, userObj.token, 'buyer');
       return { success: true, user: userObj, token: userObj.token };
     }
   },
 
   getCurrentUser: () => {
     try {
-      const s = localStorage.getItem(AUTH_STORAGE_KEY) || localStorage.getItem('dhanya_auth_user');
+      // Purge old persistent localStorage
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      localStorage.removeItem('dhanya_auth_user');
+      const s = sessionStorage.getItem(AUTH_STORAGE_KEY);
       return s ? JSON.parse(s) : null;
     } catch {
       return null;
@@ -388,14 +374,17 @@ export const authService = {
   },
 
   getToken: () => {
-    return localStorage.getItem(TOKEN_KEY) || authService.getCurrentUser()?.token || null;
+    return sessionStorage.getItem(TOKEN_KEY) || authService.getCurrentUser()?.token || null;
   },
 
   getRole: () => {
-    return localStorage.getItem(ROLE_KEY) || authService.getCurrentUser()?.role || null;
+    return sessionStorage.getItem(ROLE_KEY) || authService.getCurrentUser()?.role || null;
   },
 
   logout: async () => {
+    sessionStorage.removeItem(AUTH_STORAGE_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(ROLE_KEY);
     localStorage.removeItem(AUTH_STORAGE_KEY);
     localStorage.removeItem('dhanya_auth_user');
     localStorage.removeItem(TOKEN_KEY);

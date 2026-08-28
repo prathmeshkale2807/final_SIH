@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (updatedData) => {
     setUser((prev) => {
       const merged = { ...prev, ...updatedData };
-      localStorage.setItem('krishak_auth_user', JSON.stringify(merged));
+      sessionStorage.setItem('krishak_auth_user', JSON.stringify(merged));
       return merged;
     });
   };

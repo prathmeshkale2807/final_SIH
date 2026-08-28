@@ -160,8 +160,8 @@ export const BuyerLogin = () => {
           className="w-full h-full object-cover object-[75%_35%] lg:object-[80%_35%] opacity-90 filter brightness-[0.85] contrast-[1.08] saturate-[1.1]"
         />
         <div className="absolute inset-0 bg-blue-950/25 mix-blend-multiply"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-slate-50/95 to-slate-50/60 w-full lg:w-[70%]"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-100 via-transparent to-black/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-slate-50/80 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-100/90 via-transparent to-black/10"></div>
       </div>
 
       <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-14 items-center gap-10">
@@ -228,11 +228,12 @@ export const BuyerLogin = () => {
           </div>
 
           <div className="text-center space-y-3 pt-1">
-            <div className="h-20 w-20 rounded-full bg-white border-2 border-blue-300 mx-auto flex items-center justify-center p-2 shadow-lg shadow-blue-500/15">
+            {/* SQUARE WITH CURVED EDGES KRISHAK LOGO BADGE */}
+            <div className="h-20 w-20 rounded-2xl bg-white border-2 border-blue-400 mx-auto flex items-center justify-center p-2 shadow-lg shadow-blue-500/15 overflow-hidden">
               <img
                 src="/krishak_logo.png"
                 alt="Krishak Logo"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain filter drop-shadow-xs"
               />
             </div>
 

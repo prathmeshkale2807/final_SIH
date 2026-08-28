@@ -162,8 +162,8 @@ export const FarmerLogin = () => {
           className="w-full h-full object-cover object-[75%_35%] lg:object-[80%_35%] opacity-90 filter brightness-[0.88] contrast-[1.06] saturate-[1.12]"
         />
         <div className="absolute inset-0 bg-slate-950/20 mix-blend-multiply"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-slate-50/95 to-slate-50/60 w-full lg:w-[70%]"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-100 via-transparent to-black/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-slate-50/80 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-100/90 via-transparent to-black/10"></div>
       </div>
 
       {/* MAIN TWO-COLUMN CONTAINER */}
@@ -239,12 +239,12 @@ export const FarmerLogin = () => {
 
           {/* EMBLEM & WELCOME HEADING */}
           <div className="text-center space-y-3 pt-1">
-            {/* CIRCULAR KRISHAK LOGO BADGE */}
-            <div className="h-20 w-20 rounded-full bg-white border-2 border-emerald-300 mx-auto flex items-center justify-center p-2 shadow-lg shadow-emerald-500/15">
+            {/* SQUARE WITH CURVED EDGES KRISHAK LOGO BADGE */}
+            <div className="h-20 w-20 rounded-2xl bg-white border-2 border-emerald-400 mx-auto flex items-center justify-center p-2 shadow-lg shadow-emerald-500/15 overflow-hidden">
               <img
                 src="/krishak_logo.png"
                 alt="Krishak Logo"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain filter drop-shadow-xs"
               />
             </div>
 

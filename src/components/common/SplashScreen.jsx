@@ -33,7 +33,7 @@ export const SplashScreen = ({ onComplete }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       handleFinish();
-    }, 2600);
+    }, 1500);
 
     return () => {
       clearTimeout(timer);
@@ -49,15 +49,16 @@ export const SplashScreen = ({ onComplete }) => {
       } else {
         navigate('/login/farmer');
       }
-    }, 750);
+    }, 500);
   };
 
   return (
     <div
       onClick={handleFinish}
-      className={`fixed inset-0 z-50 flex flex-col justify-between items-center bg-slate-950 text-white overflow-hidden transition-all duration-800 ease-in-out select-none cursor-pointer p-4 sm:p-6 ${
+      className={`fixed inset-0 z-[99999] flex flex-col justify-between items-center bg-slate-950 text-white overflow-hidden transition-all duration-800 ease-in-out select-none cursor-pointer p-4 sm:p-6 ${
         fadingOut ? 'opacity-0 scale-105 filter blur-[2px] pointer-events-none' : 'opacity-100 scale-100 filter blur-0'
       }`}
+      style={{ backgroundColor: '#020617' }}
       title="Tap anywhere to continue"
     >
       {/* 1. CINEMATIC LUSH AGRICULTURE BACKGROUND */}
@@ -134,14 +135,14 @@ export const SplashScreen = ({ onComplete }) => {
           );
         })}
 
-        {/* CENTRAL KRISHAK LOGO EMBLEM */}
-        <div className="relative h-24 w-24 sm:h-36 sm:w-36 rounded-full bg-white/95 backdrop-blur-2xl p-2.5 sm:p-4 border-3 sm:border-4 border-emerald-400/80 shadow-2xl shadow-emerald-500/30 flex flex-col items-center justify-center z-20 group hover:scale-105 transition-all duration-300">
+        {/* CENTRAL KRISHAK LOGO EMBLEM - SQUARE WITH CURVED EDGES */}
+        <div className="relative h-24 w-24 sm:h-36 sm:w-36 rounded-3xl bg-white p-3 sm:p-4 border-3 sm:border-4 border-emerald-400/90 shadow-2xl shadow-emerald-500/30 flex flex-col items-center justify-center z-20 group hover:scale-105 transition-all duration-300 overflow-hidden">
           <img
             src="/krishak_logo.png"
             alt="Krishak Logo"
             className="w-full h-full object-contain filter drop-shadow-md"
           />
-          <div className="absolute inset-0 rounded-full border-2 border-harvest-400/60 animate-ping opacity-30 pointer-events-none"></div>
+          <div className="absolute inset-0 rounded-3xl border-2 border-amber-400/60 animate-ping opacity-25 pointer-events-none"></div>
         </div>
       </div>
 

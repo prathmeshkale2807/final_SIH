@@ -15,6 +15,7 @@ const farmerInitialNotifications = [
     link: '/farmer/offers',
     icon: '🤝',
     badge: 'Buyer Bid',
+    color: 'emerald',
   },
   {
     id: 'F-NOTIF-2',
@@ -26,17 +27,19 @@ const farmerInitialNotifications = [
     link: '/farmer/markets',
     icon: '📈',
     badge: 'Mandi Surge',
+    color: 'amber',
   },
   {
     id: 'F-NOTIF-3',
     category: 'escrow',
-    title: 'Deal Approved & Drop Facility Set',
+    title: 'Deal Approved & Warehouse Set',
     message: 'AgroFresh approved your 60Q request. Assigned Drop Warehouse: Bhosari MIDC, Pune.',
     time: '45 mins ago',
     unread: true,
     link: '/farmer/transactions',
     icon: '🏢',
     badge: 'Drop Assigned',
+    color: 'blue',
   },
   {
     id: 'F-NOTIF-4',
@@ -48,17 +51,19 @@ const farmerInitialNotifications = [
     link: '/farmer/transactions',
     icon: '🛡️',
     badge: 'Escrow Funded',
+    color: 'emerald',
   },
   {
     id: 'F-NOTIF-5',
     category: 'escrow',
     title: 'Escrow Payout Released to Bank',
-    message: '₹52,000 released directly to your HDFC Bank account (•••• 4019).',
+    message: '₹52,000 released directly to your Bank Account (HDFC Bank •••• 4019).',
     time: '3 hours ago',
     unread: false,
     link: '/farmer/transactions',
     icon: '💰',
     badge: 'Bank Payout',
+    color: 'teal',
   },
 ];
 
@@ -68,12 +73,13 @@ const buyerInitialNotifications = [
     id: 'B-NOTIF-1',
     category: 'requests',
     title: '⚡ Incoming Farmer Sell Request',
-    message: 'Rahul Jadhav requested direct deal for 60 Quintals Onion at ₹1,490/q. Action Required: Approve & Assign Drop Location.',
+    message: 'Rahul Jadhav requested direct deal for 60 Quintals Onion at ₹1,490/q. Action required: Approve & Assign Drop Location.',
     time: '2 mins ago',
     unread: true,
     link: '/buyer/dashboard',
     icon: '🌾',
     badge: 'Action Needed',
+    color: 'amber',
   },
   {
     id: 'B-NOTIF-2',
@@ -85,17 +91,19 @@ const buyerInitialNotifications = [
     link: '/buyer/find-farmers',
     icon: '🧅',
     badge: 'Fresh Lot',
+    color: 'blue',
   },
   {
     id: 'B-NOTIF-3',
     category: 'escrow',
     title: 'Escrow Account Locked & Verified',
-    message: '₹89,400 locked in escrow for Order LOT-2026-MH01. Delivery inspection scheduled.',
+    message: '₹89,400 locked in escrow for Order LOT-2026-MH01. Quality inspection ready.',
     time: '50 mins ago',
     unread: true,
     link: '/buyer/dashboard',
     icon: '🛡️',
     badge: 'Escrow Active',
+    color: 'emerald',
   },
   {
     id: 'B-NOTIF-4',
@@ -107,17 +115,7 @@ const buyerInitialNotifications = [
     link: '/buyer/dashboard',
     icon: '🚚',
     badge: 'In-Transit',
-  },
-  {
-    id: 'B-NOTIF-5',
-    category: 'requests',
-    title: 'Tender Bids Received (3 Farmers)',
-    message: '3 smallholders submitted matching supply quotes for your Pune 2000 KG Onion tender.',
-    time: '4 hours ago',
-    unread: false,
-    link: '/buyer/dashboard',
-    icon: '📋',
-    badge: 'Tender Match',
+    color: 'purple',
   },
 ];
 
@@ -128,7 +126,7 @@ export const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
 
-  const storageKey = isBuyer ? 'krishak_notifications_buyer_v2' : 'krishak_notifications_farmer_v2';
+  const storageKey = isBuyer ? 'krishak_notifications_buyer_v3' : 'krishak_notifications_farmer_v3';
   const defaultList = isBuyer ? buyerInitialNotifications : farmerInitialNotifications;
 
   const [notifications, setNotifications] = useState(() => {
@@ -140,7 +138,7 @@ export const NotificationDropdown = () => {
     }
   });
 
-  // Reload correct list when role changes
+  // Reload when role changes
   useEffect(() => {
     try {
       const stored = localStorage.getItem(storageKey);
@@ -153,7 +151,7 @@ export const NotificationDropdown = () => {
 
   const dropdownRef = useRef(null);
 
-  // Close dropdown on outside click
+  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -185,7 +183,7 @@ export const NotificationDropdown = () => {
   const markAllAsRead = () => {
     const updated = notifications.map((n) => ({ ...n, unread: false }));
     saveNotifications(updated);
-    showToast('All notifications marked as read ✓', 'info');
+    if (showToast) showToast('All notifications marked as read ✓', 'info');
   };
 
   const simulateNewAlert = () => {
@@ -199,6 +197,7 @@ export const NotificationDropdown = () => {
           icon: '🍅',
           link: '/buyer/dashboard',
           badge: 'New Request',
+          color: 'amber',
         },
         {
           title: 'Fresh Grade A Harvest Lot in Latur',
@@ -207,14 +206,7 @@ export const NotificationDropdown = () => {
           icon: '🌱',
           link: '/buyer/find-farmers',
           badge: 'New Lot',
-        },
-        {
-          title: 'Delivery Arrived at Dock Warehouse',
-          message: 'Lot LOT-2026-MH01 arrived at Bhosari MIDC. Ready for quality scan & escrow release.',
-          category: 'escrow',
-          icon: '🏢',
-          link: '/buyer/dashboard',
-          badge: 'Dock Arrived',
+          color: 'blue',
         },
       ];
       pick = buyerSims[Math.floor(Math.random() * buyerSims.length)];
@@ -227,6 +219,7 @@ export const NotificationDropdown = () => {
           icon: '🌾',
           link: '/farmer/offers',
           badge: 'New Bid',
+          color: 'emerald',
         },
         {
           title: 'Pune APMC Arrival Surge Alert',
@@ -235,14 +228,7 @@ export const NotificationDropdown = () => {
           icon: '📊',
           link: '/farmer/markets',
           badge: 'Mandi Feed',
-        },
-        {
-          title: 'Escrow Payment Released to Bank',
-          message: '₹52,000 released to your Bank Account (HDFC Bank •••• 4019).',
-          category: 'escrow',
-          icon: '💰',
-          link: '/farmer/transactions',
-          badge: 'Bank Payout',
+          color: 'amber',
         },
       ];
       pick = farmerSims[Math.floor(Math.random() * farmerSims.length)];
@@ -258,82 +244,96 @@ export const NotificationDropdown = () => {
       link: pick.link,
       icon: pick.icon,
       badge: pick.badge,
+      color: pick.color,
     };
 
     const updated = [newAlert, ...notifications];
     saveNotifications(updated);
-    showToast(`🔔 ${pick.title}`, 'success');
+    if (showToast) showToast(`🔔 ${pick.title}`, 'success');
   };
 
-  // Filter Categories by Role
   const buyerFilters = [
     { id: 'all', label: 'All' },
     { id: 'requests', label: 'Farmer Requests' },
     { id: 'lots', label: 'Harvest Lots' },
-    { id: 'escrow', label: 'Escrow & Delivery' },
+    { id: 'escrow', label: 'Escrow' },
   ];
 
   const farmerFilters = [
     { id: 'all', label: 'All' },
-    { id: 'deals', label: 'Buyer Offers' },
+    { id: 'deals', label: 'Buyer Bids' },
     { id: 'mandi', label: 'Mandi Rates' },
-    { id: 'escrow', label: 'Escrow Payouts' },
+    { id: 'escrow', label: 'Escrow' },
   ];
 
   const activeFiltersList = isBuyer ? buyerFilters : farmerFilters;
 
   const filteredNotifs =
-    activeFilter === 'all'
-      ? notifications
-      : notifications.filter((n) => n.category === activeFilter);
+    activeFilter === 'all' ? notifications : notifications.filter((n) => n.category === activeFilter);
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      {/* TRIGGER BUTTON */}
+    <div className="relative" ref={dropdownRef} id="krishak-notification-container">
+      {/* TRIGGER BUTTON (Aesthetic Bell with Badge) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-slate-700 hover:text-slate-900 text-lg transition-all active:scale-95 shadow-xs flex items-center justify-center"
+        className={`relative h-10 w-10 rounded-xl border flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs ${
+          isOpen
+            ? 'bg-white border-emerald-500 text-emerald-700 shadow-md ring-2 ring-emerald-500/20'
+            : 'bg-slate-100/90 hover:bg-slate-200 border-slate-200 text-slate-700 hover:text-slate-900'
+        }`}
         aria-label="Notifications"
-        title="Notifications & Alerts"
+        title="Notifications & Live Alerts"
       >
-        <i className="ri-notification-3-line"></i>
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+          />
+        </svg>
+
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center ring-2 ring-white shadow-xs animate-badge-pop">
+          <span className="absolute -top-1 -right-1 min-w-[19px] h-[19px] flex items-center justify-center rounded-full bg-emerald-600 text-white text-[10px] font-black shadow-md px-1 ring-2 ring-white">
             {unreadCount}
           </span>
         )}
       </button>
 
-      {/* FLOATING NOTIFICATION POPUP - 100% SOLID & NON-TRANSPARENT */}
+      {/* FLOATING NOTIFICATION MODAL - 100% SOLID OPAQUE WHITE */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl shadow-slate-900/40 border-2 border-slate-200 z-[100] overflow-hidden animate-slide-down">
-          
-          {/* HEADER (SOLID DARK OPAQUE) */}
-          <div className="p-4 sm:p-5 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
-            <div className="flex items-center space-x-2">
-              <span className="text-lg">{isBuyer ? '🏪' : '🌾'}</span>
+        <div
+          className="absolute right-0 top-13 mt-1 w-80 sm:w-96 bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.25)] border-2 border-slate-200 z-[100] overflow-hidden text-xs animate-fade-in-up"
+          style={{ backgroundColor: '#ffffff' }}
+        >
+          {/* HEADER (SOLID SLATE OPAQUE) */}
+          <div className="p-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-emerald-600/30 border border-emerald-400/40 flex items-center justify-center text-base">
+                {isBuyer ? '🏪' : '🌾'}
+              </div>
               <div>
-                <h3 className="font-extrabold text-sm leading-tight text-white">
+                <h3 className="font-extrabold text-sm text-white leading-tight">
                   {isBuyer ? 'Buyer Procurement Alerts' : 'Farmer Harvest Alerts'}
                 </h3>
-                <p className="text-[10px] text-slate-300 font-medium">
-                  {unreadCount} unread alert{unreadCount !== 1 ? 's' : ''} • {isBuyer ? 'Enterprise Desk' : 'Farm Gate'}
+                <p className="text-[10.5px] text-slate-300 font-medium">
+                  {unreadCount} unread alert{unreadCount !== 1 ? 's' : ''} • Live Feed
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-[10px] font-bold text-emerald-300 hover:text-emerald-200 hover:underline transition-colors"
+                  className="text-[10px] font-extrabold text-emerald-400 hover:text-emerald-300 hover:underline transition-colors cursor-pointer"
                 >
-                  Mark all read
+                  Mark read
                 </button>
               )}
               <button
                 onClick={() => setIsOpen(false)}
-                className="h-7 w-7 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center text-xs font-bold transition-all"
+                className="h-6 w-6 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs font-bold transition-all cursor-pointer"
                 title="Close"
               >
                 ✕
@@ -341,18 +341,16 @@ export const NotificationDropdown = () => {
             </div>
           </div>
 
-          {/* ROLE-SPECIFIC FILTER PILLS (SOLID LIGHT OPAQUE) */}
-          <div className="flex items-center space-x-1.5 p-2.5 bg-slate-100 border-b border-slate-200 overflow-x-auto text-[11px] font-bold">
+          {/* FILTER PILLS (SOLID OPAQUE SLATE-100) */}
+          <div className="flex items-center gap-1.5 p-2.5 bg-slate-100 border-b border-slate-200 overflow-x-auto text-[11px] font-bold">
             {activeFiltersList.map((f) => (
               <button
                 key={f.id}
                 onClick={() => setActiveFilter(f.id)}
-                className={`px-3 py-1.5 rounded-xl transition-all whitespace-nowrap font-extrabold ${
+                className={`px-3 py-1.5 rounded-xl transition-all whitespace-nowrap font-extrabold cursor-pointer ${
                   activeFilter === f.id
-                    ? isBuyer
-                      ? 'bg-blue-900 text-white shadow-sm'
-                      : 'bg-slate-900 text-white shadow-sm'
-                    : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-300'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-300/80'
                 }`}
               >
                 {f.label}
@@ -360,8 +358,8 @@ export const NotificationDropdown = () => {
             ))}
           </div>
 
-          {/* NOTIFICATION LIST (SOLID OPAQUE WHITE) */}
-          <div className="max-h-80 overflow-y-auto divide-y divide-slate-200 bg-white">
+          {/* NOTIFICATION CARDS LIST (SOLID OPAQUE WHITE) */}
+          <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 bg-white" style={{ backgroundColor: '#ffffff' }}>
             {filteredNotifs.length === 0 ? (
               <div className="text-center py-10 text-xs text-slate-400 font-medium bg-white">
                 No notifications in this category.
@@ -371,11 +369,12 @@ export const NotificationDropdown = () => {
                 <div
                   key={n.id}
                   onClick={() => handleNotificationClick(n)}
-                  className={`p-3.5 sm:p-4 hover:bg-slate-100 transition-all cursor-pointer flex items-start space-x-3 text-left ${
-                    n.unread ? (isBuyer ? 'bg-blue-50' : 'bg-emerald-50') : 'bg-white'
+                  className={`p-3.5 hover:bg-slate-50 transition-all cursor-pointer flex items-start gap-3 text-left ${
+                    n.unread ? 'bg-emerald-50/60' : 'bg-white'
                   }`}
+                  style={{ backgroundColor: n.unread ? '#f0fdf4' : '#ffffff' }}
                 >
-                  <div className="h-10 w-10 rounded-2xl bg-white border border-slate-300 flex items-center justify-center text-lg flex-shrink-0 shadow-xs mt-0.5">
+                  <div className="h-9 w-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-base flex-shrink-0 shadow-xs mt-0.5">
                     {n.icon}
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
@@ -384,19 +383,13 @@ export const NotificationDropdown = () => {
                         {n.title}
                       </h4>
                       {n.unread && (
-                        <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ring-2 ${
-                          isBuyer ? 'bg-blue-600 ring-blue-200' : 'bg-emerald-600 ring-emerald-200'
-                        }`}></span>
+                        <span className="h-2 w-2 rounded-full bg-emerald-600 flex-shrink-0 ring-2 ring-emerald-200"></span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-700 leading-snug font-medium line-clamp-2">{n.message}</p>
+                    <p className="text-[11px] text-slate-600 leading-snug font-medium line-clamp-2">{n.message}</p>
                     <div className="flex items-center justify-between text-[10px] pt-1">
-                      <span className="text-slate-500 font-semibold">{n.time}</span>
-                      <span className={`font-bold px-2 py-0.5 rounded-md border ${
-                        isBuyer
-                          ? 'text-blue-800 bg-blue-100 border-blue-200'
-                          : 'text-emerald-800 bg-emerald-100 border-emerald-200'
-                      }`}>
+                      <span className="text-slate-400 font-semibold">{n.time}</span>
+                      <span className="font-extrabold px-2 py-0.5 rounded-md text-emerald-800 bg-emerald-100 border border-emerald-200">
                         {n.badge} →
                       </span>
                     </div>
@@ -406,22 +399,19 @@ export const NotificationDropdown = () => {
             )}
           </div>
 
-          {/* FOOTER ACTION (SOLID OPAQUE) */}
-          <div className="p-3 bg-slate-100 border-t border-slate-200 flex items-center justify-between text-[11px]">
+          {/* FOOTER ACTION BAR (SOLID OPAQUE) */}
+          <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-[11px]" style={{ backgroundColor: '#f8fafc' }}>
             <button
               onClick={simulateNewAlert}
-              className={`px-3.5 py-1.5 text-white font-black rounded-xl shadow-xs transition-all flex items-center space-x-1.5 active:scale-95 ${
-                isBuyer ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'
-              }`}
+              className="px-3 py-1.5 text-white font-black text-xs rounded-xl bg-emerald-600 hover:bg-emerald-700 shadow-xs transition-all flex items-center gap-1 active:scale-95 cursor-pointer"
             >
               <span>⚡</span>
-              <span>Simulate {isBuyer ? 'Buyer' : 'Farmer'} Alert</span>
+              <span>Test New Alert</span>
             </button>
             <span className="text-[10px] text-slate-500 font-semibold">
-              {isBuyer ? 'Enterprise Feed' : 'APMC & Deal Stream'}
+              Live Mandi &amp; Bids Stream
             </span>
           </div>
-
         </div>
       )}
     </div>

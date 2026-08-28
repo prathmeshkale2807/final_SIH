@@ -44,27 +44,24 @@ export const App = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Startup Splash Screen: Shown on first initial load in session or at /splash
-  const [showSplash, setShowSplash] = useState(() => {
-    if (location.pathname === '/splash') return true;
-    const seen = sessionStorage.getItem('krishak_splash_seen_v2');
-    return !seen && !isAuthenticated && location.pathname === '/';
-  });
+  // Startup Splash Screen: Always shown every time website is opened
+  const [showSplash, setShowSplash] = useState(true);
 
   const handleSplashComplete = () => {
-    sessionStorage.setItem('krishak_splash_seen_v2', 'true');
     setShowSplash(false);
     if (!isAuthenticated) {
       navigate('/login/farmer');
     }
   };
 
+  // Pure Full-Screen Splash Screen without Navbar
+  if (showSplash) {
+    return <SplashScreen onComplete={handleSplashComplete} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased selection:bg-emerald-500 selection:text-white">
       <ScrollToTop />
-
-      {/* 1. STARTUP ANIMATED SPLASH SCREEN OVERLAY */}
-      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
       {/* 2. GLOBAL TOAST NOTIFICATION - SOLID OPAQUE */}
       {toast && (

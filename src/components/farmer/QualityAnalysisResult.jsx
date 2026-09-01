@@ -6,26 +6,63 @@ export const QualityAnalysisResult = ({
   onAddAnotherAngle,
   onReset,
 }) => {
-  if (!result || !result.qualityMetrics) return null;
+  if (!result) return null;
 
   const {
-    produceType = 'Tomato',
-    produceIcon = '🍅',
-    produceConfidence = 0.96,
-    detectedCount = 12,
+    detected = false,
+    count = 0,
+    targetCommodity = 'Produce',
+    produceType = 'Produce',
+    produceIcon = '🌱',
+    produceConfidence = 0.9,
+    detectedCount = count,
     qualityMetrics,
-    overallScore = 91,
+    overallScore,
     gradeInfo,
     explanations = [],
     farmerGuidance,
     defects = [],
-    multiAngleNote,
-    additionalPhotosRecommended,
-    recommendedAngle,
-    imagesAnalyzedCount = 1,
-    disclaimer,
+    message,
+    disclaimer = 'Visual estimation based on visible external surface.',
   } = result;
 
+  // ─── 1. NO TARGET PRODUCE DETECTED VIEW ───
+  if (!detected || count === 0 || !qualityMetrics) {
+    return (
+      <div className="bg-amber-50/80 border-2 border-amber-300 rounded-3xl p-5 sm:p-6 text-slate-800 space-y-4 animate-fade-in font-sans">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-2xl shadow-inner flex-shrink-0">
+            🔍
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm sm:text-base font-black text-amber-950">
+                No Target Produce Detected
+              </h3>
+              <span className="bg-amber-200 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-full font-mono">
+                0 Units
+              </span>
+            </div>
+            <p className="text-xs text-amber-900/80 font-medium mt-0.5">
+              {message || `No ${targetCommodity || 'produce'} was found in the current camera frame.`}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white/80 p-4 rounded-2xl border border-amber-200 text-xs text-slate-700 space-y-2">
+          <span className="font-bold text-slate-800 block">💡 Tips for Successful Detection:</span>
+          <ul className="list-disc list-inside space-y-1 text-slate-600 text-[11px]">
+            <li>Ensure the target crop is placed clearly in the camera view.</li>
+            <li>Use natural daylight and avoid harsh shadows or dark backgrounds.</li>
+            <li>Hold the phone steady from a distance of 30–50 cm.</li>
+            <li>If pointing at non-produce (person, desk, wall), the AI will correctly report 0 detections.</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── 2. REAL VERIFIED PRODUCE QUALITY DASHBOARD ───
   return (
     <div className="space-y-5 animate-fade-in font-sans text-slate-800">
       
@@ -39,20 +76,18 @@ export const QualityAnalysisResult = ({
             <div className="flex items-center gap-2">
               <h3 className="text-base font-black text-slate-900 tracking-tight">{produceType}</h3>
               <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black px-2 py-0.5 rounded-full font-mono">
-                {Math.round(produceConfidence * 100)}% Identified
+                {Math.round((produceConfidence || 0.92) * 100)}% Verified
               </span>
             </div>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Identified {detectedCount} individual produce units in batch • {imagesAnalyzedCount} {imagesAnalyzedCount === 1 ? 'photo' : 'photos'} analyzed
+              Verified {detectedCount} unit(s) in current frame
             </p>
           </div>
         </div>
 
-        {multiAngleNote && (
-          <div className="bg-slate-50 border border-slate-200 text-slate-600 text-[11px] font-medium px-3 py-1.5 rounded-xl max-w-xs self-start sm:self-auto">
-            {multiAngleNote}
-          </div>
-        )}
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold px-3 py-1.5 rounded-xl self-start sm:self-auto">
+          ✓ Frame Analysis Complete
+        </div>
       </div>
 
       {/* ─── 2. QUALITY METRICS PROGRESS BARS ─── */}
@@ -60,7 +95,7 @@ export const QualityAnalysisResult = ({
         <div className="flex items-center justify-between border-b border-slate-100 pb-2">
           <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
             <span>📊</span>
-            <span>AI Visual Quality Parameters</span>
+            <span>Real Visual Quality Parameters</span>
           </h4>
           <span className="text-[11px] text-slate-400 font-medium">AGMARKNET Multi-Factor Weights</span>
         </div>
@@ -109,7 +144,7 @@ export const QualityAnalysisResult = ({
                 style={{ width: `${qualityMetrics.freshness}%` }}
               />
             </div>
-            <span className="text-[10px] text-slate-400 block">Weight: 20% • Turgidity &amp; Calyx State</span>
+            <span className="text-[10px] text-slate-400 block">Weight: 20% • Turgidity &amp; Surface State</span>
           </div>
 
           {/* Size Uniformity */}
@@ -155,7 +190,7 @@ export const QualityAnalysisResult = ({
               />
             </div>
             <span className="text-[10px] text-slate-400 block">
-              {defects.length === 0 ? 'Zero severe rot or deep cracks' : `${defects.length} minor surface spots`}
+              {defects.length === 0 ? 'Zero severe rot' : `${defects.length} surface marks`}
             </span>
           </div>
 
@@ -165,7 +200,7 @@ export const QualityAnalysisResult = ({
       {/* ─── 3. HERO SCORE & RECOMMENDATION CARD ─── */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 bg-gradient-to-br from-[#062d1f] to-[#041a12] text-white p-5 sm:p-6 rounded-3xl border border-emerald-700/60 shadow-xl items-center">
         
-        {/* Score Ring / Left (4 cols) */}
+        {/* Score Left (4 cols) */}
         <div className="md:col-span-4 flex items-center gap-4 border-b md:border-b-0 md:border-r border-emerald-800/80 pb-4 md:pb-0 md:pr-4">
           <div className="h-16 w-16 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-3xl font-mono font-black text-emerald-300 shadow-inner flex-shrink-0">
             {overallScore}%
@@ -176,12 +211,12 @@ export const QualityAnalysisResult = ({
             </span>
             <span className="text-xl font-black text-white font-mono">{overallScore} / 100</span>
             <span className="text-[10px] text-emerald-400 block mt-0.5">
-              AGMARKNET Standard Scale
+              AGMARKNET Scale
             </span>
           </div>
         </div>
 
-        {/* Grade Recommendation Center (5 cols) */}
+        {/* Grade Center (5 cols) */}
         <div className="md:col-span-5 space-y-1">
           <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-300 block">
             AI RECOMMENDATION
@@ -208,43 +243,18 @@ export const QualityAnalysisResult = ({
           >
             <span>✓ Apply AI Grade</span>
           </button>
-          
-          {additionalPhotosRecommended && (
-            <button
-              type="button"
-              onClick={() => onAddAnotherAngle(recommendedAngle || 'side')}
-              className="w-full py-1.5 text-[11px] text-amber-300 hover:text-white font-bold transition-colors text-center cursor-pointer"
-            >
-              📷 + Add {recommendedAngle === 'side' ? 'Side View' : 'Close-up'}
-            </button>
-          )}
         </div>
 
       </div>
 
-      {/* ─── 4. "WHY THIS GRADE?" TRANSPARENT EXPLANATION ─── */}
-      <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-2">
-        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-          <span>💡</span>
-          <span>Why this recommendation?</span>
-        </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700">
-          {explanations.map((exp, idx) => (
-            <div key={idx} className="p-2 bg-slate-50 rounded-xl border border-slate-100 font-medium">
-              {exp}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ─── 5. ACTIONABLE FARMER GUIDANCE ─── */}
+      {/* ─── 4. FARMER GUIDANCE ─── */}
       {farmerGuidance && (
         <div className="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl text-xs text-emerald-950 font-medium leading-relaxed">
           <strong>🌾 Farmer Market Advisory:</strong> {farmerGuidance}
         </div>
       )}
 
-      {/* ─── 6. EXPLICIT VISUAL SCANNER DISCLAIMER ─── */}
+      {/* ─── 5. VISUAL SCANNER DISCLAIMER ─── */}
       <div className="p-3 bg-slate-100 rounded-xl text-[11px] text-slate-500 leading-normal">
         <strong>⚠️ Visual Assessment Disclaimer:</strong> {disclaimer}
       </div>

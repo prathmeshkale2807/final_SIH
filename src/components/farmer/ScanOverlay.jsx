@@ -1,20 +1,30 @@
 import React from 'react';
 
-export const ScanOverlay = ({ isScanning = false, guidanceText = 'Keep produce centered inside the frame', detectedCount = 0 }) => {
+export const ScanOverlay = ({
+  isScanning = false,
+  guidanceText = 'Place produce inside the camera frame',
+  detectedCount = 0,
+}) => {
   return (
     <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between p-4 sm:p-6 overflow-hidden">
       
       {/* ─── TOP STATUS BADGES ─── */}
       <div className="flex items-center justify-between gap-2">
-        <div className="bg-slate-950/80 backdrop-blur-md border border-slate-700/80 text-white text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
-          <span className={`h-2 w-2 rounded-full ${isScanning ? 'bg-emerald-400 animate-ping' : 'bg-emerald-400'}`} />
-          <span className="font-mono">{isScanning ? 'AI SCANNING IN PROGRESS' : 'VISION SENSOR READY'}</span>
+        <div className="bg-slate-950/85 backdrop-blur-md border border-slate-700/80 text-white text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
+          <span className={`h-2 w-2 rounded-full ${isScanning ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'}`} />
+          <span className="font-mono">
+            {isScanning ? 'ANALYZING CURRENT FRAME...' : 'VISION SENSOR READY'}
+          </span>
         </div>
 
-        {detectedCount > 0 && (
-          <div className="bg-emerald-950/85 backdrop-blur-md border border-emerald-500/50 text-emerald-300 text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+        {detectedCount > 0 ? (
+          <div className="bg-emerald-950/90 backdrop-blur-md border border-emerald-500/50 text-emerald-300 text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
             <span>🎯</span>
-            <span>{detectedCount} Units Tracked</span>
+            <span>{detectedCount} {detectedCount === 1 ? 'Unit' : 'Units'} Verified</span>
+          </div>
+        ) : (
+          <div className="bg-slate-950/80 backdrop-blur-md border border-slate-800 text-slate-400 text-[11px] font-medium px-2.5 py-1 rounded-full">
+            <span>0 Units Detected</span>
           </div>
         )}
       </div>

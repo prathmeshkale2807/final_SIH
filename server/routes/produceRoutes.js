@@ -10,9 +10,12 @@ import {
 } from '../controllers/produceController.js';
 import { protect, requireRole } from '../middleware/authMiddleware.js';
 
+import { analyzeProduceVision } from '../controllers/aiQualityController.js';
+
 const router = express.Router();
 
-// Specific routes before param route
+// Real computer vision analysis route
+router.post('/analyze-vision', analyzeProduceVision);
 router.get('/my', protect, requireRole('farmer'), getMyProduce);
 router.post('/', protect, requireRole('farmer'), createProduce);
 router.get('/', getAllProduce);

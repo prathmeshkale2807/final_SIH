@@ -1,14 +1,14 @@
 import React, { useRef } from 'react';
-import { REALISTIC_FARM_SAMPLES } from '../../services/aiQualityService';
+import { PRODUCE_PROFILES } from '../../services/aiQualityService';
 
 export const ProduceImageUploader = ({
   photos = [],
   onAddPhoto,
   onRemovePhoto,
-  onSelectSample,
+  onSelectCommodity,
   onTriggerCamera,
   isScanning = false,
-  targetProduceName = 'Tomato',
+  targetProduceName = 'onion',
 }) => {
   const fileInputRef = useRef(null);
 
@@ -17,7 +17,6 @@ export const ProduceImageUploader = ({
     Array.from(files).forEach((file) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        // Determine angle label based on current count
         const angle = photos.length === 0 ? 'front' : photos.length === 1 ? 'side' : 'closeup';
         onAddPhoto(e.target.result, angle);
       };
@@ -37,6 +36,8 @@ export const ProduceImageUploader = ({
     bottom: { label: 'Bottom View', color: 'bg-amber-100 text-amber-800 border-amber-200' },
   };
 
+  const availableCommodities = Object.values(PRODUCE_PROFILES);
+
   return (
     <div className="space-y-4 font-sans">
       
@@ -44,10 +45,10 @@ export const ProduceImageUploader = ({
       <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
         <div>
           <span className="text-xs font-black text-slate-800 uppercase tracking-wider block">
-            Step 1: Input Harvest Photos ({photos.length}/4)
+            Camera &amp; Photo Input ({photos.length}/4)
           </span>
           <p className="text-[11px] text-slate-500 font-medium">
-            Multi-angle photographs ensure 100% surface &amp; blemish coverage.
+            Capture live camera frame or upload produce photos.
           </p>
         </div>
 
@@ -60,7 +61,7 @@ export const ProduceImageUploader = ({
             className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <span>📷</span>
-            <span>Take Photo</span>
+            <span>Open Real Camera</span>
           </button>
 
           {/* Upload File Button */}
@@ -71,7 +72,7 @@ export const ProduceImageUploader = ({
             className="px-3.5 py-2 bg-white hover:bg-slate-100 active:scale-95 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <span>🖼</span>
-            <span>Upload Image</span>
+            <span>Upload Photo</span>
           </button>
           <input
             type="file"
@@ -120,7 +121,7 @@ export const ProduceImageUploader = ({
                 )}
 
                 <div className="absolute bottom-1.5 left-1.5 text-[10px] text-white/90 font-mono bg-slate-950/75 px-1.5 py-0.5 rounded">
-                  Photo #{idx + 1}
+                  Frame #{idx + 1}
                 </div>
               </div>
             );
@@ -135,14 +136,14 @@ export const ProduceImageUploader = ({
             >
               <span className="text-2xl text-slate-400 group-hover:text-emerald-600">＋</span>
               <span className="text-[11px] font-bold text-slate-600 mt-1">
-                {photos.length === 1 ? '+ Add Side View' : photos.length === 2 ? '+ Add Close-up' : '+ Add Angle'}
+                + Add Another Photo
               </span>
             </button>
           )}
         </div>
       )}
 
-      {/* ─── 3. DRAG & DROP EMPTY ZONE ─── */}
+      {/* ─── 3. EMPTY STATE ─── */}
       {photos.length === 0 && (
         <div
           onDragOver={(e) => e.preventDefault()}
@@ -151,41 +152,50 @@ export const ProduceImageUploader = ({
           className="border-2 border-dashed border-slate-300 hover:border-emerald-500 bg-white hover:bg-emerald-50/20 rounded-3xl p-6 sm:p-8 text-center transition-all cursor-pointer space-y-2.5 shadow-2xs"
         >
           <div className="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-2xl mx-auto shadow-inner">
-            🌱
+            📷
           </div>
           <div className="space-y-0.5">
             <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
-              Upload Your Harvest Photos
+              No Camera Frame Loaded
             </h4>
             <p className="text-[11px] text-slate-500 font-medium">
-              Drag &amp; drop photos here or click to select from your phone/computer
+              Click &quot;Open Real Camera&quot; above to capture from live video feed, or upload a photo.
             </p>
           </div>
         </div>
       )}
 
-      {/* ─── 4. REALISTIC FARM CROPS SAMPLES SELECTOR ─── */}
+      {/* ─── 4. TARGET COMMODITY SELECTOR ─── */}
       <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-black text-slate-700 uppercase tracking-wider">
-            Test With Realistic Farm Harvest Samples:
+            Target Produce Filter:
           </span>
-          <span className="text-[10px] text-slate-400">Direct from field</span>
+          <span className="text-[10px] text-slate-400 font-medium">
+            AI checks specifically for this crop in frame
+          </span>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {REALISTIC_FARM_SAMPLES.map((sample) => (
-            <button
-              key={sample.id}
-              type="button"
-              onClick={() => onSelectSample(sample)}
-              disabled={isScanning}
-              className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 hover:text-emerald-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-            >
-              <span>{sample.label.split(' ')[0]}</span>
-              <span>{sample.crop}</span>
-            </button>
-          ))}
+          {availableCommodities.map((item) => {
+            const isSelected = targetProduceName.toLowerCase().includes(item.id);
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectCommodity(item.id)}
+                disabled={isScanning}
+                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 ${
+                  isSelected
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    : 'bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700'
+                }`}
+              >
+                <span>{item.icon}</span>
+                <span>{item.name.split(' ')[0]}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

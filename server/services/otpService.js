@@ -21,7 +21,7 @@ export const otpService = {
   /**
    * Generates and sends a real SMS OTP to the provided mobile number
    * @param {string} rawMobile - 10-digit mobile number
-   * @returns {Promise<{ success: boolean, message: string, cooldownSeconds?: number }>}
+   * @returns {Promise<{ success: boolean, message: string, cooldownSeconds?: number, devOtp?: string }>}
    */
   sendOTP: async (rawMobile) => {
     const mobile = String(rawMobile).replace(/\D/g, '').slice(-10);
@@ -78,17 +78,23 @@ export const otpService = {
     }
 
     // 4. Dispatch SMS via configured provider (2Factor, Fast2SMS, MSG91, Twilio)
+    let smsResult = { success: true };
     try {
-      await smsProvider.sendOtp(mobile, rawOtp);
+      smsResult = await smsProvider.sendOtp(mobile, rawOtp);
     } catch (smsErr) {
       console.error('[OTP Service] SMS Dispatch Failure:', smsErr.message);
       throw new Error(smsErr.message || 'Failed to dispatch SMS OTP. Please check service.');
     }
 
+    const isDev = process.env.NODE_ENV !== 'production';
+
     return {
       success: true,
-      message: `OTP sent successfully to +91 ${mobile}`,
+      message: smsResult.provider === 'development-logger'
+        ? `OTP generated: ${rawOtp} (Valid for 5 mins)`
+        : `OTP sent successfully to +91 ${mobile}`,
       cooldownSeconds: 60,
+      devOtp: isDev ? rawOtp : undefined,
     };
   },
 

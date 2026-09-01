@@ -115,7 +115,13 @@ export const BuyerLogin = () => {
       if (res.success) {
         setStep('otp_verify');
         setCountdown(res.cooldownSeconds || 60);
-        showToast(res.message || 'OTP sent successfully to your mobile', 'success');
+        if (res.devOtp) {
+          const digits = res.devOtp.split('');
+          setOtp(digits);
+          showToast(`KRISHAK Verification Code: ${res.devOtp}`, 'info');
+        } else {
+          showToast(res.message || 'OTP sent successfully to your mobile', 'success');
+        }
       } else {
         showToast(res.message || 'Failed to send OTP. Please try again.', 'error');
       }

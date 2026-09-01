@@ -69,7 +69,10 @@ const request = async (endpoint, options = {}) => {
 
     return data;
   } catch (error) {
-    console.error(`[API Error] ${options.method || 'GET'} ${url}:`, error.message);
+    // Suppress console.error for expected unauthenticated check
+    if (!url.includes('/auth/me')) {
+      console.error(`[API Error] ${options.method || 'GET'} ${url}:`, error.message);
+    }
     throw error;
   }
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   PRODUCE_PROFILES,
   getProduceProfile,
@@ -28,12 +28,14 @@ export const AIQualityDetectionModal = ({
   // Target produce filter
   const [selectedCommodity, setSelectedCommodity] = useState(commodity || 'onion');
 
-  // Real Computer Vision Detection States (ZERO MOCK DEFAULTS)
+  // 3-Stage Pipeline States
   const [isScanning, setIsScanning] = useState(false);
-  const [pipelineStep, setPipelineStep] = useState(-1);
-  const [showDetections, setShowDetections] = useState(false);
+  const [currentStage, setCurrentStage] = useState(-1); // -1=idle, 0=verifying, 1=grading, 2=counting
+  const [stageStatuses, setStageStatuses] = useState(['pending', 'pending', 'pending']); // pending|active|done|failed
   const [analysisResult, setAnalysisResult] = useState(null);
-  const [currentFrameId, setCurrentFrameId] = useState(null);
+
+  // Stale request protection
+  const latestRequestRef = useRef(null);
 
   // Sync target commodity prop
   useEffect(() => {
@@ -47,7 +49,7 @@ export const AIQualityDetectionModal = ({
     if (isOpen) {
       resetScan();
       if (photosList.length === 0) {
-        setViewState('camera'); // Open camera immediately for live inspection
+        setViewState('camera');
       } else {
         setViewState('uploader');
       }
@@ -56,10 +58,10 @@ export const AIQualityDetectionModal = ({
 
   const resetScan = () => {
     setIsScanning(false);
-    setPipelineStep(-1);
-    setShowDetections(false);
+    setCurrentStage(-1);
+    setStageStatuses(['pending', 'pending', 'pending']);
     setAnalysisResult(null);
-    setCurrentFrameId(null);
+    latestRequestRef.current = null;
   };
 
   const handleAddPhoto = (imageSrc, angle = 'front') => {
@@ -83,7 +85,7 @@ export const AIQualityDetectionModal = ({
 
   const handleSelectCommodity = (cropKey) => {
     setSelectedCommodity(cropKey);
-    resetScan(); // Invalidate stale results when target changes
+    resetScan();
   };
 
   const handleTriggerCamera = (angle = 'front') => {
@@ -95,34 +97,93 @@ export const AIQualityDetectionModal = ({
     handleAddPhoto(dataUrl, angle);
   };
 
-  // ─── REAL COMPUTER VISION PIPELINE EXECUTION ───
+  // ─── 3-STAGE VISION PIPELINE EXECUTION ───
   const handleStartScan = async () => {
     if (photosList.length === 0) return;
 
     resetScan();
     setIsScanning(true);
     setViewState('scanning');
-    setPipelineStep(0);
 
-    const frameId = Date.now();
-    setCurrentFrameId(frameId);
+    const requestId = Date.now();
+    latestRequestRef.current = requestId;
 
     const currentImage = photosList[activePhotoIndex]?.src || photosList[0].src;
 
-    // Fast step tracker for visual feedback
-    setPipelineStep(1);
-    await new Promise((r) => setTimeout(r, 250));
-    setPipelineStep(3);
+    // Stage 1: Verifying
+    setCurrentStage(0);
+    setStageStatuses(['active', 'pending', 'pending']);
 
-    // Call Real Vision Analyzer with actual frame data
-    const result = await analyzeProduce(currentImage, selectedCommodity, frameId);
+    // Call backend 3-stage pipeline
+    const result = await analyzeProduce(currentImage, selectedCommodity, requestId);
 
-    setPipelineStep(6);
-    await new Promise((r) => setTimeout(r, 200));
-    setPipelineStep(8);
+    // Stale request protection
+    if (latestRequestRef.current !== requestId) {
+      return; // A newer request was started — discard this one
+    }
+
+    // Determine stage outcomes from result
+    if (result.errorType === 'config_error' || result.errorType === 'network_error' || result.errorType === 'server_error' || result.errorType === 'api_error') {
+      // All stages failed
+      setStageStatuses(['failed', 'failed', 'failed']);
+      setCurrentStage(-1);
+    } else if (!result.detected) {
+      // Stage 1 completed but verification failed
+      setStageStatuses(['done', 'pending', 'pending']);
+      setCurrentStage(-1);
+    } else {
+      // Stage 1 passed
+      setStageStatuses((prev) => {
+        const next = [...prev];
+        next[0] = 'done';
+        return next;
+      });
+      setCurrentStage(1);
+
+      // Brief visual delay for Stage 2
+      await new Promise((r) => setTimeout(r, 200));
+
+      if (latestRequestRef.current !== requestId) return;
+
+      // Stage 2 complete
+      if (result.quality?.available) {
+        setStageStatuses((prev) => {
+          const next = [...prev];
+          next[1] = 'done';
+          return next;
+        });
+      } else {
+        setStageStatuses((prev) => {
+          const next = [...prev];
+          next[1] = result.quality?.error ? 'failed' : 'done';
+          return next;
+        });
+      }
+      setCurrentStage(2);
+
+      // Brief visual delay for Stage 3
+      await new Promise((r) => setTimeout(r, 200));
+
+      if (latestRequestRef.current !== requestId) return;
+
+      // Stage 3 complete
+      if (result.quantity?.available) {
+        setStageStatuses((prev) => {
+          const next = [...prev];
+          next[2] = 'done';
+          return next;
+        });
+      } else {
+        setStageStatuses((prev) => {
+          const next = [...prev];
+          next[2] = result.quantity?.error ? 'failed' : 'done';
+          return next;
+        });
+      }
+      setCurrentStage(-1);
+    }
 
     setAnalysisResult(result);
-    setShowDetections(Boolean(result.detected && result.count > 0));
     setIsScanning(false);
     setViewState('results');
   };
@@ -130,8 +191,6 @@ export const AIQualityDetectionModal = ({
   const handleApply = () => {
     if (analysisResult?.gradeInfo?.dropdownValue) {
       onApplyGrade(analysisResult.gradeInfo.dropdownValue);
-    } else {
-      onApplyGrade('Grade A (Export / Processing Quality)');
     }
     onClose();
   };
@@ -154,14 +213,14 @@ export const AIQualityDetectionModal = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
-                  Real AI Quality Detection
+                  AI Quality Detection
                 </h2>
                 <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  Live Vision Engine
+                  Gemini Vision
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-medium">
-                Camera-grounded computer vision produce inspection
+                3-stage pipeline: Verify → Grade → Count
               </p>
             </div>
           </div>
@@ -231,31 +290,31 @@ export const AIQualityDetectionModal = ({
                         crossOrigin="anonymous"
                       />
 
-                      {/* Computer Vision Frame Overlays */}
+                      {/* Scan Overlay */}
                       <ScanOverlay
                         isScanning={isScanning}
                         guidanceText={
                           isScanning
-                            ? 'Analyzing current camera frame for target produce...'
-                            : analysisResult?.message || 'Frame ready. Click "Analyze Frame" below.'
+                            ? 'Analyzing image with Gemini Vision AI...'
+                            : analysisResult?.message || 'Image ready. Click "Analyze with AI" below.'
                         }
                         detectedCount={analysisResult?.count || 0}
                       />
 
-                      {/* REAL BOUNDING BOXES (ZERO FAKE OBJECTS) */}
-                      {showDetections && analysisResult && (
+                      {/* Detection Overlay — for any bounding boxes */}
+                      {analysisResult?.detected && analysisResult?.objects?.length > 0 && (
                         <DetectionOverlay
-                          detections={analysisResult.objects || []}
-                          defects={analysisResult.defects || []}
+                          detections={analysisResult.objects}
+                          defects={[]}
                           showDetections={true}
-                          showDefects={true}
+                          showDefects={false}
                         />
                       )}
                     </div>
                   ) : (
                     <div className="p-6 text-center text-slate-400 text-xs space-y-2">
                       <div className="text-3xl">📷</div>
-                      <p>No camera frame loaded.</p>
+                      <p>No image loaded.</p>
                       <button
                         type="button"
                         onClick={() => handleTriggerCamera('front')}
@@ -271,7 +330,8 @@ export const AIQualityDetectionModal = ({
                 {/* Pipeline Step Progress Card (5 cols) */}
                 <div className="lg:col-span-5 space-y-4">
                   <AnalysisProgress
-                    currentStepIndex={pipelineStep}
+                    currentStage={currentStage}
+                    stageStatuses={stageStatuses}
                     isScanning={isScanning}
                     isCompleted={analysisResult !== null}
                   />
@@ -326,11 +386,11 @@ export const AIQualityDetectionModal = ({
                 className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <span>⚡</span>
-                <span>{isScanning ? 'Analyzing Frame...' : 'Analyze Frame with Vision AI'}</span>
+                <span>{isScanning ? 'Analyzing...' : 'Analyze with AI'}</span>
               </button>
             )}
 
-            {viewState === 'results' && analysisResult?.detected && analysisResult?.count > 0 && (
+            {viewState === 'results' && analysisResult?.detected && analysisResult?.gradeInfo && (
               <button
                 type="button"
                 onClick={handleApply}
@@ -341,7 +401,7 @@ export const AIQualityDetectionModal = ({
               </button>
             )}
 
-            {viewState === 'results' && (!analysisResult?.detected || analysisResult?.count === 0) && (
+            {viewState === 'results' && (!analysisResult?.detected) && (
               <button
                 type="button"
                 onClick={() => handleTriggerCamera('front')}

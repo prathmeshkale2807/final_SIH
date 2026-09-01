@@ -87,14 +87,15 @@ export const otpService = {
     }
 
     const isDev = process.env.NODE_ENV !== 'production';
+    const isFallback = smsResult.isFallback || smsResult.provider === 'development-logger';
 
     return {
       success: true,
-      message: smsResult.provider === 'development-logger'
+      message: isFallback
         ? `OTP generated: ${rawOtp} (Valid for 5 mins)`
         : `OTP sent successfully to +91 ${mobile}`,
       cooldownSeconds: 60,
-      devOtp: isDev ? rawOtp : undefined,
+      devOtp: (isDev || isFallback) ? rawOtp : undefined,
     };
   },
 

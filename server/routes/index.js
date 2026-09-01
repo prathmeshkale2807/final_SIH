@@ -10,6 +10,7 @@ import transactionRoutes from './transactionRoutes.js';
 import marketRoutes from './marketRoutes.js';
 import predictionRoutes from './predictionRoutes.js';
 import profitRoutes from './profitRoutes.js';
+import aiQualityRoutes from './aiQualityRoutes.js';
 
 const router = express.Router();
 
@@ -34,5 +35,6 @@ router.use('/transactions', transactionRoutes);
 router.use('/markets', marketRoutes);
 router.use('/predictions', predictionRoutes);
 router.use('/profit', profitRoutes);
+router.use('/ai-quality', aiQualityRoutes);
 
 export default router;

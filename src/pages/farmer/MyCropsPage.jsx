@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { getRelativeDate } from '../../utils/dateUtils';
 
 export const MyCropsPage = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ export const MyCropsPage = () => {
       name: 'Nashik Red Onion',
       variety: 'Garwa Grade A',
       quantity: '100 Quintals (10,000 kg)',
-      harvestDate: '15 May 2025',
+      harvestDate: getRelativeDate(-5),
       storageLocation: 'Ventilated Farm Shed, Ausa',
       status: 'Active',
       statusColor: 'emerald',
@@ -24,7 +25,7 @@ export const MyCropsPage = () => {
       name: 'Hybrid Tomato',
       variety: 'Abhinav Grade A',
       quantity: '80 Quintals (8,000 kg)',
-      harvestDate: '22 May 2025',
+      harvestDate: getRelativeDate(-2),
       storageLocation: 'Pre-cooled Crate Hub',
       status: 'Active',
       statusColor: 'emerald',
@@ -36,7 +37,7 @@ export const MyCropsPage = () => {
       name: 'Yellow Soybean',
       variety: 'JS-335 (Moisture < 10%)',
       quantity: '60 Quintals',
-      harvestDate: '10 April 2025',
+      harvestDate: getRelativeDate(-30),
       storageLocation: 'Adani Wilmar Mill Silo',
       status: 'Sold',
       statusColor: 'slate',
@@ -48,7 +49,7 @@ export const MyCropsPage = () => {
       name: 'Thompson Grapes',
       variety: 'Export Grade B+',
       quantity: '120 Quintals',
-      harvestDate: '28 March 2025',
+      harvestDate: getRelativeDate(-45),
       storageLocation: 'Dindori Cold Packhouse',
       status: 'Sold',
       statusColor: 'slate',

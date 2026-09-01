@@ -1,13 +1,10 @@
 import React from 'react';
+import { getForecastDays } from '../../utils/dateUtils';
 
 export const WeatherForecastPage = () => {
-  const days = [
-    { day: 'Wednesday (Today)', date: '28 May 2025', temp: '32°C / 21°C', weather: 'Sunny', icon: '☀️', rain: '0%', humidity: '48%', wind: '14 km/h', advice: 'Optimal for field harvesting and open-air shed drying.' },
-    { day: 'Thursday', date: '29 May 2025', temp: '33°C / 21°C', weather: 'Partly Cloudy', icon: '⛅', rain: '10%', humidity: '52%', wind: '12 km/h', advice: 'Favorable storage conditions, low decay risk.' },
-    { day: 'Friday', date: '30 May 2025', temp: '32°C / 20°C', weather: 'Light Rain Shower', icon: '🌧️', rain: '65%', humidity: '74%', wind: '18 km/h', advice: 'Ensure onion storage sheds are covered with tarpaulin.' },
-    { day: 'Saturday', date: '31 May 2025', temp: '31°C / 19°C', weather: 'Moderate Rain', icon: '🌧️', rain: '80%', humidity: '82%', wind: '22 km/h', advice: 'Avoid transporting produce in open tractor trailers.' },
-    { day: 'Sunday', date: '01 June 2025', temp: '30°C / 18°C', weather: 'Thunderstorm', icon: '⛈️', rain: '85%', humidity: '85%', wind: '25 km/h', advice: 'Keep drain channels clear in low-lying plots.' },
-  ];
+  const days = getForecastDays();
+  const rainDay = days[2] || days[0];
+  const harvestCutoffDay = days[1] || days[0];
 
   return (
     <div className="space-y-6 animate-fade-in font-sans text-slate-800">
@@ -57,11 +54,11 @@ export const WeatherForecastPage = () => {
               <h3 className="font-extrabold text-slate-900 text-base">AI Harvesting &amp; Drying Window</h3>
             </div>
             <p className="text-xs text-slate-600 mt-2 leading-relaxed font-medium">
-              You have a prime <strong>48-hour harvesting and sorting window</strong> before the monsoon cloud band brings showers on Friday afternoon. Complete all lot bagging and dispatch to farm-gate buyer pickups by Thursday evening.
+              You have a prime <strong>48-hour harvesting and sorting window</strong> before the monsoon cloud band brings showers on {rainDay.dayName} afternoon. Complete all lot bagging and dispatch to farm-gate buyer pickups by {harvestCutoffDay.dayName} evening.
             </p>
           </div>
           <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-900 font-bold">
-            ⚠️ Advisory: Rain alert active for Friday 30 May (65% precipitation chance).
+            ⚠️ Advisory: Rain alert active for {rainDay.dayName} {rainDay.date} ({rainDay.rain} precipitation chance).
           </div>
         </div>
       </div>

@@ -173,6 +173,26 @@
     animation: pulseGlow 3s ease-in-out infinite;
   }
 
+  @keyframes scanLaser {
+    0% {
+      top: 0%;
+      opacity: 0.9;
+    }
+    50% {
+      top: 98%;
+      opacity: 1;
+    }
+    100% {
+      top: 0%;
+      opacity: 0.9;
+    }
+  }
+
+  .animate-scan-laser {
+    position: absolute;
+    animation: scanLaser 2.2s ease-in-out infinite;
+  }
+
   /* Safe Area for Mobile Notch/Bottom Bar */
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 1rem);

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { dealService } from '../../services/dealService';
+import { getTodayFormatted, getRelativeDate } from '../../utils/dateUtils';
 
 export const FindFarmersPage = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export const FindFarmersPage = () => {
       grade: 'Grade A (Export 55mm+)',
       quantity: 120,
       unit: 'Quintals',
-      harvestDate: '24 Aug 2026',
+      harvestDate: getRelativeDate(-1),
       freshness: 'Fresh Harvest (< 48 hrs)',
       expectedPrice: 1480,
       trustScore: '98/100',
@@ -49,7 +50,7 @@ export const FindFarmersPage = () => {
       grade: 'Grade A (Processing Quality)',
       quantity: 200,
       unit: 'Quintals',
-      harvestDate: '23 Aug 2026',
+      harvestDate: getRelativeDate(-2),
       freshness: 'Fresh Harvest',
       expectedPrice: 1460,
       trustScore: '95/100',
@@ -69,7 +70,7 @@ export const FindFarmersPage = () => {
       grade: 'Grade A (Firm Red)',
       quantity: 80,
       unit: 'Quintals',
-      harvestDate: '25 Aug 2026',
+      harvestDate: getTodayFormatted(),
       freshness: 'Freshly Picked Today',
       expectedPrice: 3200,
       trustScore: '97/100',
@@ -89,7 +90,7 @@ export const FindFarmersPage = () => {
       grade: 'Grade A (Moisture < 10%)',
       quantity: 150,
       unit: 'Quintals',
-      harvestDate: '21 Aug 2026',
+      harvestDate: getRelativeDate(-4),
       freshness: 'Clean Dry Storage',
       expectedPrice: 4700,
       trustScore: '94/100',

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { getRelativeDate } from '../../utils/dateUtils';
 
 export const ContractsPage = () => {
   const { user } = useAuth();
@@ -14,7 +15,7 @@ export const ContractsPage = () => {
       totalValue: '₹1,11,000',
       escrowStatus: '100% Escrow Deposited',
       escrowProtected: true,
-      pickupDate: '30 May 2025 (Farm-Gate)',
+      pickupDate: `${getRelativeDate(3)} (Farm-Gate)`,
       status: 'Active',
     },
     {
@@ -26,7 +27,7 @@ export const ContractsPage = () => {
       totalValue: '₹2,67,000',
       escrowStatus: 'Settled to HDFC Bank A/C',
       escrowProtected: true,
-      pickupDate: 'Completed 12 April 2025',
+      pickupDate: `Completed ${getRelativeDate(-20)}`,
       status: 'Completed',
     },
   ]);

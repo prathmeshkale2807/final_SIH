@@ -4,6 +4,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { marketService } from '../../services/marketService';
 import { RouteMapModal } from '../../components/common/RouteMapModal';
+import { getTodayFormatted, getLiveRateBadgeLabel } from '../../utils/dateUtils';
 
 export const LandingPage = () => {
   const navigate = useNavigate();
@@ -1829,7 +1830,7 @@ export const LandingPage = () => {
               </h3>
               <span className="bg-emerald-100 text-emerald-950 border border-emerald-300 text-[11px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-2xs">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>📅 {language === 'mr' ? 'आजचे थेट दर (२८ ऑगस्ट २०२६)' : "Today's Live Rates (28 Aug 2026)"}</span>
+                <span>📅 {getLiveRateBadgeLabel(language)}</span>
               </span>
               <span className="bg-amber-50 text-amber-900 border border-amber-200 text-[10.5px] font-black px-2.5 py-0.5 rounded-full">
                 🎯 {language === 'mr' ? `२०० किमी परिसर (${sortedMandis.length} पर्याय उपलब्ध)` : `200 km Radius (${sortedMandis.length} options found)`}
@@ -2026,7 +2027,7 @@ export const LandingPage = () => {
                     ✓
                   </span>
                   <span className="text-[10px] font-black bg-emerald-100 text-emerald-950 px-2 py-0.5 rounded-full border border-emerald-300">
-                    📅 Today, 28 Aug 2026 Live
+                    📅 Today, {getTodayFormatted()} Live
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
@@ -2200,7 +2201,7 @@ export const LandingPage = () => {
                   </h3>
                   <span className="bg-emerald-100 text-emerald-950 border border-emerald-300 text-[10.5px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
                     <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>📅 Today 28 Aug 2026 • Verified</span>
+                    <span>📅 Today {getTodayFormatted()} • Verified</span>
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -2401,7 +2402,7 @@ export const LandingPage = () => {
 
                     <div className="absolute bottom-3 right-3 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-white text-[11px] font-bold shadow-lg flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                      <span>📅 Live 28 Aug 2026 Agmarknet Verified Feed</span>
+                      <span>📅 Live {getTodayFormatted()} Agmarknet Verified Feed</span>
                     </div>
                   </div>
                 </div>
@@ -2429,7 +2430,7 @@ export const LandingPage = () => {
                     </span>
                     <div>
                       <span className="text-slate-900 block font-extrabold">{m.name}</span>
-                      <span className="text-slate-500 text-[11px]">{m.location} • 📅 28 Aug 2026</span>
+                      <span className="text-slate-500 text-[11px]">{m.location} • 📅 {getTodayFormatted()}</span>
                     </div>
                   </div>
 

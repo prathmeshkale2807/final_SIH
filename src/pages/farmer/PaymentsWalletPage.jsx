@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { getRelativeDate } from '../../utils/dateUtils';
 
 export const PaymentsWalletPage = () => {
   const { showToast } = useApp ? useApp() : { showToast: () => {} };
@@ -8,7 +9,7 @@ export const PaymentsWalletPage = () => {
     {
       id: 'TXN-7721',
       title: 'Soybean Lot Payout (Adani Wilmar)',
-      date: '12 April 2025',
+      date: getRelativeDate(-14),
       amount: '+₹2,67,000',
       type: 'credit',
       mode: 'IMPS Direct to HDFC A/C •••• 4019',
@@ -17,7 +18,7 @@ export const PaymentsWalletPage = () => {
     {
       id: 'TXN-7650',
       title: 'Withdrawal to Bank Account',
-      date: '15 April 2025',
+      date: getRelativeDate(-10),
       amount: '-₹2,50,000',
       type: 'debit',
       mode: 'Bank Transfer (UTR #98127391)',
@@ -26,7 +27,7 @@ export const PaymentsWalletPage = () => {
     {
       id: 'TXN-7510',
       title: 'Tomato Advance Escrow Lock (Keventer)',
-      date: '24 May 2025',
+      date: getRelativeDate(-3),
       amount: '+₹51,600',
       type: 'credit',
       mode: 'Escrow Digital Wallet Settlement',

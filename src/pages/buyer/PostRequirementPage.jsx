@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
 import { LocationPicker } from '../../components/auth/LocationPicker';
+import { getRelativeDateISO } from '../../utils/dateUtils';
 
 export const PostRequirementPage = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export const PostRequirementPage = () => {
     unit: 'KG',
     qualityRequirement: 'Grade A (Uniform size 50mm+)',
     maxBuyingPrice: '19', // per KG
-    requiredByDate: '2026-08-30',
+    requiredByDate: getRelativeDateISO(7),
     deliveryPreference: 'Farm Gate Pickup by Buyer Truck',
     requirementType: 'Recurring Monthly Order',
     city: 'Pune APMC Yard',

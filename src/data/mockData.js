@@ -1,3 +1,5 @@
+import { getRelativeDate, getRelativeDateISO, getRelativeDateTime } from '../utils/dateUtils';
+
 export const CROPS = {
   onion: {
     id: 'onion',
@@ -217,49 +219,49 @@ export const MARKETS = {
 export const HISTORICAL_PRICES = {
   onion: {
     '7d': [
-      { day: 'Day 1', date: '17 Aug', price: 1200, arrivals: 14200 },
-      { day: 'Day 2', date: '18 Aug', price: 1280, arrivals: 13900 },
-      { day: 'Day 3', date: '19 Aug', price: 1250, arrivals: 14500 },
-      { day: 'Day 4', date: '20 Aug', price: 1350, arrivals: 13850 },
-      { day: 'Day 5', date: '21 Aug', price: 1370, arrivals: 13400 },
-      { day: 'Day 6', date: '22 Aug', price: 1390, arrivals: 12900 },
-      { day: 'Today', date: '23 Aug', price: 1420, arrivals: 12500 }
+      { day: 'Day 1', date: getRelativeDate(-6, { day: 'numeric', month: 'short' }), price: 1200, arrivals: 14200 },
+      { day: 'Day 2', date: getRelativeDate(-5, { day: 'numeric', month: 'short' }), price: 1280, arrivals: 13900 },
+      { day: 'Day 3', date: getRelativeDate(-4, { day: 'numeric', month: 'short' }), price: 1250, arrivals: 14500 },
+      { day: 'Day 4', date: getRelativeDate(-3, { day: 'numeric', month: 'short' }), price: 1350, arrivals: 13850 },
+      { day: 'Day 5', date: getRelativeDate(-2, { day: 'numeric', month: 'short' }), price: 1370, arrivals: 13400 },
+      { day: 'Day 6', date: getRelativeDate(-1, { day: 'numeric', month: 'short' }), price: 1390, arrivals: 12900 },
+      { day: 'Today', date: getRelativeDate(0, { day: 'numeric', month: 'short' }), price: 1420, arrivals: 12500 }
     ],
     '30d': [
-      { day: 'Wk 1', date: '01 Aug', price: 1150, arrivals: 16000 },
-      { day: 'Wk 2', date: '07 Aug', price: 1220, arrivals: 15000 },
-      { day: 'Wk 3', date: '14 Aug', price: 1295, arrivals: 13800 },
-      { day: 'Wk 4', date: '21 Aug', price: 1380, arrivals: 12800 },
-      { day: 'Today', date: '23 Aug', price: 1420, arrivals: 12500 }
+      { day: 'Wk 1', date: getRelativeDate(-24, { day: 'numeric', month: 'short' }), price: 1150, arrivals: 16000 },
+      { day: 'Wk 2', date: getRelativeDate(-18, { day: 'numeric', month: 'short' }), price: 1220, arrivals: 15000 },
+      { day: 'Wk 3', date: getRelativeDate(-12, { day: 'numeric', month: 'short' }), price: 1295, arrivals: 13800 },
+      { day: 'Wk 4', date: getRelativeDate(-6, { day: 'numeric', month: 'short' }), price: 1380, arrivals: 12800 },
+      { day: 'Today', date: getRelativeDate(0, { day: 'numeric', month: 'short' }), price: 1420, arrivals: 12500 }
     ],
     '3m': [
-      { day: 'Month 1', date: 'Jun', price: 1080, arrivals: 18000 },
-      { day: 'Month 2', date: 'Jul', price: 1190, arrivals: 16500 },
-      { day: 'Month 3', date: 'Aug', price: 1420, arrivals: 12500 }
+      { day: 'Month 1', date: '2 Mos Ago', price: 1080, arrivals: 18000 },
+      { day: 'Month 2', date: 'Last Month', price: 1190, arrivals: 16500 },
+      { day: 'Month 3', date: 'This Month', price: 1420, arrivals: 12500 }
     ],
     '1y': [
-      { day: 'Q1', date: 'Sep-Nov', price: 980, arrivals: 21000 },
-      { day: 'Q2', date: 'Dec-Feb', price: 1150, arrivals: 17500 },
-      { day: 'Q3', date: 'Mar-May', price: 1320, arrivals: 13900 },
-      { day: 'Q4', date: 'Jun-Aug', price: 1420, arrivals: 12500 }
+      { day: 'Q1', date: 'Q1', price: 980, arrivals: 21000 },
+      { day: 'Q2', date: 'Q2', price: 1150, arrivals: 17500 },
+      { day: 'Q3', date: 'Q3', price: 1320, arrivals: 13900 },
+      { day: 'Q4', date: 'Current', price: 1420, arrivals: 12500 }
     ]
   },
   tomato: {
     '7d': [
-      { day: 'Day 1', date: '17 Aug', price: 2280, arrivals: 16500 },
-      { day: 'Day 2', date: '18 Aug', price: 2240, arrivals: 17000 },
-      { day: 'Day 3', date: '19 Aug', price: 2190, arrivals: 17500 },
-      { day: 'Day 4', date: '20 Aug', price: 2150, arrivals: 18000 },
-      { day: 'Day 5', date: '21 Aug', price: 2100, arrivals: 18600 },
-      { day: 'Day 6', date: '22 Aug', price: 2080, arrivals: 19000 },
-      { day: 'Today', date: '23 Aug', price: 2050, arrivals: 19200 }
+      { day: 'Day 1', date: getRelativeDate(-6, { day: 'numeric', month: 'short' }), price: 2280, arrivals: 16500 },
+      { day: 'Day 2', date: getRelativeDate(-5, { day: 'numeric', month: 'short' }), price: 2240, arrivals: 17000 },
+      { day: 'Day 3', date: getRelativeDate(-4, { day: 'numeric', month: 'short' }), price: 2190, arrivals: 17500 },
+      { day: 'Day 4', date: getRelativeDate(-3, { day: 'numeric', month: 'short' }), price: 2150, arrivals: 18000 },
+      { day: 'Day 5', date: getRelativeDate(-2, { day: 'numeric', month: 'short' }), price: 2100, arrivals: 18600 },
+      { day: 'Day 6', date: getRelativeDate(-1, { day: 'numeric', month: 'short' }), price: 2080, arrivals: 19000 },
+      { day: 'Today', date: getRelativeDate(0, { day: 'numeric', month: 'short' }), price: 2050, arrivals: 19200 }
     ],
     '30d': [
-      { day: 'Wk 1', date: '01 Aug', price: 2400, arrivals: 15000 },
-      { day: 'Wk 2', date: '07 Aug', price: 2300, arrivals: 16000 },
-      { day: 'Wk 3', date: '14 Aug', price: 2180, arrivals: 17500 },
-      { day: 'Wk 4', date: '21 Aug', price: 2080, arrivals: 19000 },
-      { day: 'Today', date: '23 Aug', price: 2050, arrivals: 19200 }
+      { day: 'Wk 1', date: getRelativeDate(-24, { day: 'numeric', month: 'short' }), price: 2400, arrivals: 15000 },
+      { day: 'Wk 2', date: getRelativeDate(-18, { day: 'numeric', month: 'short' }), price: 2300, arrivals: 16000 },
+      { day: 'Wk 3', date: getRelativeDate(-12, { day: 'numeric', month: 'short' }), price: 2180, arrivals: 17500 },
+      { day: 'Wk 4', date: getRelativeDate(-6, { day: 'numeric', month: 'short' }), price: 2080, arrivals: 19000 },
+      { day: 'Today', date: getRelativeDate(0, { day: 'numeric', month: 'short' }), price: 2050, arrivals: 19200 }
     ]
   }
 };
@@ -279,7 +281,7 @@ export const BUYER_OFFERS = [
     deliveryWindow: '2 Days',
     paymentTerms: 'Instant Escrow (IMPS/UPI)',
     status: 'PENDING_REVIEW',
-    date: '23 Aug 2026'
+    date: getRelativeDate(0)
   },
   {
     id: 'OFF-002',
@@ -295,7 +297,7 @@ export const BUYER_OFFERS = [
     deliveryWindow: '4 Days',
     paymentTerms: '20% Advance + 80% On Delivery',
     status: 'ACTIVE',
-    date: '22 Aug 2026'
+    date: getRelativeDate(-1)
   },
   {
     id: 'OFF-003',
@@ -311,7 +313,7 @@ export const BUYER_OFFERS = [
     deliveryWindow: '1 Day',
     paymentTerms: 'Escrow (Same Day)',
     status: 'PENDING_REVIEW',
-    date: '23 Aug 2026'
+    date: getRelativeDate(0)
   },
   {
     id: 'OFF-004',
@@ -327,7 +329,7 @@ export const BUYER_OFFERS = [
     deliveryWindow: '3 Days',
     paymentTerms: 'Direct Bank Transfer',
     status: 'PENDING_REVIEW',
-    date: '21 Aug 2026'
+    date: getRelativeDate(-2)
   }
 ];
 
@@ -339,10 +341,10 @@ export const PRODUCE_LOTS = [
     quantity: 50,
     unit: 'Quintals',
     quality: 'Grade A',
-    harvestDate: '2026-08-20',
+    harvestDate: getRelativeDateISO(-3),
     location: 'Latur, Maharashtra',
     expectedPrice: 1450,
-    availableUntil: '2026-08-30',
+    availableUntil: getRelativeDateISO(7),
     status: 'ACTIVE',
     views: 142,
     offersReceived: 3,
@@ -356,10 +358,10 @@ export const PRODUCE_LOTS = [
     quantity: 30,
     unit: 'Quintals',
     quality: 'Grade A:',
-    harvestDate: '2026-08-22',
+    harvestDate: getRelativeDateISO(-1),
     location: 'Latur, Maharashtra',
     expectedPrice: 2100,
-    availableUntil: '2026-08-25',
+    availableUntil: getRelativeDateISO(4),
     status: 'ACTIVE',
     views: 89,
     offersReceived: 1,
@@ -373,10 +375,10 @@ export const PRODUCE_LOTS = [
     quantity: 100,
     unit: 'Quintals',
     quality: 'Grade A:',
-    harvestDate: '2026-08-15',
+    harvestDate: getRelativeDateISO(-10),
     location: 'Latur, Maharashtra',
     expectedPrice: 5000,
-    availableUntil: '2026-09-15',
+    availableUntil: getRelativeDateISO(15),
     status: 'PDUSED',
     views: 210,
     offersReceived: 5,
@@ -398,12 +400,12 @@ export const TRANSACTIONS = [
     status: 'PICKUP_COMPLETED',
     statusLabel: 'In Transit - On Way to Pune',
     escrowStatus: 'Funds Locked in Escrow',
-    date: '23 Aug 2026',
+    date: getRelativeDate(-1),
     timeline: [
-      { step: 'Offer Accepted', date: '21 Aug, 10:45 AM', done: true },
-      { step: 'Lot Confirmed', date: '21 Aug, 04:10 PM', done: true },
-      { step: 'Pickup Completed', date: '22 Aug, 09:30 AM', done: true },
-      { step: 'Delivered & Quality Check', date: 'Estimated 6 PM', done: false, current: true },
+      { step: 'Offer Accepted', date: getRelativeDateTime(-2, '10:45 AM'), done: true },
+      { step: 'Lot Confirmed', date: getRelativeDateTime(-2, '04:10 PM'), done: true },
+      { step: 'Pickup Completed', date: getRelativeDateTime(-1, '09:30 AM'), done: true },
+      { step: 'Delivered & Quality Check', date: 'Estimated Today 6 PM', done: false, current: true },
       { step: 'Payment Pending Release', date: 'Pending Quality', done: false },
       { step: 'Payment Completed', date: '-', done: false }
     ]
@@ -420,14 +422,14 @@ export const TRANSACTIONS = [
     status: 'COMPLETED',
     statusLabel: 'Payment Credited to Bank Account',
     escrowStatus: 'Payout Successful',
-    date: '19 Aug 2026',
+    date: getRelativeDate(-4),
     timeline: [
-      { step: 'Offer Accepted', date: '17 Aug, 11:20 AM', done: true },
-      { step: 'Lot Confirmed', date: '17 Aug, 05:00 PM', done: true },
-      { step: 'Pickup Completed', date: '18 Aug, 09:00 AM', done: true },
-      { step: 'Delivered & Quality Check', date: '18 Aug, 03:00 PM', done: true },
-      { step: 'Payment Pending Release', date: '19 Aug, 09:15 AM', done: true },
-      { step: 'Payment Completed', date: '19 Aug, 09:20 AM', done: true }
+      { step: 'Offer Accepted', date: getRelativeDateTime(-6, '11:20 AM'), done: true },
+      { step: 'Lot Confirmed', date: getRelativeDateTime(-6, '05:00 PM'), done: true },
+      { step: 'Pickup Completed', date: getRelativeDateTime(-5, '09:00 AM'), done: true },
+      { step: 'Delivered & Quality Check', date: getRelativeDateTime(-5, '03:00 PM'), done: true },
+      { step: 'Payment Pending Release', date: getRelativeDateTime(-4, '09:15 AM'), done: true },
+      { step: 'Payment Completed', date: getRelativeDateTime(-4, '09:20 AM'), done: true }
     ]
   }
 ];

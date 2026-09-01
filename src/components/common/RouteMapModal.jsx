@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getTollPlazaAlongPolyline } from '../../data/maharashtraTolls';
+import { getTodayFormatted } from '../../utils/dateUtils';
 
 // ─── 1. TILE SERVERS (100% FREE, HIGH-CONTRAST, ZERO WATERMARKS) ─────────────
 const TILE_PROVIDERS = {
@@ -603,7 +604,7 @@ export const RouteMapModal = ({
               </h2>
               <span className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1.5 flex-shrink-0 shadow-xs">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>📅 28 Aug 2026 Live Agmarknet</span>
+                <span>📅 {getTodayFormatted()} Live Agmarknet</span>
               </span>
             </div>
             <p className="text-[11px] text-slate-400 truncate mt-0.5">

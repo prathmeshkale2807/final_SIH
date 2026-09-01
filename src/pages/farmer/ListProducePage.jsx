@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { LocationPicker } from '../../components/auth/LocationPicker';
 import { firestoreService } from '../../services/firestoreService';
+import { AIQualityDetectionModal } from '../../components/farmer/AIQualityDetectionModal';
 
 // ─── COMPREHENSIVE CROP DATABASE (CATEGORY ➔ COMMODITY ➔ VARIETY) ───────────
 export const CROP_DATABASE = {
@@ -364,6 +365,13 @@ export const ListProducePage = () => {
   const { user } = useAuth();
   const { showToast } = useApp();
 
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+
+  const handleApplyAiGrade = (recommendedGrade) => {
+    setFormData((prev) => ({ ...prev, qualityGrade: recommendedGrade }));
+    showToast('✓ AI recommendation applied successfully', 'success');
+  };
+
   const initialCategory = 'Vegetables (भाज्या)';
   const initialCommodity = 'Onion (कांदा)';
   const initialVariety = CROP_DATABASE[initialCategory]?.[initialCommodity]?.[0] || 'Nashik Red / Garwa (नाशिक लाल)';
@@ -611,19 +619,37 @@ export const ListProducePage = () => {
                 <select
                   value={formData.qualityGrade}
                   onChange={(e) => setFormData({ ...formData, qualityGrade: e.target.value })}
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800"
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white cursor-pointer"
                 >
                   <option value="Grade A (Export / Processing Quality)">Grade A (Export / Processing Quality)</option>
                   <option value="Grade B (Standard Mandi Quality)">Grade B (Standard Market Quality)</option>
                   <option value="Grade C (Local Consumption)">Grade C (Local Mandi Quality)</option>
                 </select>
+
+                {/* 🤖 AI Detect Quality Feature */}
+                <div className="mt-2.5 space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsAiModalOpen(true)}
+                    className="w-full py-2.5 px-3.5 bg-emerald-50 hover:bg-emerald-100/90 active:scale-[0.99] border border-emerald-300/80 rounded-xl text-xs font-black text-emerald-800 transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer group"
+                  >
+                    <span className="text-base group-hover:scale-110 transition-transform">🤖</span>
+                    <span>AI Detect Quality</span>
+                    <span className="text-[10px] bg-emerald-600 text-white font-black px-1.5 py-0.2 rounded-full uppercase tracking-wider ml-0.5">
+                      Vision
+                    </span>
+                  </button>
+                  <p className="text-[11px] text-slate-500 font-medium text-center">
+                    Use AI image analysis to recommend a quality grade.
+                  </p>
+                </div>
               </div>
 
               <div>
                 <label className="text-xs font-bold text-slate-600 block mb-1">Harvest Date (MM/DD/YYYY) *</label>
                 <input
                   type="text"
-                  placeholder="MM/DD/YYYY (e.g., 08/28/2026)"
+                  placeholder={`MM/DD/YYYY (e.g., ${getTodayMMDDYYYY()})`}
                   value={formData.harvestDate}
                   onChange={(e) => setFormData({ ...formData, harvestDate: e.target.value })}
                   className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800"
@@ -700,6 +726,14 @@ export const ListProducePage = () => {
           </div>
         </form>
       </div>
+
+      {/* AI Quality Detection Modal */}
+      <AIQualityDetectionModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        onApplyGrade={handleApplyAiGrade}
+        commodity={formData.cropName}
+      />
     </div>
   );
 };

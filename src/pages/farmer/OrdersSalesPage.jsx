@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { getTodayFormatted, getRelativeDate } from '../../utils/dateUtils';
 
 export const OrdersSalesPage = () => {
   const { showToast } = useApp ? useApp() : { showToast: () => {} };
@@ -11,7 +12,7 @@ export const OrdersSalesPage = () => {
       crop: 'Nashik Red Onion (Garwa Grade A)',
       quantity: '60 Quintals',
       amount: '₹1,11,000',
-      date: 'Today, 28 May 2025',
+      date: `Today, ${getTodayFormatted()}`,
       status: 'In Progress (Pickup Scheduled)',
       stage: 3,
     },
@@ -21,7 +22,7 @@ export const OrdersSalesPage = () => {
       crop: 'Hybrid Tomato (Abhinav)',
       quantity: '50 Quintals',
       amount: '₹86,000',
-      date: '26 May 2025',
+      date: getRelativeDate(-2),
       status: 'Quality Verification Completed',
       stage: 2,
     },
@@ -31,7 +32,7 @@ export const OrdersSalesPage = () => {
       crop: 'Hybrid Tomato (Grade A)',
       quantity: '30 Quintals',
       amount: '₹51,600',
-      date: '24 May 2025',
+      date: getRelativeDate(-4),
       status: 'Payment Released to Bank',
       stage: 4,
     },

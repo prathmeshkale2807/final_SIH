@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
+import { getTodayFormatted, getRelativeDate } from '../../utils/dateUtils';
 
 export const MyLotsPage = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export const MyLotsPage = () => {
       crop: `${user?.primaryCrop || 'Onion'} (Grade A / Standard)`,
       grade: 'Grade A (Export / Processing Quality)',
       qty: '100 Quintals',
-      harvestDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+      harvestDate: getTodayFormatted(),
       freshness: 'Fresh Harvest (< 48 hrs)',
       expectedPrice: '₹1,820 / q',
       status: 'ACTIVE',
@@ -30,7 +31,7 @@ export const MyLotsPage = () => {
       crop: 'Tomato (Hybrid Abhinav)',
       grade: 'Grade B (Standard Market)',
       qty: '40 Quintals',
-      harvestDate: '20 Aug 2026',
+      harvestDate: getRelativeDate(-7),
       freshness: 'Good Quality',
       expectedPrice: '₹3,100 / q',
       status: 'SOLD',

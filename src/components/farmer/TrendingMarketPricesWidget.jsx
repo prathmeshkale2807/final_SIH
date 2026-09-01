@@ -1,109 +1,111 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { marketService } from '../../services/marketService';
 import { RouteMapModal } from '../common/RouteMapModal';
+import { getTodayFormatted } from '../../utils/dateUtils';
 
 // ─── Static fallback data per channel tab ─────────────────────────────────────
+const todayStr = getTodayFormatted();
 
 const APMC_DATA = {
   onion: [
-    { id: 1, name: 'Nashik APMC Market', verified: true, location: 'Panchavati Yard, Nashik', date: '28 Aug 2026 Today', routes: 3, distanceKm: 3, bestRouteMin: 2, grossPrice: 2020, takeHomePrice: 2017, changePercent: 1.2, isPositive: true },
-    { id: 2, name: 'Sinnar APMC Market', verified: true, location: 'Sinnar, Nashik', date: '28 Aug 2026 Today', routes: 3, distanceKm: 34, bestRouteMin: 27, grossPrice: 1980, takeHomePrice: 1951, changePercent: 0.8, isPositive: false },
-    { id: 3, name: 'Pimpalgaon Baswant APMC', verified: true, location: 'Pimpalgaon, Nashik', date: '28 Aug 2026 Today', routes: 3, distanceKm: 35, bestRouteMin: 38, grossPrice: 2080, takeHomePrice: 2050, changePercent: 1.8, isPositive: true },
-    { id: 4, name: 'Lasalgaon APMC', verified: true, location: 'Lasalgaon, Nashik', date: '28 Aug 2026 Today', routes: 2, distanceKm: 56, bestRouteMin: 55, grossPrice: 2100, takeHomePrice: 2062, changePercent: 3.2, isPositive: true },
-    { id: 5, name: 'Yeola APMC Market', verified: true, location: 'Yeola, Nashik', date: '28 Aug 2026 Today', routes: 2, distanceKm: 72, bestRouteMin: 68, grossPrice: 1960, takeHomePrice: 1931, changePercent: 1.1, isPositive: false },
-    { id: 6, name: 'Malegaon APMC Yard', verified: false, location: 'Malegaon, Nashik', date: '28 Aug 2026 Today', routes: 3, distanceKm: 95, bestRouteMin: 90, grossPrice: 1940, takeHomePrice: 1908, changePercent: 0.6, isPositive: true },
-    { id: 7, name: 'Nandgaon APMC', verified: true, location: 'Nandgaon, Nashik', date: '28 Aug 2026 Today', routes: 2, distanceKm: 110, bestRouteMin: 102, grossPrice: 1970, takeHomePrice: 1934, changePercent: 1.5, isPositive: true },
-    { id: 8, name: 'Kopargaon APMC', verified: true, location: 'Kopargaon, Ahmednagar', date: '28 Aug 2026 Today', routes: 3, distanceKm: 138, bestRouteMin: 130, grossPrice: 2010, takeHomePrice: 1966, changePercent: 2.4, isPositive: true },
-    { id: 9, name: 'Ahmednagar APMC', verified: true, location: 'Ahmednagar, MH', date: '28 Aug 2026 Today', routes: 2, distanceKm: 162, bestRouteMin: 158, grossPrice: 2050, takeHomePrice: 2003, changePercent: 2.1, isPositive: true },
-    { id: 10, name: 'Pune APMC (Gultekdi)', verified: true, location: 'Gultekdi, Pune', date: '28 Aug 2026 Today', routes: 3, distanceKm: 195, bestRouteMin: 190, grossPrice: 2140, takeHomePrice: 2082, changePercent: 5.1, isPositive: true },
+    { id: 1, name: 'Nashik APMC Market', verified: true, location: 'Panchavati Yard, Nashik', date: `${todayStr} Today`, routes: 3, distanceKm: 3, bestRouteMin: 2, grossPrice: 2020, takeHomePrice: 2017, changePercent: 1.2, isPositive: true },
+    { id: 2, name: 'Sinnar APMC Market', verified: true, location: 'Sinnar, Nashik', date: `${todayStr} Today`, routes: 3, distanceKm: 34, bestRouteMin: 27, grossPrice: 1980, takeHomePrice: 1951, changePercent: 0.8, isPositive: false },
+    { id: 3, name: 'Pimpalgaon Baswant APMC', verified: true, location: 'Pimpalgaon, Nashik', date: `${todayStr} Today`, routes: 3, distanceKm: 35, bestRouteMin: 38, grossPrice: 2080, takeHomePrice: 2050, changePercent: 1.8, isPositive: true },
+    { id: 4, name: 'Lasalgaon APMC', verified: true, location: 'Lasalgaon, Nashik', date: `${todayStr} Today`, routes: 2, distanceKm: 56, bestRouteMin: 55, grossPrice: 2100, takeHomePrice: 2062, changePercent: 3.2, isPositive: true },
+    { id: 5, name: 'Yeola APMC Market', verified: true, location: 'Yeola, Nashik', date: `${todayStr} Today`, routes: 2, distanceKm: 72, bestRouteMin: 68, grossPrice: 1960, takeHomePrice: 1931, changePercent: 1.1, isPositive: false },
+    { id: 6, name: 'Malegaon APMC Yard', verified: false, location: 'Malegaon, Nashik', date: `${todayStr} Today`, routes: 3, distanceKm: 95, bestRouteMin: 90, grossPrice: 1940, takeHomePrice: 1908, changePercent: 0.6, isPositive: true },
+    { id: 7, name: 'Nandgaon APMC', verified: true, location: 'Nandgaon, Nashik', date: `${todayStr} Today`, routes: 2, distanceKm: 110, bestRouteMin: 102, grossPrice: 1970, takeHomePrice: 1934, changePercent: 1.5, isPositive: true },
+    { id: 8, name: 'Kopargaon APMC', verified: true, location: 'Kopargaon, Ahmednagar', date: `${todayStr} Today`, routes: 3, distanceKm: 138, bestRouteMin: 130, grossPrice: 2010, takeHomePrice: 1966, changePercent: 2.4, isPositive: true },
+    { id: 9, name: 'Ahmednagar APMC', verified: true, location: 'Ahmednagar, MH', date: `${todayStr} Today`, routes: 2, distanceKm: 162, bestRouteMin: 158, grossPrice: 2050, takeHomePrice: 2003, changePercent: 2.1, isPositive: true },
+    { id: 10, name: 'Pune APMC (Gultekdi)', verified: true, location: 'Gultekdi, Pune', date: `${todayStr} Today`, routes: 3, distanceKm: 195, bestRouteMin: 190, grossPrice: 2140, takeHomePrice: 2082, changePercent: 5.1, isPositive: true },
   ],
   tomato: [
-    { id: 1, name: 'Narayangaon Tomato APMC', verified: true, location: 'Narayangaon, Pune', date: '28 Aug 2026 Today', routes: 3, distanceKm: 18, bestRouteMin: 16, grossPrice: 3250, takeHomePrice: 3168, changePercent: 6.4, isPositive: true },
-    { id: 2, name: 'Junnar APMC', verified: true, location: 'Junnar, Pune', date: '28 Aug 2026 Today', routes: 2, distanceKm: 42, bestRouteMin: 38, grossPrice: 3100, takeHomePrice: 3022, changePercent: 3.1, isPositive: true },
-    { id: 3, name: 'Nashik APMC (Panchavati)', verified: true, location: 'Nashik', date: '28 Aug 2026 Today', routes: 3, distanceKm: 80, bestRouteMin: 75, grossPrice: 3050, takeHomePrice: 2994, changePercent: 2.1, isPositive: false },
+    { id: 1, name: 'Narayangaon Tomato APMC', verified: true, location: 'Narayangaon, Pune', date: `${todayStr} Today`, routes: 3, distanceKm: 18, bestRouteMin: 16, grossPrice: 3250, takeHomePrice: 3168, changePercent: 6.4, isPositive: true },
+    { id: 2, name: 'Junnar APMC', verified: true, location: 'Junnar, Pune', date: `${todayStr} Today`, routes: 2, distanceKm: 42, bestRouteMin: 38, grossPrice: 3100, takeHomePrice: 3022, changePercent: 3.1, isPositive: true },
+    { id: 3, name: 'Nashik APMC (Panchavati)', verified: true, location: 'Nashik', date: `${todayStr} Today`, routes: 3, distanceKm: 80, bestRouteMin: 75, grossPrice: 3050, takeHomePrice: 2994, changePercent: 2.1, isPositive: false },
   ],
   potato: [
-    { id: 1, name: 'Manchar APMC', verified: true, location: 'Manchar, Pune', date: '28 Aug 2026 Today', routes: 3, distanceKm: 22, bestRouteMin: 20, grossPrice: 2480, takeHomePrice: 2411, changePercent: 2.8, isPositive: true },
-    { id: 2, name: 'Pune APMC (Gultekdi)', verified: true, location: 'Pune', date: '28 Aug 2026 Today', routes: 2, distanceKm: 58, bestRouteMin: 55, grossPrice: 2390, takeHomePrice: 2325, changePercent: 1.5, isPositive: true },
+    { id: 1, name: 'Manchar APMC', verified: true, location: 'Manchar, Pune', date: `${todayStr} Today`, routes: 3, distanceKm: 22, bestRouteMin: 20, grossPrice: 2480, takeHomePrice: 2411, changePercent: 2.8, isPositive: true },
+    { id: 2, name: 'Pune APMC (Gultekdi)', verified: true, location: 'Pune', date: `${todayStr} Today`, routes: 2, distanceKm: 58, bestRouteMin: 55, grossPrice: 2390, takeHomePrice: 2325, changePercent: 1.5, isPositive: true },
   ],
   soybean: [
-    { id: 1, name: 'Latur Main Mandi', verified: true, location: 'Latur', date: '28 Aug 2026 Today', routes: 3, distanceKm: 15, bestRouteMin: 14, grossPrice: 4750, takeHomePrice: 4683, changePercent: 4.5, isPositive: true },
-    { id: 2, name: 'Akola APMC Yard', verified: true, location: 'Akola, Vidarbha', date: '28 Aug 2026 Today', routes: 2, distanceKm: 190, bestRouteMin: 185, grossPrice: 4710, takeHomePrice: 4498, changePercent: 3.1, isPositive: true },
+    { id: 1, name: 'Latur Main Mandi', verified: true, location: 'Latur', date: `${todayStr} Today`, routes: 3, distanceKm: 15, bestRouteMin: 14, grossPrice: 4750, takeHomePrice: 4683, changePercent: 4.5, isPositive: true },
+    { id: 2, name: 'Akola APMC Yard', verified: true, location: 'Akola, Vidarbha', date: `${todayStr} Today`, routes: 2, distanceKm: 190, bestRouteMin: 185, grossPrice: 4710, takeHomePrice: 4498, changePercent: 3.1, isPositive: true },
   ],
   wheat: [
-    { id: 1, name: 'Solapur Grain APMC', verified: true, location: 'Solapur', date: '28 Aug 2026 Today', routes: 2, distanceKm: 110, bestRouteMin: 105, grossPrice: 2420, takeHomePrice: 2311, changePercent: 1.2, isPositive: true },
+    { id: 1, name: 'Solapur Grain APMC', verified: true, location: 'Solapur', date: `${todayStr} Today`, routes: 2, distanceKm: 110, bestRouteMin: 105, grossPrice: 2420, takeHomePrice: 2311, changePercent: 1.2, isPositive: true },
   ],
   cotton: [
-    { id: 1, name: 'Jalna APMC Yard', verified: true, location: 'Jalna, Marathwada', date: '28 Aug 2026 Today', routes: 3, distanceKm: 140, bestRouteMin: 132, grossPrice: 7350, takeHomePrice: 7157, changePercent: 5.4, isPositive: true },
+    { id: 1, name: 'Jalna APMC Yard', verified: true, location: 'Jalna, Marathwada', date: `${todayStr} Today`, routes: 3, distanceKm: 140, bestRouteMin: 132, grossPrice: 7350, takeHomePrice: 7157, changePercent: 5.4, isPositive: true },
   ],
 };
 
 const PROCESSORS_DATA = {
   onion: [
-    { id: 1, name: 'AgroFresh Dehydration Hub', verified: true, location: 'Niphad, Nashik', date: '28 Aug 2026', routes: 2, distanceKm: 28, bestRouteMin: 25, grossPrice: 1960, takeHomePrice: 1940, changePercent: 2.1, isPositive: true },
-    { id: 2, name: 'Mahindra Agri Processing', verified: true, location: 'Sinnar, Nashik', date: '28 Aug 2026', routes: 3, distanceKm: 34, bestRouteMin: 30, grossPrice: 1980, takeHomePrice: 1960, changePercent: 1.5, isPositive: true },
-    { id: 3, name: 'Patanjali Agro Centre', verified: true, location: 'Igatpuri, Nashik', date: '28 Aug 2026', routes: 2, distanceKm: 65, bestRouteMin: 62, grossPrice: 2000, takeHomePrice: 1975, changePercent: 3.0, isPositive: true },
+    { id: 1, name: 'AgroFresh Dehydration Hub', verified: true, location: 'Niphad, Nashik', date: todayStr, routes: 2, distanceKm: 28, bestRouteMin: 25, grossPrice: 1960, takeHomePrice: 1940, changePercent: 2.1, isPositive: true },
+    { id: 2, name: 'Mahindra Agri Processing', verified: true, location: 'Sinnar, Nashik', date: todayStr, routes: 3, distanceKm: 34, bestRouteMin: 30, grossPrice: 1980, takeHomePrice: 1960, changePercent: 1.5, isPositive: true },
+    { id: 3, name: 'Patanjali Agro Centre', verified: true, location: 'Igatpuri, Nashik', date: todayStr, routes: 2, distanceKm: 65, bestRouteMin: 62, grossPrice: 2000, takeHomePrice: 1975, changePercent: 3.0, isPositive: true },
   ],
   tomato: [
-    { id: 1, name: 'Sahyadri Agro Processing', verified: true, location: 'Mohadi, Nashik', date: '28 Aug 2026', routes: 3, distanceKm: 45, bestRouteMin: 40, grossPrice: 3100, takeHomePrice: 3065, changePercent: 4.2, isPositive: true },
+    { id: 1, name: 'Sahyadri Agro Processing', verified: true, location: 'Mohadi, Nashik', date: todayStr, routes: 3, distanceKm: 45, bestRouteMin: 40, grossPrice: 3100, takeHomePrice: 3065, changePercent: 4.2, isPositive: true },
   ],
   potato: [
-    { id: 1, name: 'PepsiCo AgriHub (Potato)', verified: true, location: 'Pune Belt', date: '28 Aug 2026', routes: 2, distanceKm: 55, bestRouteMin: 50, grossPrice: 2300, takeHomePrice: 2280, changePercent: 2.0, isPositive: true },
+    { id: 1, name: 'PepsiCo AgriHub (Potato)', verified: true, location: 'Pune Belt', date: todayStr, routes: 2, distanceKm: 55, bestRouteMin: 50, grossPrice: 2300, takeHomePrice: 2280, changePercent: 2.0, isPositive: true },
   ],
   soybean: [
-    { id: 1, name: 'Ruchi Soya Processing', verified: true, location: 'Latur', date: '28 Aug 2026', routes: 2, distanceKm: 12, bestRouteMin: 11, grossPrice: 4800, takeHomePrice: 4770, changePercent: 3.8, isPositive: true },
+    { id: 1, name: 'Ruchi Soya Processing', verified: true, location: 'Latur', date: todayStr, routes: 2, distanceKm: 12, bestRouteMin: 11, grossPrice: 4800, takeHomePrice: 4770, changePercent: 3.8, isPositive: true },
   ],
   wheat: [
-    { id: 1, name: 'ITC Agri Flour Hub', verified: true, location: 'Solapur', date: '28 Aug 2026', routes: 2, distanceKm: 105, bestRouteMin: 100, grossPrice: 2450, takeHomePrice: 2430, changePercent: 1.0, isPositive: true },
+    { id: 1, name: 'ITC Agri Flour Hub', verified: true, location: 'Solapur', date: todayStr, routes: 2, distanceKm: 105, bestRouteMin: 100, grossPrice: 2450, takeHomePrice: 2430, changePercent: 1.0, isPositive: true },
   ],
   cotton: [
-    { id: 1, name: 'Welspun Cotton Gin', verified: true, location: 'Jalna', date: '28 Aug 2026', routes: 2, distanceKm: 135, bestRouteMin: 128, grossPrice: 7400, takeHomePrice: 7370, changePercent: 6.0, isPositive: true },
+    { id: 1, name: 'Welspun Cotton Gin', verified: true, location: 'Jalna', date: todayStr, routes: 2, distanceKm: 135, bestRouteMin: 128, grossPrice: 7400, takeHomePrice: 7370, changePercent: 6.0, isPositive: true },
   ],
 };
 
 const INSTITUTIONAL_DATA = {
   onion: [
-    { id: 1, name: 'Reliance Retail Direct', verified: true, location: 'Nashik Distribution', date: '28 Aug 2026', routes: 1, distanceKm: 10, bestRouteMin: 10, grossPrice: 2050, takeHomePrice: 2040, changePercent: 2.8, isPositive: true },
-    { id: 2, name: 'Metro Cash & Carry', verified: true, location: 'Nashik Warehouse', date: '28 Aug 2026', routes: 1, distanceKm: 12, bestRouteMin: 12, grossPrice: 2030, takeHomePrice: 2018, changePercent: 1.9, isPositive: true },
-    { id: 3, name: 'NAFED Procurement', verified: true, location: 'Nashik Collection', date: '28 Aug 2026', routes: 2, distanceKm: 8, bestRouteMin: 8, grossPrice: 1980, takeHomePrice: 1970, changePercent: 0.5, isPositive: true },
+    { id: 1, name: 'Reliance Retail Direct', verified: true, location: 'Nashik Distribution', date: todayStr, routes: 1, distanceKm: 10, bestRouteMin: 10, grossPrice: 2050, takeHomePrice: 2040, changePercent: 2.8, isPositive: true },
+    { id: 2, name: 'Metro Cash & Carry', verified: true, location: 'Nashik Warehouse', date: todayStr, routes: 1, distanceKm: 12, bestRouteMin: 12, grossPrice: 2030, takeHomePrice: 2018, changePercent: 1.9, isPositive: true },
+    { id: 3, name: 'NAFED Procurement', verified: true, location: 'Nashik Collection', date: todayStr, routes: 2, distanceKm: 8, bestRouteMin: 8, grossPrice: 1980, takeHomePrice: 1970, changePercent: 0.5, isPositive: true },
   ],
   tomato: [
-    { id: 1, name: 'BigBasket Direct Farm', verified: true, location: 'Nashik Hub', date: '28 Aug 2026', routes: 1, distanceKm: 15, bestRouteMin: 14, grossPrice: 3200, takeHomePrice: 3180, changePercent: 5.5, isPositive: true },
+    { id: 1, name: 'BigBasket Direct Farm', verified: true, location: 'Nashik Hub', date: todayStr, routes: 1, distanceKm: 15, bestRouteMin: 14, grossPrice: 3200, takeHomePrice: 3180, changePercent: 5.5, isPositive: true },
   ],
   potato: [
-    { id: 1, name: 'Spencer\'s Retail Potato Buy', verified: true, location: 'Pune Hub', date: '28 Aug 2026', routes: 1, distanceKm: 20, bestRouteMin: 18, grossPrice: 2350, takeHomePrice: 2330, changePercent: 2.2, isPositive: true },
+    { id: 1, name: 'Spencer\'s Retail Potato Buy', verified: true, location: 'Pune Hub', date: todayStr, routes: 1, distanceKm: 20, bestRouteMin: 18, grossPrice: 2350, takeHomePrice: 2330, changePercent: 2.2, isPositive: true },
   ],
   soybean: [
-    { id: 1, name: 'Govt. MSP Procurement (NAFED)', verified: true, location: 'Latur', date: '28 Aug 2026', routes: 1, distanceKm: 5, bestRouteMin: 5, grossPrice: 4892, takeHomePrice: 4892, changePercent: 0.0, isPositive: true },
+    { id: 1, name: 'Govt. MSP Procurement (NAFED)', verified: true, location: 'Latur', date: todayStr, routes: 1, distanceKm: 5, bestRouteMin: 5, grossPrice: 4892, takeHomePrice: 4892, changePercent: 0.0, isPositive: true },
   ],
   wheat: [
-    { id: 1, name: 'FCI MSP Wheat Procurement', verified: true, location: 'Solapur', date: '28 Aug 2026', routes: 1, distanceKm: 8, bestRouteMin: 8, grossPrice: 2275, takeHomePrice: 2275, changePercent: 0.0, isPositive: true },
+    { id: 1, name: 'FCI MSP Wheat Procurement', verified: true, location: 'Solapur', date: todayStr, routes: 1, distanceKm: 8, bestRouteMin: 8, grossPrice: 2275, takeHomePrice: 2275, changePercent: 0.0, isPositive: true },
   ],
   cotton: [
-    { id: 1, name: 'CCI Cotton Procurement', verified: true, location: 'Jalna', date: '28 Aug 2026', routes: 1, distanceKm: 10, bestRouteMin: 10, grossPrice: 6620, takeHomePrice: 6620, changePercent: 0.0, isPositive: true },
+    { id: 1, name: 'CCI Cotton Procurement', verified: true, location: 'Jalna', date: todayStr, routes: 1, distanceKm: 10, bestRouteMin: 10, grossPrice: 6620, takeHomePrice: 6620, changePercent: 0.0, isPositive: true },
   ],
 };
 
 const DIGITAL_DATA = {
   onion: [
-    { id: 1, name: 'eNAM Platform (Nashik)', verified: true, location: 'Online / APMC Integrated', date: '28 Aug 2026', routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 2010, takeHomePrice: 2000, changePercent: 2.0, isPositive: true },
-    { id: 2, name: 'MahaAgro FPO Tender', verified: true, location: 'Digital Auction Platform', date: '28 Aug 2026', routes: 0, distanceKm: 5, bestRouteMin: 0, grossPrice: 1990, takeHomePrice: 1980, changePercent: 1.4, isPositive: true },
-    { id: 3, name: 'AgriMarket.in Bid', verified: false, location: 'Online Marketplace', date: '28 Aug 2026', routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 1975, takeHomePrice: 1960, changePercent: 0.8, isPositive: true },
+    { id: 1, name: 'eNAM Platform (Nashik)', verified: true, location: 'Online / APMC Integrated', date: todayStr, routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 2010, takeHomePrice: 2000, changePercent: 2.0, isPositive: true },
+    { id: 2, name: 'MahaAgro FPO Tender', verified: true, location: 'Digital Auction Platform', date: todayStr, routes: 0, distanceKm: 5, bestRouteMin: 0, grossPrice: 1990, takeHomePrice: 1980, changePercent: 1.4, isPositive: true },
+    { id: 3, name: 'AgriMarket.in Bid', verified: false, location: 'Online Marketplace', date: todayStr, routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 1975, takeHomePrice: 1960, changePercent: 0.8, isPositive: true },
   ],
   tomato: [
-    { id: 1, name: 'Fasal Digital Platform', verified: true, location: 'App-Based Trading', date: '28 Aug 2026', routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 3150, takeHomePrice: 3135, changePercent: 3.8, isPositive: true },
+    { id: 1, name: 'Fasal Digital Platform', verified: true, location: 'App-Based Trading', date: todayStr, routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 3150, takeHomePrice: 3135, changePercent: 3.8, isPositive: true },
   ],
   potato: [
-    { id: 1, name: 'Kisan Network Potato Bid', verified: true, location: 'Digital Platform', date: '28 Aug 2026', routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 2320, takeHomePrice: 2310, changePercent: 1.8, isPositive: true },
+    { id: 1, name: 'Kisan Network Potato Bid', verified: true, location: 'Digital Platform', date: todayStr, routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 2320, takeHomePrice: 2310, changePercent: 1.8, isPositive: true },
   ],
   soybean: [
-    { id: 1, name: 'eNAM Soybean Auction', verified: true, location: 'Online / eNAM', date: '28 Aug 2026', routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 4760, takeHomePrice: 4750, changePercent: 4.0, isPositive: true },
+    { id: 1, name: 'eNAM Soybean Auction', verified: true, location: 'Online / eNAM', date: todayStr, routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 4760, takeHomePrice: 4750, changePercent: 4.0, isPositive: true },
   ],
   wheat: [
-    { id: 1, name: 'DeHaat Grain Exchange', verified: true, location: 'Digital Platform', date: '28 Aug 2026', routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 2400, takeHomePrice: 2388, changePercent: 1.1, isPositive: true },
+    { id: 1, name: 'DeHaat Grain Exchange', verified: true, location: 'Digital Platform', date: todayStr, routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 2400, takeHomePrice: 2388, changePercent: 1.1, isPositive: true },
   ],
   cotton: [
-    { id: 1, name: 'Cotton Corp Digital Tender', verified: true, location: 'Digital / Online', date: '28 Aug 2026', routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 7300, takeHomePrice: 7285, changePercent: 4.9, isPositive: true },
+    { id: 1, name: 'Cotton Corp Digital Tender', verified: true, location: 'Digital / Online', date: todayStr, routes: 0, distanceKm: 0, bestRouteMin: 0, grossPrice: 7300, takeHomePrice: 7285, changePercent: 4.9, isPositive: true },
   ],
 };
 

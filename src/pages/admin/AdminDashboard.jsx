@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { getRelativeDate, getRelativeDateTime } from '../../utils/dateUtils';
 
 export const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -199,7 +200,7 @@ export const AdminDashboard = () => {
       step: 6,
       stepLabel: 'Inspection Approved ➔ Disbursal Pending',
       status: 'Pending Disbursal',
-      date: '26 Aug 2026, 11:45 AM',
+      date: getRelativeDateTime(-1, '11:45 AM'),
     },
     {
       txnId: 'ESC-2026-8832',
@@ -210,7 +211,7 @@ export const AdminDashboard = () => {
       step: 7,
       stepLabel: '100% Settled & Bank Credited',
       status: 'Settled',
-      date: '25 Aug 2026, 04:30 PM',
+      date: getRelativeDateTime(-2, '04:30 PM'),
     },
     {
       txnId: 'ESC-2026-8833',
@@ -221,7 +222,7 @@ export const AdminDashboard = () => {
       step: 3,
       stepLabel: 'In Transit • GPS Monitored',
       status: 'In Transit',
-      date: '26 Aug 2026, 09:15 AM',
+      date: getRelativeDateTime(0, '09:15 AM'),
     },
     {
       txnId: 'ESC-2026-8834',
@@ -232,7 +233,7 @@ export const AdminDashboard = () => {
       step: 2,
       stepLabel: 'Buyer Funds Locked in Escrow Account',
       status: 'Escrow Funded',
-      date: '26 Aug 2026, 12:05 PM',
+      date: getRelativeDateTime(0, '12:05 PM'),
     },
   ]);
 

@@ -1,4 +1,5 @@
 import api from './api';
+import { getRelativeDateTime } from '../utils/dateUtils';
 
 const DEALS_STORAGE_KEY = 'krishak_active_deals_v1';
 
@@ -28,9 +29,9 @@ const defaultDeals = [
     createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
     approvedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
     milestones: [
-      { key: 'REQUEST_SENT', label: 'Farmer Deal Request Sent', date: '25 Aug, 04:00 PM', done: true },
-      { key: 'BUYER_APPROVED', label: 'Buyer Approved & Drop Assigned', date: '25 Aug, 05:30 PM', done: true },
-      { key: 'ESCROW_FUNDED', label: '100% Escrow Amount Deposited', date: '25 Aug, 05:35 PM', done: true },
+      { key: 'REQUEST_SENT', label: 'Farmer Deal Request Sent', date: getRelativeDateTime(-1, '04:00 PM'), done: true },
+      { key: 'BUYER_APPROVED', label: 'Buyer Approved & Drop Assigned', date: getRelativeDateTime(-1, '05:30 PM'), done: true },
+      { key: 'ESCROW_FUNDED', label: '100% Escrow Amount Deposited', date: getRelativeDateTime(-1, '05:35 PM'), done: true },
       { key: 'PICKUP_SCHEDULED', label: 'Truck Dispatched for Pickup', date: 'Today, 08:30 AM', done: true },
       { key: 'PICKUP_COMPLETED', label: 'Farm Gate Loading Complete', date: 'Pending', done: false },
       { key: 'DELIVERED', label: 'Delivered to Drop Facility', date: 'Pending', done: false },
@@ -54,7 +55,7 @@ const defaultDeals = [
     totalValue: 59000,
     status: 'PENDING_APPROVAL',
     dropLocation: 'Metro Distribution Center, Chakan Phase 2, Pune, Maharashtra',
-    pickupDate: '27 Aug, 10:00 AM',
+    pickupDate: getRelativeDateTime(1, '10:00 AM'),
     transporterName: 'Pending Assignment',
     vehicleNumber: 'Pending',
     driverPhone: '',

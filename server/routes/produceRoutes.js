@@ -10,11 +10,12 @@ import {
 } from '../controllers/produceController.js';
 import { protect, requireRole } from '../middleware/authMiddleware.js';
 
-import { analyzeProduceVision } from '../controllers/aiQualityController.js';
+import { analyzeProduceVision, analyzeProducePipeline } from '../controllers/aiQualityController.js';
 
 const router = express.Router();
 
-// Real computer vision analysis route
+// Real computer vision analysis routes
+router.post('/analyze', analyzeProducePipeline);
 router.post('/analyze-vision', analyzeProduceVision);
 router.get('/my', protect, requireRole('farmer'), getMyProduce);
 router.post('/', protect, requireRole('farmer'), createProduce);

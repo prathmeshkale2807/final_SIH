@@ -13,6 +13,8 @@
  * The Gemini API key stays server-side ONLY.
  */
 
+import api from './api';
+
 // ─── PRODUCE PROFILES (used by UI components) ───────────────────────────────
 
 export const PRODUCE_PROFILES = {
@@ -83,7 +85,7 @@ export const resolveProduceKey = (name = '') => {
   if (norm.includes('apple') || norm.includes('सफरचंद')) return 'apple';
   if (norm.includes('brinjal') || norm.includes('वांगी')) return 'brinjal';
   if (norm.includes('capsicum') || norm.includes('ढोबळी')) return 'capsicum';
-  return null; // Return null instead of defaulting — let the user pick
+  return null;
 };
 
 export const getProduceProfile = (name) => {
@@ -170,46 +172,26 @@ export const getQualityGrade = (grade, freshnessScore) => {
  * @returns {Promise<object>} Analysis result with verification, quality, quantity
  */
 export const analyzeProduce = async (imageSrc, selectedCommodity = 'onion', requestId = Date.now()) => {
-  const apiUrl = import.meta.env?.VITE_API_URL || '';
-
   // Resolve the produce name for display purposes
   const profile = getProduceProfile(selectedCommodity);
   const cropName = resolveProduceKey(selectedCommodity) || selectedCommodity;
 
   try {
-    const response = await fetch(`${apiUrl}/api/ai-quality/analyze`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    let data;
+    try {
+      data = await api.post('/ai-quality/analyze', {
         image: imageSrc,
         selectedProduce: cropName,
         requestId,
-      }),
-    });
-
-    if (!response.ok) {
-      // Server error
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = { message: `Server returned ${response.status}` };
-      }
-
-      return {
+      });
+    } catch (primaryErr) {
+      // Fallback endpoint if needed
+      data = await api.post('/produce/analyze', {
+        image: imageSrc,
+        selectedProduce: cropName,
         requestId,
-        success: false,
-        errorType: 'server_error',
-        detected: false,
-        verification: null,
-        quality: null,
-        quantity: null,
-        message: errorData.message || 'AI vision analysis is temporarily unavailable. Please try again.',
-        gradeInfo: null,
-      };
+      });
     }
-
-    const data = await response.json();
 
     // ── Handle API key missing ──
     if (data.errorCode === 'GEMINI_API_KEY_MISSING') {
@@ -221,7 +203,7 @@ export const analyzeProduce = async (imageSrc, selectedCommodity = 'onion', requ
         verification: null,
         quality: null,
         quantity: null,
-        message: 'AI vision is not configured. Please contact support.',
+        message: 'AI vision is not configured. Please add GEMINI_API_KEY to environment variables.',
         gradeInfo: null,
       };
     }
@@ -295,12 +277,12 @@ export const analyzeProduce = async (imageSrc, selectedCommodity = 'onion', requ
       qualityMetrics,
       overallScore,
       gradeInfo,
-      objects: [], // No bounding box objects from Gemini — this is fine
+      objects: [],
       message: data.message,
       disclaimer: 'AI visual estimate — based on photograph analysis by Gemini Vision.',
     };
   } catch (err) {
-    console.error('[analyzeProduce] Network error:', err);
+    console.error('[analyzeProduce] Error:', err);
     return {
       requestId,
       success: false,
@@ -309,32 +291,26 @@ export const analyzeProduce = async (imageSrc, selectedCommodity = 'onion', requ
       verification: null,
       quality: null,
       quantity: null,
-      message: 'Could not connect to AI vision server. Please check your connection and try again.',
+      message: err.message || 'Could not connect to AI vision server. Please check your connection and try again.',
       gradeInfo: null,
     };
   }
 };
 
 // ─── HELPER: Map descriptive text metrics to numeric scores ──────────────────
-// Gemini returns text descriptions like "deep red, evenly colored".
-// The UI expects numeric 0-100 scores for progress bars.
-// We derive approximate scores from the overall grade.
-
 function mapMetricToScore(textValue, grade) {
   if (!textValue || textValue === 'not determined' || textValue === 'not_visually_measurable') {
     return 0;
   }
 
-  // Map grade to base score range
   const gradeStr = String(grade).toUpperCase();
-  if (gradeStr === 'A') return Math.floor(85 + Math.random() * 10); // 85-94
-  if (gradeStr === 'B') return Math.floor(65 + Math.random() * 15); // 65-79
-  if (gradeStr === 'C') return Math.floor(45 + Math.random() * 15); // 45-59
-  return Math.floor(20 + Math.random() * 20); // Rejected: 20-39
+  if (gradeStr === 'A') return Math.floor(88 + Math.random() * 8);
+  if (gradeStr === 'B') return Math.floor(70 + Math.random() * 12);
+  if (gradeStr === 'C') return Math.floor(50 + Math.random() * 12);
+  return Math.floor(25 + Math.random() * 15);
 }
 
-// ─── LEGACY EXPORTS (for backward compatibility with any imports) ────────────
-
+// ─── LEGACY EXPORTS ──────────────────────────────────────────────────────────
 export const DETECTION_CONFIDENCE_THRESHOLD = 0.50;
 export const ANALYSIS_INTERVAL_MS = 2000;
 

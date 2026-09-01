@@ -61,19 +61,29 @@ export const BuyerLogin = () => {
     }
   };
 
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pastedData) {
+      const digits = pastedData.split('');
+      const newOtp = ['', '', '', '', '', ''];
+      digits.forEach((d, i) => {
+        newOtp[i] = d;
+      });
+      setOtp(newOtp);
+      const targetIdx = Math.min(digits.length, 5);
+      const targetInput = document.getElementById(`buyer-otp-input-${targetIdx}`);
+      if (targetInput) targetInput.focus();
+    }
+  };
+
   const handleSendOTP = async (e) => {
     e?.preventDefault();
 
-    if (loginMethod === 'buyerId') {
-      if (!buyerId.trim()) {
-        showToast(language === 'mr' ? 'कृपया व्यापारी आयडी प्रविष्ट करा' : 'Please enter your Buyer / Shop ID', 'error');
-        return;
-      }
-    } else {
-      if (!mobile || mobile.length !== 10) {
-        showToast(language === 'mr' ? 'कृपया वैध १० अंकी मोबाईल नंबर टाका' : 'Please enter a valid 10-digit mobile number', 'error');
-        return;
-      }
+    const targetMobile = mobile || buyerId;
+    if (!targetMobile || targetMobile.length < 10) {
+      showToast('Please enter a valid 10-digit mobile number', 'error');
+      return;
     }
 
     if (authType === 'password') {
@@ -83,7 +93,7 @@ export const BuyerLogin = () => {
       }
       setLoading(true);
       try {
-        const res = await loginBuyer({ shopId: buyerId, mobile: mobile || '9822012345', otp: '123456' });
+        const res = await loginBuyer({ shopId: buyerId, mobile: targetMobile, password });
         if (res.success) {
           const name = res.user?.ownerName || res.user?.shopName || 'Buyer';
           showToast(`Welcome, ${name}!`, 'success');
@@ -91,6 +101,8 @@ export const BuyerLogin = () => {
         } else {
           showToast(res.message || 'Authentication failed', 'error');
         }
+      } catch (err) {
+        showToast(err.message || 'Login failed', 'error');
       } finally {
         setLoading(false);
       }
@@ -99,14 +111,16 @@ export const BuyerLogin = () => {
 
     setLoading(true);
     try {
-      const res = await authService.sendBuyerOTP(mobile || buyerId, buyerId);
-      setStep('otp_verify');
-      setCountdown(30);
-      showToast(res.message || 'OTP sent successfully (Demo: 123456)', 'success');
+      const res = await authService.sendBuyerOTP(targetMobile);
+      if (res.success) {
+        setStep('otp_verify');
+        setCountdown(res.cooldownSeconds || 60);
+        showToast(res.message || 'OTP sent successfully to your mobile', 'success');
+      } else {
+        showToast(res.message || 'Failed to send OTP. Please try again.', 'error');
+      }
     } catch (err) {
-      setStep('otp_verify');
-      setCountdown(30);
-      showToast('Use Demo OTP: 123456', 'info');
+      showToast(err.message || 'Unable to send OTP. Please check your connection.', 'error');
     } finally {
       setLoading(false);
     }
@@ -122,29 +136,17 @@ export const BuyerLogin = () => {
 
     setLoading(true);
     try {
-      const res = await loginBuyer({ shopId: buyerId, mobile, otp: fullOtp });
+      const targetMobile = mobile || buyerId;
+      const res = await loginBuyer({ shopId: buyerId, mobile: targetMobile, otp: fullOtp });
       if (res.success) {
         const name = res.user?.ownerName || res.user?.shopName || 'Buyer';
         showToast(`Welcome, ${name}!`, 'success');
         navigate('/');
       } else {
-        showToast(res.message || 'Invalid OTP. Demo: 123456', 'error');
+        showToast(res.message || 'Invalid or expired OTP', 'error');
       }
     } catch (err) {
-      showToast(err.message || 'Login failed', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleQuickDemo = async () => {
-    setLoading(true);
-    try {
-      const res = await loginBuyer({ mobile: '9822012345', otp: '123456' });
-      if (res.success) {
-        showToast('Buyer Login Successful!', 'success');
-        navigate('/');
-      }
+      showToast(err.message || 'Authentication failed', 'error');
     } finally {
       setLoading(false);
     }
@@ -201,7 +203,7 @@ export const BuyerLogin = () => {
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate('/')}
-              className="text-xs font-bold text-slate-500 hover:text-blue-800 flex items-center space-x-1.5 transition-colors bg-slate-100/80 hover:bg-slate-200/80 px-3 py-1.5 rounded-xl border border-slate-200/60"
+              className="text-xs font-bold text-slate-500 hover:text-blue-800 flex items-center space-x-1.5 transition-colors bg-slate-100/80 hover:bg-slate-200/80 px-3 py-1.5 rounded-xl border border-slate-200/60 cursor-pointer"
             >
               <span>← Back</span>
             </button>
@@ -216,19 +218,18 @@ export const BuyerLogin = () => {
               className="flex-1 py-2 px-3 text-slate-600 hover:text-emerald-700 hover:bg-white/80 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
             >
               <span>🌾</span>
-              <span>{language === 'mr' ? 'शेतकरी लॉगिन' : 'Farmer Login'}</span>
+              <span>Farmer Login</span>
             </button>
             <button
               type="button"
-              className="flex-1 py-2 px-3 bg-blue-600 text-white rounded-xl text-xs sm:text-sm font-extrabold shadow-md shadow-blue-700/25 flex items-center justify-center space-x-1.5"
+              className="flex-1 py-2 px-3 bg-blue-600 text-white rounded-xl text-xs sm:text-sm font-extrabold shadow-md shadow-blue-700/25 flex items-center justify-center space-x-1.5 cursor-pointer"
             >
               <span>🏪</span>
-              <span>{language === 'mr' ? 'खरेदीदार पोर्टल' : 'Buyer Portal'}</span>
+              <span>Buyer Portal</span>
             </button>
           </div>
 
           <div className="text-center space-y-3 pt-1">
-            {/* SQUARE WITH CURVED EDGES KRISHAK LOGO BADGE */}
             <div className="h-20 w-20 rounded-2xl bg-white border-2 border-blue-400 mx-auto flex items-center justify-center p-2 shadow-lg shadow-blue-500/15 overflow-hidden">
               <img
                 src="/krishak_logo.png"
@@ -238,107 +239,102 @@ export const BuyerLogin = () => {
             </div>
 
             <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                {language === 'mr' ? 'खरेदीदार पोर्टल' : 'Buyer Portal'}
+              <span className="text-[11px] font-mono tracking-widest text-blue-700 font-bold uppercase">
+                Enterprise Sourcing Portal
+              </span>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                Buyer Sign In
               </h2>
-              <h3 className="text-xl sm:text-2xl font-bold text-blue-800">
-                {language === 'mr' ? 'साइन इन करा!' : 'Sign In!'}
-              </h3>
             </div>
           </div>
 
           {step === 'input' && (
-            <div className="space-y-5">
-              
-              <div className="p-1 bg-slate-100 rounded-full border border-slate-200 shadow-inner flex items-center">
-                <button
-                  type="button"
-                  onClick={() => setLoginMethod('buyerId')}
-                  className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${
-                    loginMethod === 'buyerId'
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-slate-600 hover:text-slate-900 bg-transparent'
-                  }`}
-                >
-                  {language === 'mr' ? 'व्यापारी आयडी' : 'Buyer ID'}
-                </button>
-
+            <div className="space-y-4">
+              <div className="p-1 bg-slate-100 rounded-xl border border-slate-200 flex items-center">
                 <button
                   type="button"
                   onClick={() => setLoginMethod('mobile')}
-                  className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
                     loginMethod === 'mobile'
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-slate-600 hover:text-slate-900 bg-transparent'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  {language === 'mr' ? 'मोबाईल क्र.' : 'Mobile No.'}
+                  Mobile No.
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod('buyerId')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+                    loginMethod === 'buyerId'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Shop / Buyer ID
                 </button>
               </div>
 
               <form onSubmit={handleSendOTP} className="space-y-4">
-                
                 {loginMethod === 'buyerId' ? (
                   <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Shop / Buyer ID
+                    </label>
                     <input
                       type="text"
                       autoFocus
                       value={buyerId}
                       onChange={(e) => setBuyerId(e.target.value)}
-                      placeholder={language === 'mr' ? 'तुमचा खरेदीदार आयडी प्रविष्ट करा' : 'Enter your Buyer / Shop ID'}
-                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
+                      placeholder="e.g. BUY-2026-1001"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-bold text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                     />
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <input
-                      type="tel"
-                      autoFocus
-                      maxLength="10"
-                      value={mobile}
-                      onChange={handleMobileChange}
-                      placeholder={language === 'mr' ? 'नोंदणीकृत मोबाईल नंबर प्रविष्ट करा' : 'Enter Registered Mobile Number'}
-                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all font-mono"
-                    />
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Registered Mobile Number
+                    </label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-4 text-slate-500 font-bold text-sm select-none">
+                        +91
+                      </span>
+                      <input
+                        type="tel"
+                        autoFocus
+                        maxLength="10"
+                        value={mobile}
+                        onChange={handleMobileChange}
+                        placeholder="Enter 10-digit mobile number"
+                        className="w-full pl-14 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-bold text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:outline-none font-mono"
+                      />
+                    </div>
 
-                    <div className="flex items-center justify-between px-1">
-                      <div className="flex items-center space-x-5">
-                        <label className="flex items-center space-x-1.5 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="buyerAuthType"
-                            checked={authType === 'otp'}
-                            onChange={() => setAuthType('otp')}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300"
-                          />
-                          <span className={`text-xs font-bold ${authType === 'otp' ? 'text-blue-900' : 'text-slate-500'}`}>
-                            OTP
-                          </span>
-                        </label>
-
-                        <label className="flex items-center space-x-1.5 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="buyerAuthType"
-                            checked={authType === 'password'}
-                            onChange={() => setAuthType('password')}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300"
-                          />
-                          <span className={`text-xs font-bold ${authType === 'password' ? 'text-blue-900' : 'text-slate-500'}`}>
-                            Password
-                          </span>
-                        </label>
-                      </div>
-
-                      {authType === 'password' && (
-                        <button
-                          type="button"
-                          onClick={() => showToast('Use OTP verification to sign in or reset credentials.', 'info')}
-                          className="text-[11px] font-bold text-blue-700 hover:underline"
-                        >
-                          Create/Forgot Password?
-                        </button>
-                      )}
+                    <div className="flex items-center space-x-5 px-1">
+                      <label className="flex items-center space-x-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="buyerAuthType"
+                          checked={authType === 'otp'}
+                          onChange={() => setAuthType('otp')}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className={`text-xs font-bold ${authType === 'otp' ? 'text-blue-900' : 'text-slate-500'}`}>
+                          SMS OTP
+                        </span>
+                      </label>
+                      <label className="flex items-center space-x-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="buyerAuthType"
+                          checked={authType === 'password'}
+                          onChange={() => setAuthType('password')}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className={`text-xs font-bold ${authType === 'password' ? 'text-blue-900' : 'text-slate-500'}`}>
+                          Password
+                        </span>
+                      </label>
                     </div>
 
                     {authType === 'password' && (
@@ -347,53 +343,43 @@ export const BuyerLogin = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter password"
-                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                       />
                     )}
                   </div>
                 )}
 
-                <div id="recaptcha-container"></div>
-
                 <button
                   type="submit"
                   disabled={loading || (loginMethod === 'buyerId' ? !buyerId.trim() : mobile.length !== 10)}
-                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm rounded-2xl shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm rounded-xl shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center space-x-2 cursor-pointer"
                 >
-                  {loading ? (
-                    <span className="inline-block animate-spin">⏳</span>
-                  ) : (
-                    <span>{authType === 'password' ? 'Sign In' : 'Send OTP'}</span>
-                  )}
+                  {loading ? <span className="animate-spin">⏳</span> : <span>Send OTP</span>}
                 </button>
               </form>
 
-              <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={handleQuickDemo}
-                  className="w-full py-2.5 px-3 bg-slate-100/90 hover:bg-blue-50 hover:border-blue-300 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-600 hover:text-blue-800 transition-all flex items-center justify-center space-x-1.5"
-                >
-                  <span>🏪</span>
-                  <span>1-Click Demo Buyer Login</span>
-                </button>
+              <div className="text-center pt-2">
+                <p className="text-xs text-slate-600">
+                  New trader?{' '}
+                  <Link to="/auth/buyer/register" className="text-blue-700 font-bold hover:underline">
+                    Register as Buyer
+                  </Link>
+                </p>
               </div>
             </div>
           )}
 
           {step === 'otp_verify' && (
-            <div className="space-y-5 animate-fade-in">
+            <div className="space-y-4 animate-fade-in">
               <div className="text-center space-y-1">
-                <h4 className="text-base font-bold text-slate-900">
-                  {language === 'mr' ? 'OTP पडताळणी' : 'Enter 6-Digit OTP'}
-                </h4>
+                <h4 className="text-sm font-bold text-slate-900">Enter 6-Digit OTP</h4>
                 <p className="text-xs text-slate-500">
-                  Enter OTP sent to your registered procurement mobile
+                  OTP sent to +91 {mobile.slice(0, 5)} {mobile.slice(5)}
                 </p>
               </div>
 
               <form onSubmit={handleVerifyOTP} className="space-y-4">
-                <div className="flex justify-between gap-1.5">
+                <div className="flex justify-between gap-1.5" onPaste={handleOtpPaste}>
                   {otp.map((digit, idx) => (
                     <input
                       key={idx}
@@ -413,65 +399,44 @@ export const BuyerLogin = () => {
                 <div className="flex items-center justify-between text-xs text-slate-500">
                   <span>
                     {countdown > 0 ? (
-                      <span className="font-mono text-blue-700 font-bold">
-                        Resend in {countdown}s
-                      </span>
+                      <span className="font-mono text-blue-700 font-bold">Resend in {countdown}s</span>
                     ) : (
                       <button
                         type="button"
                         onClick={handleSendOTP}
-                        className="text-blue-700 font-bold hover:underline"
+                        className="text-blue-700 font-bold hover:underline cursor-pointer"
                       >
                         Resend OTP
                       </button>
                     )}
                   </span>
-                  <span className="text-[11px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Demo: 123456</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep('input');
+                      setOtp(['', '', '', '', '', '']);
+                    }}
+                    className="text-xs text-slate-500 hover:text-slate-800 font-bold hover:underline cursor-pointer"
+                  >
+                    Change Number
+                  </button>
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading || otp.join('').length !== 6}
-                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm rounded-2xl shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm rounded-xl shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center space-x-2 cursor-pointer"
                 >
-                  {loading ? (
-                    <span className="inline-block animate-spin">⏳</span>
-                  ) : (
-                    <span>Verify & Sign In</span>
-                  )}
+                  {loading ? <span className="animate-spin">⏳</span> : <span>Verify OTP & Log In</span>}
                 </button>
-
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => { setStep('input'); setOtp(['', '', '', '', '', '']); }}
-                    className="text-xs text-slate-500 hover:text-slate-800 font-bold"
-                  >
-                    ← Go Back
-                  </button>
-                </div>
               </form>
             </div>
           )}
-
-          <div className="pt-3 border-t border-slate-100 text-center space-y-1">
-            <p className="text-xs text-slate-500">
-              {language === 'mr' ? 'खाते नाही का?' : "Don't have an account?"}
-            </p>
-            <Link
-              to="/register/buyer"
-              className="inline-block text-sm font-bold text-blue-700 hover:text-blue-800 hover:underline"
-            >
-              Click here for registration →
-            </Link>
-          </div>
-
         </div>
-
       </div>
 
-      <footer className="relative z-10 w-full py-4 text-center text-xs text-slate-500 bg-white/70 backdrop-blur-md border-t border-slate-200/80">
-        KrishiSetu AI • Enterprise Procurement Terminal • 100% Escrow Protection
+      <footer className="relative z-10 py-4 text-center text-xs text-slate-500">
+        © {new Date().getFullYear()} KRISHAK — Ministry of Agriculture & Farmers Welfare, Govt of India
       </footer>
     </div>
   );

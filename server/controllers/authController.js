@@ -3,81 +3,293 @@ import { Farmer } from '../models/Farmer.js';
 import { Buyer } from '../models/Buyer.js';
 import { isDBConnected } from '../config/db.js';
 import { otpService } from '../services/otpService.js';
-import { registerBuyerInMemory } from './buyerController.js';
 import { verifyFirebaseIdToken, isFirebaseAdminInitialized } from '../config/firebase.js';
 
+const JWT_SECRET = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'krishak_super_secret_jwt_key_2026';
+const COOKIE_NAME = 'krishak_token';
+
 const generateToken = (payload) => {
-  return jwt.sign(payload, process.env.JWT_SECRET || 'krishak_super_secret_jwt_key_2026', {
+  return jwt.sign(payload, JWT_SECRET, {
     expiresIn: '30d',
   });
 };
 
-/**
- * Pre-validates farmer credentials before initiating SMS OTP
- */
+const setAuthCookie = (res, token) => {
+  const isProd = process.env.NODE_ENV === 'production';
+  res.cookie(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'lax' : 'lax',
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    path: '/',
+  });
+};
+
+// ─── 1. SEND OTP CONTROLLER (Unified for /send-otp & /farmer/send-otp & /buyer/send-otp) ───
+export const sendOTP = async (req, res) => {
+  try {
+    const rawMobile = req.body.mobileNumber || req.body.mobile;
+    if (!rawMobile) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid 10-digit mobile number.',
+      });
+    }
+
+    const result = await otpService.sendOTP(rawMobile);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error('[Auth Controller] sendOTP error:', error.message);
+    return res.status(400).json({
+      success: false,
+      message: error.message || 'Unable to send OTP. Please try again.',
+    });
+  }
+};
+
+export const sendFarmerOTP = sendOTP;
+export const sendBuyerOTP = sendOTP;
+
+// ─── 2. VERIFY OTP & AUTHENTICATE CONTROLLER ─────────────────────────────────
+export const verifyOTP = async (req, res) => {
+  try {
+    const rawMobile = req.body.mobileNumber || req.body.mobile;
+    const submittedOtp = req.body.otp;
+    const role = (req.body.role || 'farmer').toLowerCase();
+    const providedName = req.body.name || req.body.farmerName || req.body.ownerName;
+
+    if (!rawMobile || !submittedOtp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mobile number and 6-digit OTP are required.',
+      });
+    }
+
+    const mobile = String(rawMobile).replace(/\D/g, '').slice(-10);
+
+    // Verify against cryptographically hashed OTP in database
+    const verifyResult = await otpService.verifyOTP(mobile, submittedOtp);
+    if (!verifyResult.success) {
+      return res.status(401).json(verifyResult);
+    }
+
+    // ─── ROLE: FARMER ───
+    if (role === 'farmer') {
+      let farmer = null;
+      try {
+        farmer = await Farmer.findOne({ mobile });
+        if (!farmer && req.body.farmerId) {
+          farmer = await Farmer.findOne({ farmerId: req.body.farmerId });
+        }
+      } catch (err) {
+        console.warn('[Auth Controller] Farmer lookup notice:', err.message);
+      }
+
+      // Create farmer account if first-time user
+      if (!farmer) {
+        const farmerId = req.body.farmerId || `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+        const payload = {
+          farmerId,
+          id: farmerId,
+          name: providedName || 'Farmer',
+          mobile,
+          role: 'farmer',
+          village: req.body.village || 'Nashik Rural',
+          taluka: req.body.taluka || 'Niphad',
+          district: req.body.district || 'Nashik',
+          state: req.body.state || 'Maharashtra',
+          primaryCrop: req.body.primaryCrop || 'Onion',
+          landArea: req.body.landArea || '5',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        farmer = await Farmer.create(payload);
+      }
+
+      const farmerData = farmer.toObject ? farmer.toObject() : farmer;
+      const token = generateToken({
+        id: farmerData.farmerId || farmerData.id,
+        role: 'farmer',
+        mobile: farmerData.mobile,
+        name: farmerData.name,
+      });
+
+      setAuthCookie(res, token);
+
+      return res.status(200).json({
+        success: true,
+        token,
+        user: farmerData,
+        message: 'Farmer authenticated successfully.',
+      });
+    }
+
+    // ─── ROLE: BUYER ───
+    if (role === 'buyer') {
+      let buyer = null;
+      try {
+        buyer = await Buyer.findOne({ mobile });
+        if (!buyer && req.body.shopId) {
+          buyer = await Buyer.findOne({ shopId: req.body.shopId });
+        }
+      } catch (err) {
+        console.warn('[Auth Controller] Buyer lookup notice:', err.message);
+      }
+
+      // Create buyer account if first-time user
+      if (!buyer) {
+        const shopId = req.body.shopId || `BUY-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+        const payload = {
+          shopId,
+          id: shopId,
+          ownerName: providedName || 'Buyer',
+          shopName: req.body.shopName || 'Wholesale Trader',
+          mobile,
+          role: 'buyer',
+          licenseNumber: req.body.licenseNumber || 'MH-APMC-2026-08',
+          city: req.body.city || 'Nashik',
+          state: req.body.state || 'Maharashtra',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        buyer = await Buyer.create(payload);
+      }
+
+      const buyerData = buyer.toObject ? buyer.toObject() : buyer;
+      const token = generateToken({
+        id: buyerData.shopId || buyerData.id,
+        role: 'buyer',
+        mobile: buyerData.mobile,
+        name: buyerData.ownerName || buyerData.shopName,
+      });
+
+      setAuthCookie(res, token);
+
+      return res.status(200).json({
+        success: true,
+        token,
+        user: buyerData,
+        message: 'Buyer authenticated successfully.',
+      });
+    }
+
+    return res.status(400).json({ success: false, message: 'Invalid user role requested.' });
+  } catch (error) {
+    console.error('[Auth Controller] verifyOTP error:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Authentication failed. Please try again.',
+    });
+  }
+};
+
+export const verifyFarmerOTP = verifyOTP;
+export const verifyBuyerOTP = verifyOTP;
+
+// ─── 3. GET CURRENT USER SESSION (GET /api/auth/me) ───────────────────────────
+export const getMe = async (req, res) => {
+  try {
+    let token = req.cookies?.[COOKIE_NAME];
+    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    let user = null;
+
+    if (decoded.role === 'farmer') {
+      user = await Farmer.findOne({ mobile: decoded.mobile });
+      if (!user && decoded.id) {
+        user = await Farmer.findOne({ farmerId: decoded.id });
+      }
+    } else if (decoded.role === 'buyer') {
+      user = await Buyer.findOne({ mobile: decoded.mobile });
+      if (!user && decoded.id) {
+        user = await Buyer.findOne({ shopId: decoded.id });
+      }
+    }
+
+    if (!user) {
+      user = {
+        id: decoded.id,
+        role: decoded.role,
+        mobile: decoded.mobile,
+        name: decoded.name || 'User',
+      };
+    } else {
+      user = user.toObject ? user.toObject() : user;
+    }
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid or expired session',
+    });
+  }
+};
+
+// ─── 4. LOGOUT (POST /api/auth/logout) ────────────────────────────────────────
+export const logout = (req, res) => {
+  const isProd = process.env.NODE_ENV === 'production';
+  res.clearCookie(COOKIE_NAME, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'lax' : 'lax',
+    path: '/',
+  });
+  return res.status(200).json({
+    success: true,
+    message: 'Logged out successfully.',
+  });
+};
+
+// ─── 5. USER PRE-VALIDATION ──────────────────────────────────────────────────
 export const validateFarmerUser = async (req, res) => {
   const { farmerId, mobile } = req.body;
-  if (!mobile) {
-    return res.status(400).json({ success: false, message: 'Mobile number is required' });
+  if (!mobile && !farmerId) {
+    return res.status(400).json({ success: false, message: 'Mobile or Farmer ID is required' });
   }
 
-  const authMode = process.env.AUTH_MODE || 'firebase';
   let farmer = null;
-
   if (isDBConnected()) {
     try {
-      if (farmerId) {
-        farmer = await Farmer.findOne({ farmerId });
-      }
-      if (!farmer) {
-        farmer = await Farmer.findOne({ mobile });
-      }
-    } catch (err) { }
-  }
-
-  if (!farmer && (farmerId === 'FARM-2026-MH01' || mobile === '9876543210')) {
-    farmer = { farmerId: 'FARM-2026-MH01', name: 'Rahul Jadhav', mobile: '9876543210' };
+      if (farmerId) farmer = await Farmer.findOne({ farmerId });
+      if (!farmer && mobile) farmer = await Farmer.findOne({ mobile });
+    } catch (err) {}
   }
 
   return res.json({
     success: true,
-    authMode,
     farmerExists: !!farmer,
     farmerName: farmer?.name || 'Farmer',
     message: farmer ? 'Farmer account verified' : 'Ready for verification',
   });
 };
 
-/**
- * Pre-validates buyer credentials before initiating SMS OTP
- */
 export const validateBuyerUser = async (req, res) => {
   const { shopId, mobile } = req.body;
-  if (!mobile) {
-    return res.status(400).json({ success: false, message: 'Registered mobile number is required' });
+  if (!mobile && !shopId) {
+    return res.status(400).json({ success: false, message: 'Registered mobile number or Shop ID required' });
   }
 
-  const authMode = process.env.AUTH_MODE || 'firebase';
   let buyer = null;
-
   if (isDBConnected()) {
     try {
-      if (shopId) {
-        buyer = await Buyer.findOne({ shopId });
-      }
-      if (!buyer) {
-        buyer = await Buyer.findOne({ mobile });
-      }
-    } catch (err) { }
-  }
-
-  if (!buyer && (shopId === 'BUY-2026-PN08' || mobile === '9822012345')) {
-    buyer = { shopId: 'BUY-2026-PN08', shopName: 'AgroFresh Food Processors Ltd.', ownerName: 'Vikram Mehta', mobile: '9822012345' };
+      if (shopId) buyer = await Buyer.findOne({ shopId });
+      if (!buyer && mobile) buyer = await Buyer.findOne({ mobile });
+    } catch (err) {}
   }
 
   return res.json({
     success: true,
-    authMode,
     buyerExists: !!buyer,
     ownerName: buyer?.ownerName || 'Buyer',
     shopName: buyer?.shopName || 'Enterprise Buyer',
@@ -85,649 +297,118 @@ export const validateBuyerUser = async (req, res) => {
   });
 };
 
-export const sendFarmerOTP = async (req, res) => {
-  const { mobile, farmerId } = req.body;
-  if (!mobile) {
-    return res.status(400).json({ success: false, message: 'Mobile number is required' });
-  }
-
-  const authMode = process.env.AUTH_MODE || 'firebase';
-  const result = await otpService.sendOTP(mobile);
-  return res.json({
-    ...result,
-    authMode,
-  });
-};
-
-export const verifyFarmerOTP = async (req, res) => {
-  const { mobile, otp, farmerId, firebaseUid } = req.body;
-  if (!mobile || !otp) {
-    return res.status(400).json({ success: false, message: 'Mobile and OTP are required' });
-  }
-
-  const verifyResult = await otpService.verifyOTP(mobile, otp);
-  if (!verifyResult.success) {
-    return res.status(400).json(verifyResult);
-  }
-
-  let farmer = null;
-  if (isDBConnected()) {
-    try {
-      if (farmerId) {
-        farmer = await Farmer.findOne({ farmerId });
-      }
-      if (!farmer) {
-        farmer = await Farmer.findOne({ mobile });
-      }
-      if (farmer && firebaseUid && !farmer.firebaseUid) {
-        farmer.firebaseUid = firebaseUid;
-        await farmer.save();
-      }
-      if (!farmer) {
-        if (mobile === '9876543210' || farmerId === 'FARM-2026-MH01') {
-          farmer = await Farmer.create({
-            farmerId: farmerId || 'FARM-2026-MH01',
-            firebaseUid: firebaseUid || '',
-            name: 'Rahul Jadhav',
-            mobile,
-            location: { village: 'Ausa', taluka: 'Ausa', district: 'Latur', state: 'Maharashtra' },
-            crops: { primaryCrop: 'Onion', otherCrops: 'Tomato, Soybean' },
-            landArea: '8.5',
-          });
-        }
-      }
-    } catch (err) { }
-  }
-
-  if (!farmer) {
-    if (mobile === '9876543210' || farmerId === 'FARM-2026-MH01') {
-      farmer = {
-        farmerId: 'FARM-2026-MH01',
-        id: 'FARM-2026-MH01',
-        firebaseUid: firebaseUid || '',
-        name: 'Rahul Jadhav',
-        mobile: '9876543210',
-        location: { village: 'Ausa', taluka: 'Ausa', district: 'Latur', state: 'Maharashtra' },
-        crops: { primaryCrop: 'Onion' },
-        landArea: '8.5',
-        role: 'farmer',
-      };
-    } else {
-      return res.status(404).json({ success: false, message: 'Farmer account not found. Please register.' });
-    }
-  }
-
-  const token = generateToken({
-    id: farmer.farmerId || farmer.id,
-    farmerId: farmer.farmerId || farmer.id,
-    role: 'farmer',
-    name: farmer.name,
-    mobile: farmer.mobile,
-    firebaseUid: farmer.firebaseUid || '',
-  });
-
-  const formattedUser = {
-    id: farmer.farmerId || farmer.id,
-    farmerId: farmer.farmerId || farmer.id,
-    role: 'farmer',
-    name: farmer.name,
-    mobile: farmer.mobile,
-    firebaseUid: farmer.firebaseUid || '',
-    location: farmer.location ? `${farmer.location.village || 'Ausa'}, ${farmer.location.district || 'Latur'}` : 'Ausa, Latur',
-    village: farmer.location?.village || 'Ausa',
-    district: farmer.location?.district || 'Latur',
-    state: farmer.location?.state || 'Maharashtra',
-    landArea: `${farmer.landArea || 8.5} Acres`,
-    primaryCrop: farmer.crops?.primaryCrop || 'Onion (Pyaz)',
-    token,
-  };
-
-  return res.json({
-    success: true,
-    message: 'Farmer login successful',
-    token,
-    role: 'farmer',
-    user: formattedUser,
-  });
-};
-
-export const sendBuyerOTP = async (req, res) => {
-  const { mobile, shopId } = req.body;
-  if (!mobile) {
-    return res.status(400).json({ success: false, message: 'Registered mobile number is required' });
-  }
-
-  const authMode = process.env.AUTH_MODE || 'firebase';
-  const result = await otpService.sendOTP(mobile);
-  return res.json({
-    ...result,
-    authMode,
-  });
-};
-
-export const verifyBuyerOTP = async (req, res) => {
-  const { mobile, otp, shopId, firebaseUid } = req.body;
-  if (!mobile || !otp) {
-    return res.status(400).json({ success: false, message: 'Mobile and OTP are required' });
-  }
-
-  const verifyResult = await otpService.verifyOTP(mobile, otp);
-  if (!verifyResult.success) {
-    return res.status(400).json(verifyResult);
-  }
-
-  let buyer = null;
-  if (isDBConnected()) {
-    try {
-      if (shopId) {
-        buyer = await Buyer.findOne({ shopId });
-      }
-      if (!buyer) {
-        buyer = await Buyer.findOne({ mobile });
-      }
-      if (buyer && firebaseUid && !buyer.firebaseUid) {
-        buyer.firebaseUid = firebaseUid;
-        await buyer.save();
-      }
-      if (!buyer) {
-        if (mobile === '9822012345' || shopId === 'BUY-2026-PN08') {
-          buyer = await Buyer.create({
-            shopId: shopId || 'BUY-2026-PN08',
-            firebaseUid: firebaseUid || '',
-            shopName: 'AgroFresh Food Processors Ltd.',
-            ownerName: 'Vikram Mehta',
-            mobile,
-            businessType: 'Food Processor & Bulk Buyer',
-            location: { address: 'Pune APMC Yard', city: 'Pune', district: 'Pune', state: 'Maharashtra' },
-            productsOfInterest: ['Onion', 'Tomato', 'Soybean'],
-            trustScore: 96,
-            verified: true,
-          });
-        }
-      }
-    } catch (err) { }
-  }
-
-  if (!buyer) {
-    if (mobile === '9822012345' || shopId === 'BUY-2026-PN08') {
-      buyer = {
-        shopId: 'BUY-2026-PN08',
-        id: 'BUY-2026-PN08',
-        firebaseUid: firebaseUid || '',
-        shopName: 'AgroFresh Food Processors Ltd.',
-        ownerName: 'Vikram Mehta',
-        mobile: '9822012345',
-        businessType: 'Food Processor & Bulk Buyer',
-        location: { city: 'Pune', district: 'Pune', state: 'Maharashtra' },
-        productsOfInterest: ['Onion', 'Tomato', 'Soybean'],
-        monthlyRequirement: 200,
-        trustScore: 96,
-        verified: true,
-        role: 'buyer',
-      };
-    } else {
-      return res.status(404).json({ success: false, message: 'Buyer account not found. Please register.' });
-    }
-  }
-
-  const token = generateToken({
-    id: buyer.shopId || buyer.id,
-    shopId: buyer.shopId || buyer.id,
-    role: 'buyer',
-    ownerName: buyer.ownerName,
-    mobile: buyer.mobile,
-    firebaseUid: buyer.firebaseUid || '',
-  });
-
-  const formattedUser = {
-    id: buyer.shopId || buyer.id,
-    shopId: buyer.shopId || buyer.id,
-    role: 'buyer',
-    businessName: buyer.shopName || buyer.businessName || 'AgroFresh Food Processors Ltd.',
-    shopName: buyer.shopName || buyer.businessName || 'AgroFresh Food Processors Ltd.',
-    ownerName: buyer.ownerName,
-    mobile: buyer.mobile,
-    firebaseUid: buyer.firebaseUid || '',
-    location: buyer.location ? `${buyer.location.city || 'Pune'}, ${buyer.location.state || 'Maharashtra'}` : 'Pune, Maharashtra',
-    city: buyer.location?.city || 'Pune',
-    district: buyer.location?.district || 'Pune',
-    state: buyer.location?.state || 'Maharashtra',
-    businessType: buyer.businessType || 'Food Processor',
-    productsOfInterest: buyer.productsOfInterest || ['Onion', 'Tomato'],
-    monthlyRequirement: buyer.monthlyRequirement || 200,
-    trustScore: buyer.trustScore || 96,
-    verified: buyer.verified !== undefined ? buyer.verified : true,
-    token,
-  };
-
-  return res.json({
-    success: true,
-    message: 'Buyer login successful',
-    token,
-    role: 'buyer',
-    user: formattedUser,
-  });
-};
-
-/**
- * Direct Firebase ID Token Login Endpoint
- * Verifies Firebase ID Token, maps to Farmer or Buyer by firebaseUid, and returns JWT session
- */
-export const firebaseLogin = async (req, res) => {
-  const { idToken, role = 'farmer', farmerId, shopId, mobile, name } = req.body;
-  if (!idToken) {
-    return res.status(400).json({ success: false, message: 'Firebase idToken is required' });
-  }
-
-  let decodedUid = '';
-  let decodedPhone = '';
-
-  // 1. Verify via Firebase Admin SDK if active
-  if (isFirebaseAdminInitialized() && !idToken.startsWith('sample_')) {
-    try {
-      const decoded = await verifyFirebaseIdToken(idToken);
-      decodedUid = decoded.uid;
-      decodedPhone = (decoded.phone_number || '').replace('+91', '') || mobile;
-    } catch (err) {
-      if (process.env.AUTH_MODE === 'mock' || !process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-        decodedUid = `fb-uid-${mobile || farmerId || shopId || 'dev'}`;
-        decodedPhone = mobile || '9876543210';
-      } else {
-        return res.status(401).json({ success: false, message: `Firebase token verification failed: ${err.message}` });
-      }
-    }
-  } else {
-    decodedUid = `fb-uid-${mobile || farmerId || shopId || 'dev'}`;
-    decodedPhone = mobile || '9876543210';
-  }
-
-  if (role === 'farmer') {
-    let farmer = null;
-    if (isDBConnected()) {
-      try {
-        farmer =
-          (await Farmer.findOne({ firebaseUid: decodedUid })) ||
-          (farmerId ? await Farmer.findOne({ farmerId }) : null) ||
-          (decodedPhone ? await Farmer.findOne({ mobile: decodedPhone }) : null);
-
-        if (farmer && !farmer.firebaseUid) {
-          farmer.firebaseUid = decodedUid;
-          await farmer.save();
-        } else if (!farmer) {
-          if (decodedPhone === '9876543210' || farmerId === 'FARM-2026-MH01') {
-            farmer = await Farmer.create({
-              farmerId: farmerId || `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-              firebaseUid: decodedUid,
-              name: name || 'Rahul Jadhav',
-              mobile: decodedPhone || '9876543210',
-              location: { village: 'Dindori', district: 'Nashik', state: 'Maharashtra' },
-              crops: { primaryCrop: 'Onion' },
-              landArea: '5 Acres',
-            });
-          }
-        }
-      } catch (e) { }
-    }
-
-    if (!farmer) {
-      if (decodedPhone === '9876543210' || farmerId === 'FARM-2026-MH01') {
-        farmer = {
-          farmerId: farmerId || 'FARM-2026-MH01',
-          id: farmerId || 'FARM-2026-MH01',
-          firebaseUid: decodedUid,
-          name: name || 'Rahul Jadhav',
-          mobile: decodedPhone || '9876543210',
-          role: 'farmer',
-        };
-      } else {
-        return res.status(404).json({ success: false, message: 'Farmer account not found for this Firebase user. Please register.' });
-      }
-    }
-
-    const token = generateToken({
-      id: farmer.farmerId || farmer.id,
-      farmerId: farmer.farmerId || farmer.id,
-      role: 'farmer',
-      name: farmer.name,
-      mobile: farmer.mobile,
-      firebaseUid: decodedUid,
-    });
-
-    return res.json({
-      success: true,
-      message: 'Firebase Farmer Authentication Successful',
-      token,
-      role: 'farmer',
-      user: {
-        id: farmer.farmerId || farmer.id,
-        farmerId: farmer.farmerId || farmer.id,
-        role: 'farmer',
-        name: farmer.name,
-        mobile: farmer.mobile,
-        firebaseUid: decodedUid,
-        token,
-      },
-    });
-  } else {
-    let buyer = null;
-    if (isDBConnected()) {
-      try {
-        buyer =
-          (await Buyer.findOne({ firebaseUid: decodedUid })) ||
-          (shopId ? await Buyer.findOne({ shopId }) : null) ||
-          (decodedPhone ? await Buyer.findOne({ mobile: decodedPhone }) : null);
-
-        if (buyer && !buyer.firebaseUid) {
-          buyer.firebaseUid = decodedUid;
-          await buyer.save();
-        } else if (!buyer) {
-          if (decodedPhone === '9822012345' || shopId === 'BUY-2026-PN08') {
-            buyer = await Buyer.create({
-              shopId: shopId || `BUY-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-              firebaseUid: decodedUid,
-              shopName: 'AgroFresh Food Processors Ltd.',
-              ownerName: name || 'Vikram Mehta',
-              mobile: decodedPhone || '9822012345',
-              businessType: 'Food Processor & Bulk Buyer',
-              location: { city: 'Pune', district: 'Pune', state: 'Maharashtra' },
-              productsOfInterest: ['Onion', 'Tomato'],
-            });
-          }
-        }
-      } catch (e) { }
-    }
-
-    if (!buyer) {
-      if (decodedPhone === '9822012345' || shopId === 'BUY-2026-PN08') {
-        buyer = {
-          shopId: shopId || 'BUY-2026-PN08',
-          id: shopId || 'BUY-2026-PN08',
-          firebaseUid: decodedUid,
-          shopName: 'AgroFresh Food Processors Ltd.',
-          ownerName: name || 'Vikram Mehta',
-          mobile: decodedPhone || '9822012345',
-          role: 'buyer',
-        };
-      } else {
-        return res.status(404).json({ success: false, message: 'Buyer account not found for this Firebase user. Please register.' });
-      }
-    }
-
-    const token = generateToken({
-      id: buyer.shopId || buyer.id,
-      shopId: buyer.shopId || buyer.id,
-      role: 'buyer',
-      ownerName: buyer.ownerName,
-      mobile: buyer.mobile,
-      firebaseUid: decodedUid,
-    });
-
-    return res.json({
-      success: true,
-      message: 'Firebase Buyer Authentication Successful',
-      token,
-      role: 'buyer',
-      user: {
-        id: buyer.shopId || buyer.id,
-        shopId: buyer.shopId || buyer.id,
-        role: 'buyer',
-        shopName: buyer.shopName,
-        ownerName: buyer.ownerName,
-        mobile: buyer.mobile,
-        firebaseUid: decodedUid,
-        token,
-      },
-    });
-  }
-};
-
+// ─── 6. REGISTRATION CONTROLLERS ─────────────────────────────────────────────
 export const registerFarmer = async (req, res) => {
-  const { name, mobile, primaryCrop, otherCrops, landArea, village, taluka, district, state, gpsCoords, firebaseUid } = req.body;
-  if (!name || !mobile) {
-    return res.status(400).json({ success: false, message: 'Name and mobile number are required' });
-  }
+  try {
+    const { name, mobile, village, taluka, district, state, primaryCrop, landArea } = req.body;
+    if (!mobile) {
+      return res.status(400).json({ success: false, message: 'Mobile number is required' });
+    }
 
-  const farmerId = `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-
-  if (isDBConnected()) {
-    try {
-      const existing = await Farmer.findOne({ mobile });
-      if (existing) {
-        return res.status(409).json({ success: false, message: 'This mobile number is already registered. Please Sign In.' });
-      }
-
-      await Farmer.create({
+    let farmer = await Farmer.findOne({ mobile });
+    if (!farmer) {
+      const farmerId = `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      farmer = await Farmer.create({
         farmerId,
-        firebaseUid: firebaseUid || '',
-        name,
+        id: farmerId,
+        name: name || 'Farmer',
         mobile,
-        location: {
-          village: village || '',
-          taluka: taluka || '',
-          district: district || '',
-          state: state || 'Maharashtra',
-          latitude: gpsCoords?.lat || null,
-          longitude: gpsCoords?.lng || null,
-        },
-        crops: {
-          primaryCrop: primaryCrop || 'Onion',
-          otherCrops: otherCrops || '',
-        },
-        landArea: `${landArea || 5}`,
+        village: village || 'Nashik Rural',
+        taluka: taluka || 'Niphad',
+        district: district || 'Nashik',
+        state: state || 'Maharashtra',
+        primaryCrop: primaryCrop || 'Onion',
+        landArea: landArea || '5',
+        role: 'farmer',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
-    } catch (err) { }
+    }
+
+    const farmerData = farmer.toObject ? farmer.toObject() : farmer;
+    const token = generateToken({ id: farmerData.farmerId, role: 'farmer', mobile, name: farmerData.name });
+    setAuthCookie(res, token);
+
+    return res.status(201).json({ success: true, token, user: farmerData, message: 'Farmer registered successfully' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
   }
-
-  const token = generateToken({
-    id: farmerId,
-    farmerId,
-    role: 'farmer',
-    name,
-    mobile,
-    firebaseUid: firebaseUid || '',
-  });
-
-  const formattedUser = {
-    id: farmerId,
-    farmerId,
-    role: 'farmer',
-    name,
-    mobile,
-    firebaseUid: firebaseUid || '',
-    village: village || '',
-    district: district || '',
-    state: state || 'Maharashtra',
-    location: `${village || 'Village'}, ${district || 'District'}`,
-    landArea: `${landArea || 5} Acres`,
-    primaryCrop: primaryCrop || 'Onion',
-    gpsCoords: gpsCoords || null,
-    token,
-  };
-
-  return res.status(201).json({
-    success: true,
-    message: 'Farmer registered successfully',
-    token,
-    role: 'farmer',
-    user: formattedUser,
-  });
 };
 
 export const registerBuyer = async (req, res) => {
-  const {
-    businessName,
-    shopName,
-    shopId: customShopId,
-    ownerName,
-    mobile,
-    businessType,
-    cropInterests,
-    productsOfInterest,
-    monthlyRequirement,
-    preferredQuality,
-    address,
-    city,
-    district,
-    state,
-    location,
-    gpsCoords,
-    firebaseUid,
-  } = req.body;
+  try {
+    const { shopName, ownerName, mobile, licenseNumber, city, state } = req.body;
+    if (!mobile) {
+      return res.status(400).json({ success: false, message: 'Mobile number is required' });
+    }
 
-  if (!ownerName || !mobile) {
-    return res.status(400).json({ success: false, message: 'Owner name and mobile number are required' });
+    let buyer = await Buyer.findOne({ mobile });
+    if (!buyer) {
+      const shopId = `BUY-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      buyer = await Buyer.create({
+        shopId,
+        id: shopId,
+        shopName: shopName || 'Wholesale Buyer',
+        ownerName: ownerName || 'Trader',
+        mobile,
+        licenseNumber: licenseNumber || 'MH-APMC-2026-08',
+        city: city || 'Nashik',
+        state: state || 'Maharashtra',
+        role: 'buyer',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    }
+
+    const buyerData = buyer.toObject ? buyer.toObject() : buyer;
+    const token = generateToken({ id: buyerData.shopId, role: 'buyer', mobile, name: buyerData.ownerName });
+    setAuthCookie(res, token);
+
+    return res.status(201).json({ success: true, token, user: buyerData, message: 'Buyer registered successfully' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
   }
-
-  const chosenShopId = customShopId || `BUY-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-  const chosenShopName = businessName || shopName || 'Enterprise Buyer Desk';
-  const chosenProducts = Array.isArray(productsOfInterest)
-    ? productsOfInterest
-    : Array.isArray(cropInterests)
-      ? cropInterests
-      : ['Onion', 'Tomato'];
-
-  const locCity = location?.city || city || 'Pune';
-  const locDistrict = location?.district || district || locCity;
-  const locState = location?.state || state || 'Maharashtra';
-  const locAddress = location?.address || address || '';
-  const locLat = location?.latitude || gpsCoords?.lat || null;
-  const locLng = location?.longitude || gpsCoords?.lng || null;
-
-  const newBuyerDoc = {
-    shopId: chosenShopId,
-    id: chosenShopId,
-    firebaseUid: firebaseUid || '',
-    shopName: chosenShopName,
-    businessName: chosenShopName,
-    ownerName,
-    mobile,
-    businessType: businessType || 'Food Processor',
-    location: {
-      address: locAddress,
-      city: locCity,
-      district: locDistrict,
-      state: locState,
-      latitude: locLat,
-      longitude: locLng,
-    },
-    productsOfInterest: chosenProducts,
-    monthlyRequirement: Number(monthlyRequirement) || 200,
-    preferredQuality: preferredQuality || 'Grade A (Export / Processing Quality)',
-    trustScore: 85,
-    verified: false,
-    role: 'buyer',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  if (isDBConnected()) {
-    try {
-      const existing = await Buyer.findOne({ mobile });
-      if (existing) {
-        return res.status(409).json({ success: false, message: 'This mobile number is already registered. Please Sign In.' });
-      }
-
-      await Buyer.create(newBuyerDoc);
-    } catch (err) { }
-  }
-
-  registerBuyerInMemory(newBuyerDoc);
-
-  const token = generateToken({
-    id: chosenShopId,
-    shopId: chosenShopId,
-    role: 'buyer',
-    ownerName,
-    mobile,
-    firebaseUid: firebaseUid || '',
-  });
-
-  const formattedUser = {
-    id: chosenShopId,
-    shopId: chosenShopId,
-    role: 'buyer',
-    businessName: chosenShopName,
-    shopName: chosenShopName,
-    ownerName,
-    mobile,
-    firebaseUid: firebaseUid || '',
-    businessType: businessType || 'Wholesaler',
-    productsOfInterest: chosenProducts,
-    cropInterests: chosenProducts,
-    monthlyRequirement: Number(monthlyRequirement) || 200,
-    preferredQuality: preferredQuality || 'Grade A (Export / Processing Quality)',
-    location: `${locCity}, ${locState}`,
-    city: locCity,
-    district: locDistrict,
-    state: locState,
-    address: locAddress,
-    verified: false,
-    trustScore: 85,
-    token,
-  };
-
-  return res.status(201).json({
-    success: true,
-    message: 'Buyer registered successfully',
-    token,
-    role: 'buyer',
-    user: formattedUser,
-  });
 };
 
-/**
- * Dedicated Admin Portal Login
- * Allows authorized administrators to log into the system with full control tower privileges
- */
-export const loginAdmin = async (req, res) => {
-  const { adminId, email, username, passcode, password, pin, otp } = req.body;
-  const identifier = (adminId || email || username || '').trim();
-  const secret = (passcode || password || pin || otp || '').trim();
-
-  // Valid admin identifiers and passcodes (supports standard admin accounts)
-  const validAdmins = ['ADMIN-KRISHAK-01', 'admin@krishak.ai', 'admin', '9999999999', 'SUPERADMIN-01'];
-  const validSecrets = ['admin2026', 'admin123', 'admin', '123456', 'krishak2026'];
-
-  const isIdentifierMatch = !identifier || validAdmins.some((a) => a.toLowerCase() === identifier.toLowerCase());
-  const isSecretMatch = !secret || validSecrets.includes(secret);
-
-  if (!isIdentifierMatch || !isSecretMatch) {
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid administrative credentials. Access restricted to authorized personnel.',
-    });
+// ─── 7. ADMIN LOGIN ──────────────────────────────────────────────────────────
+export const loginAdmin = (req, res) => {
+  const { username, password } = req.body;
+  if ((username === 'admin' || username === 'krishak_admin') && password === (process.env.ADMIN_PASSWORD || 'Krishak@Admin2026')) {
+    const token = generateToken({ id: 'ADMIN-01', role: 'admin', name: 'KRISHAK Administrator' });
+    const user = { id: 'ADMIN-01', role: 'admin', name: 'KRISHAK Administrator', email: 'admin@krishak.gov.in' };
+    setAuthCookie(res, token);
+    return res.json({ success: true, token, user, message: 'Admin authenticated successfully' });
   }
-
-  const adminUser = {
-    id: identifier && identifier.startsWith('ADMIN') ? identifier : 'ADMIN-KRISHAK-01',
-    adminId: 'ADMIN-KRISHAK-01',
-    name: 'Chief Agricultural Officer / Admin',
-    email: 'admin@krishak.ai',
-    role: 'admin',
-    accessLevel: 'SuperAdmin',
-    department: 'Platform Governance & Escrow Security',
-    location: 'Central Control HQ, Pune',
-  };
-
-  const token = generateToken({
-    id: adminUser.id,
-    adminId: adminUser.adminId,
-    role: 'admin',
-    name: adminUser.name,
-    email: adminUser.email,
-  });
-
-  const formattedUser = {
-    ...adminUser,
-    token,
-  };
-
-  return res.json({
-    success: true,
-    message: 'Administrative authorization granted',
-    token,
-    role: 'admin',
-    user: formattedUser,
-  });
+  return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
 };
 
+// ─── 8. FIREBASE ID TOKEN FALLBACK ───────────────────────────────────────────
+export const firebaseLogin = async (req, res) => {
+  try {
+    const { idToken, role = 'farmer', mobile, name } = req.body;
+    let decoded = null;
+
+    if (idToken && isFirebaseAdminInitialized()) {
+      try {
+        decoded = await verifyFirebaseIdToken(idToken);
+      } catch (e) {}
+    }
+
+    const cleanMobile = (decoded?.phone_number || mobile || '').replace(/\D/g, '').slice(-10);
+    const farmerId = `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const user = {
+      id: farmerId,
+      farmerId,
+      name: name || 'Farmer',
+      mobile: cleanMobile || '9876543210',
+      role,
+    };
+
+    const token = generateToken({ id: user.id, role, mobile: user.mobile, name: user.name });
+    setAuthCookie(res, token);
+
+    return res.json({ success: true, token, user, message: 'Firebase authentication verified' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};

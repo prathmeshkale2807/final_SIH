@@ -14,7 +14,7 @@ export const FarmerLogin = () => {
   const { showToast } = useApp();
 
   // Login Method: 'farmerId' | 'mobile'
-  const [loginMethod, setLoginMethod] = useState('farmerId');
+  const [loginMethod, setLoginMethod] = useState('mobile');
   
   // Auth Type: 'otp' | 'password'
   const [authType, setAuthType] = useState('otp');
@@ -61,19 +61,29 @@ export const FarmerLogin = () => {
     }
   };
 
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pastedData) {
+      const digits = pastedData.split('');
+      const newOtp = ['', '', '', '', '', ''];
+      digits.forEach((d, i) => {
+        newOtp[i] = d;
+      });
+      setOtp(newOtp);
+      const targetIdx = Math.min(digits.length, 5);
+      const targetInput = document.getElementById(`farmer-otp-input-${targetIdx}`);
+      if (targetInput) targetInput.focus();
+    }
+  };
+
   const handleSendOTP = async (e) => {
     e?.preventDefault();
 
-    if (loginMethod === 'farmerId') {
-      if (!farmerId.trim()) {
-        showToast(language === 'mr' ? 'कृपया शेतकरी आयडी प्रविष्ट करा' : 'Please enter your Farmer ID', 'error');
-        return;
-      }
-    } else {
-      if (!mobile || mobile.length !== 10) {
-        showToast(language === 'mr' ? 'कृपया वैध १० अंकी मोबाईल नंबर टाका' : 'Please enter a valid 10-digit mobile number', 'error');
-        return;
-      }
+    const targetMobile = mobile || farmerId;
+    if (!targetMobile || targetMobile.length < 10) {
+      showToast(language === 'mr' ? 'कृपया वैध १० अंकी मोबाईल नंबर टाका' : 'Please enter a valid 10-digit mobile number', 'error');
+      return;
     }
 
     if (authType === 'password') {
@@ -83,7 +93,7 @@ export const FarmerLogin = () => {
       }
       setLoading(true);
       try {
-        const res = await loginFarmer({ farmerId, mobile: mobile || '9876543210', otp: '123456' });
+        const res = await loginFarmer({ farmerId, mobile: targetMobile, password });
         if (res.success) {
           const name = res.user?.name || res.user?.farmerName || 'Farmer';
           showToast(language === 'mr' ? `स्वागत आहे, ${name}!` : `Welcome, ${name}!`, 'success');
@@ -91,6 +101,8 @@ export const FarmerLogin = () => {
         } else {
           showToast(res.message || 'Authentication failed', 'error');
         }
+      } catch (err) {
+        showToast(err.message || 'Login failed', 'error');
       } finally {
         setLoading(false);
       }
@@ -100,14 +112,16 @@ export const FarmerLogin = () => {
     // OTP Flow
     setLoading(true);
     try {
-      const res = await authService.sendFarmerOTP(mobile || farmerId, farmerId);
-      setStep('otp_verify');
-      setCountdown(30);
-      showToast(res.message || (language === 'mr' ? 'OTP पाठवला आहे (डेमो: 123456)' : 'OTP sent successfully (Demo: 123456)'), 'success');
+      const res = await authService.sendFarmerOTP(targetMobile);
+      if (res.success) {
+        setStep('otp_verify');
+        setCountdown(res.cooldownSeconds || 60);
+        showToast(res.message || (language === 'mr' ? 'OTP यशस्वीरित्या पाठवला आहे' : 'OTP sent successfully to your mobile'), 'success');
+      } else {
+        showToast(res.message || 'Failed to send OTP. Please try again.', 'error');
+      }
     } catch (err) {
-      setStep('otp_verify');
-      setCountdown(30);
-      showToast(language === 'mr' ? 'डेमो OTP वापरा: 123456' : 'Use Demo OTP: 123456', 'info');
+      showToast(err.message || 'Unable to send OTP. Please check your connection.', 'error');
     } finally {
       setLoading(false);
     }
@@ -123,29 +137,17 @@ export const FarmerLogin = () => {
 
     setLoading(true);
     try {
-      const res = await loginFarmer({ farmerId, mobile, otp: fullOtp });
+      const targetMobile = mobile || farmerId;
+      const res = await loginFarmer({ farmerId, mobile: targetMobile, otp: fullOtp });
       if (res.success) {
         const name = res.user?.name || res.user?.farmerName || 'Farmer';
         showToast(language === 'mr' ? `स्वागत आहे, ${name}!` : `Welcome, ${name}!`, 'success');
         navigate('/');
       } else {
-        showToast(res.message || (language === 'mr' ? 'अवैध OTP. डेमो: 123456' : 'Invalid OTP. Demo: 123456'), 'error');
+        showToast(res.message || (language === 'mr' ? 'अवैध किंवा कालबाह्य OTP' : 'Invalid or expired OTP'), 'error');
       }
     } catch (err) {
-      showToast(err.message || 'Login failed', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleQuickDemo = async () => {
-    setLoading(true);
-    try {
-      const res = await loginFarmer({ mobile: '9876543210', otp: '123456' });
-      if (res.success) {
-        showToast(language === 'mr' ? 'शेतकरी लॉगिन यशस्वी!' : 'Farmer Login Successful!', 'success');
-        navigate('/');
-      }
+      showToast(err.message || 'Authentication failed', 'error');
     } finally {
       setLoading(false);
     }
@@ -180,318 +182,300 @@ export const FarmerLogin = () => {
             <span>{language === 'mr' ? 'थेट शेतकरी डिजिटल पोर्टल' : 'Direct Farmer Marketplace'}</span>
           </div>
 
-          <h1 className="text-4xl lg:text-5xl font-display font-black text-slate-900 leading-tight">
-            {language === 'mr'
-              ? 'शेतमालाला योग्य भाव व थेट खरेदीदारांशी जोडणी.'
-              : 'Empowering Farmers to Make Smarter Selling Decisions.'}
+          <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.15]">
+            {language === 'mr' ? (
+              <>
+                शेतकऱ्यांचे हक्काचे <br />
+                <span className="text-emerald-700">थेट डिजिटल मार्केट</span>
+              </>
+            ) : (
+              <>
+                Empowering Farmers with <br />
+                <span className="text-emerald-700">Direct Market Access</span>
+              </>
+            )}
           </h1>
 
-          <p className="text-slate-600 text-sm leading-relaxed max-w-lg font-medium">
+          <p className="text-base text-slate-700 max-w-lg leading-relaxed font-medium">
             {language === 'mr'
-              ? 'लाइव्ह कृषी उत्पन्न बाजार समितीचे भाव, थेट प्रक्रिया उद्योगांच्या खरेदी ऑर्डर्स आणि १००% सुरक्षित एस्क्रो पेमेंट पद्धतीचा लाभ घ्या.'
-              : 'Access live APMC modal feeds, direct industrial buyer bids, AI price forecasts, and optimal profit allocation calculations with guaranteed escrow payouts.'}
+              ? 'दलालांशिवाय थेट खरेदीदारांशी व्यवहार करा, योग्य भाव मिळवा आणि पारदर्शक पेमेंटचा लाभ घ्या.'
+              : 'Direct trade with verified buyers across India, fair APMC price intelligence, instant automated payments.'}
           </p>
 
-          <div className="pt-2 flex items-center space-x-6 text-xs font-bold text-slate-500">
-            <div className="flex items-center space-x-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-              <span>100% Escrow Protected</span>
+          {/* FEATURE PILLS */}
+          <div className="grid grid-cols-2 gap-3 pt-2 max-w-md">
+            <div className="flex items-center space-x-2.5 p-3 rounded-2xl bg-white/80 border border-emerald-100 shadow-sm backdrop-blur-xs">
+              <span className="text-xl">💰</span>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900">{language === 'mr' ? 'योग्य भाव हमी' : 'Fair Pricing'}</h4>
+                <p className="text-[10px] text-slate-500">{language === 'mr' ? 'थेट बाजारभाव' : 'Live Mandi Rates'}</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="h-2 w-2 rounded-full bg-harvest-500"></span>
-              <span>AI Market Insights</span>
+
+            <div className="flex items-center space-x-2.5 p-3 rounded-2xl bg-white/80 border border-emerald-100 shadow-sm backdrop-blur-xs">
+              <span className="text-xl">🛡️</span>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900">{language === 'mr' ? 'सुरक्षित पेमेंट' : '100% Secure'}</h4>
+                <p className="text-[10px] text-slate-500">{language === 'mr' ? 'थेट बँक खात्यात' : 'Direct Bank Transfer'}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: MAHAVISTAAR CONCEPT LOGIN CARD */}
-        <div className="lg:col-span-6 max-w-md mx-auto w-full bg-white/95 backdrop-blur-2xl rounded-[36px] p-6 sm:p-9 shadow-2xl border border-slate-200/90 space-y-6 animate-fade-in-up relative">
-          
-          {/* TOP ACTIONS: BACK & LANGUAGE */}
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate('/')}
-              className="text-xs font-bold text-slate-500 hover:text-emerald-800 flex items-center space-x-1.5 transition-colors bg-slate-100/80 hover:bg-slate-200/80 px-3 py-1.5 rounded-xl border border-slate-200/60"
-            >
-              <span>← Back</span>
-            </button>
-            <LanguageSwitcher />
-          </div>
-
-          {/* DUAL ROLE SWITCHER: FARMER vs BUYER */}
-          <div className="p-1 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner flex items-center gap-1">
-            <button
-              type="button"
-              className="flex-1 py-2 px-3 bg-emerald-600 text-white rounded-xl text-xs sm:text-sm font-extrabold shadow-md shadow-emerald-700/25 flex items-center justify-center space-x-1.5"
-            >
-              <span>🌾</span>
-              <span>{language === 'mr' ? 'शेतकरी लॉगिन' : 'Farmer Login'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/login/buyer')}
-              className="flex-1 py-2 px-3 text-slate-600 hover:text-blue-700 hover:bg-white/80 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
-            >
-              <span>🏪</span>
-              <span>{language === 'mr' ? 'खरेदीदार पोर्टल' : 'Buyer Portal'}</span>
-            </button>
-          </div>
-
-          {/* EMBLEM & WELCOME HEADING */}
-          <div className="text-center space-y-3 pt-1">
-            {/* SQUARE WITH CURVED EDGES KRISHAK LOGO BADGE */}
-            <div className="h-20 w-20 rounded-2xl bg-white border-2 border-emerald-400 mx-auto flex items-center justify-center p-2 shadow-lg shadow-emerald-500/15 overflow-hidden">
-              <img
-                src="/krishak_logo.png"
-                alt="Krishak Logo"
-                className="w-full h-full object-contain filter drop-shadow-xs"
-              />
-            </div>
-
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                {language === 'mr' ? 'स्वागत आहे' : 'Welcome'}
-              </h2>
-              <h3 className="text-xl sm:text-2xl font-bold text-emerald-800">
-                {language === 'mr' ? 'साइन इन करा!' : 'Sign In!'}
-              </h3>
-            </div>
-          </div>
-
-          {/* STEP 1: CREDENTIAL INPUT VIEW */}
-          {step === 'input' && (
-            <div className="space-y-5">
-              
-              {/* DUAL PILL TOGGLE TABS: FARMER ID vs MOBILE NO. */}
-              <div className="p-1 bg-slate-100 rounded-full border border-slate-200 shadow-inner flex items-center">
-                <button
-                  type="button"
-                  onClick={() => setLoginMethod('farmerId')}
-                  className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${
-                    loginMethod === 'farmerId'
-                      ? 'bg-emerald-600 text-white shadow-md'
-                      : 'text-slate-600 hover:text-slate-900 bg-transparent'
-                  }`}
-                >
-                  {language === 'mr' ? 'शेतकरी आयडी' : 'Farmer ID'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setLoginMethod('mobile')}
-                  className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${
-                    loginMethod === 'mobile'
-                      ? 'bg-emerald-600 text-white shadow-md'
-                      : 'text-slate-600 hover:text-slate-900 bg-transparent'
-                  }`}
-                >
-                  {language === 'mr' ? 'मोबाईल क्र.' : 'Mobile No.'}
-                </button>
+        {/* RIGHT COLUMN: LOGIN CARD */}
+        <div className="lg:col-span-6 w-full max-w-md mx-auto animate-fade-in">
+          <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200/80 space-y-6">
+            
+            {/* CARD TOP BAR: LOGO & LANGUAGE SWITCHER */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <Link to="/" className="lg:hidden">
+                <KrishakLogo size="small" />
+              </Link>
+              <div className="ml-auto">
+                <LanguageSwitcher />
               </div>
+            </div>
 
-              {/* INPUT FORM */}
-              <form onSubmit={handleSendOTP} className="space-y-4">
+            {/* CARD TITLE */}
+            <div className="space-y-1">
+              <div className="inline-block px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[11px] font-bold uppercase tracking-wider">
+                {language === 'mr' ? 'शेतकरी प्रवेशद्वार' : 'Farmer Access'}
+              </div>
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                  {language === 'mr' ? 'स्वागत आहे' : 'Welcome'}
+                </h2>
+                <h3 className="text-xl sm:text-2xl font-bold text-emerald-800">
+                  {language === 'mr' ? 'साइन इन करा!' : 'Sign In!'}
+                </h3>
+              </div>
+            </div>
+
+            {/* STEP 1: CREDENTIAL INPUT VIEW */}
+            {step === 'input' && (
+              <div className="space-y-5">
                 
-                {loginMethod === 'farmerId' ? (
-                  <div>
-                    <input
-                      type="text"
-                      autoFocus
-                      value={farmerId}
-                      onChange={(e) => setFarmerId(e.target.value)}
-                      placeholder={language === 'mr' ? 'तुमचा शेतकरी आयडी प्रविष्ट करा' : 'Enter your Farmer ID'}
-                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
-                    />
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <input
-                      type="tel"
-                      autoFocus
-                      maxLength="10"
-                      value={mobile}
-                      onChange={handleMobileChange}
-                      placeholder={language === 'mr' ? 'नोंदणीकृत मोबाईल नंबर प्रविष्ट करा' : 'Enter Registered Mobile Number'}
-                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all font-mono"
-                    />
+                {/* DUAL PILL TOGGLE TABS */}
+                <div className="p-1 bg-slate-100 rounded-full border border-slate-200 shadow-inner flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setLoginMethod('mobile')}
+                    className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${
+                      loginMethod === 'mobile'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'text-slate-600 hover:text-slate-900 bg-transparent'
+                    }`}
+                  >
+                    {language === 'mr' ? 'मोबाईल क्र.' : 'Mobile No.'}
+                  </button>
 
-                    {/* RADIO SELECTORS: OTP vs PASSWORD */}
-                    <div className="flex items-center justify-between px-1">
-                      <div className="flex items-center space-x-5">
-                        <label className="flex items-center space-x-1.5 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="farmerAuthType"
-                            checked={authType === 'otp'}
-                            onChange={() => setAuthType('otp')}
-                            className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-slate-300"
-                          />
-                          <span className={`text-xs font-bold ${authType === 'otp' ? 'text-emerald-900' : 'text-slate-500'}`}>
-                            OTP
-                          </span>
-                        </label>
+                  <button
+                    type="button"
+                    onClick={() => setLoginMethod('farmerId')}
+                    className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${
+                      loginMethod === 'farmerId'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'text-slate-600 hover:text-slate-900 bg-transparent'
+                    }`}
+                  >
+                    {language === 'mr' ? 'शेतकरी आयडी' : 'Farmer ID'}
+                  </button>
+                </div>
 
-                        <label className="flex items-center space-x-1.5 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="farmerAuthType"
-                            checked={authType === 'password'}
-                            onChange={() => setAuthType('password')}
-                            className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-slate-300"
-                          />
-                          <span className={`text-xs font-bold ${authType === 'password' ? 'text-emerald-900' : 'text-slate-500'}`}>
-                            Password
-                          </span>
-                        </label>
+                {/* INPUT FORM */}
+                <form onSubmit={handleSendOTP} className="space-y-4">
+                  
+                  {loginMethod === 'farmerId' ? (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {language === 'mr' ? 'शेतकरी आयडी' : 'Farmer ID'}
+                      </label>
+                      <input
+                        type="text"
+                        autoFocus
+                        value={farmerId}
+                        onChange={(e) => setFarmerId(e.target.value)}
+                        placeholder={language === 'mr' ? 'उदा. FARM-2026-1001' : 'e.g. FARM-2026-1001'}
+                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {language === 'mr' ? 'मोबाईल नंबर' : 'Mobile Number'}
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-4 text-slate-500 font-bold text-sm select-none">
+                          +91
+                        </span>
+                        <input
+                          type="tel"
+                          autoFocus
+                          maxLength="10"
+                          value={mobile}
+                          onChange={handleMobileChange}
+                          placeholder={language === 'mr' ? '१० अंकी मोबाईल नंबर टाका' : 'Enter 10-digit mobile number'}
+                          className="w-full pl-14 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all font-mono"
+                        />
+                      </div>
+
+                      {/* RADIO SELECTORS: OTP vs PASSWORD */}
+                      <div className="flex items-center justify-between px-1">
+                        <div className="flex items-center space-x-5">
+                          <label className="flex items-center space-x-1.5 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="farmerAuthType"
+                              checked={authType === 'otp'}
+                              onChange={() => setAuthType('otp')}
+                              className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-slate-300"
+                            />
+                            <span className={`text-xs font-bold ${authType === 'otp' ? 'text-emerald-900' : 'text-slate-500'}`}>
+                              SMS OTP
+                            </span>
+                          </label>
+
+                          <label className="flex items-center space-x-1.5 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="farmerAuthType"
+                              checked={authType === 'password'}
+                              onChange={() => setAuthType('password')}
+                              className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-slate-300"
+                            />
+                            <span className={`text-xs font-bold ${authType === 'password' ? 'text-emerald-900' : 'text-slate-500'}`}>
+                              Password
+                            </span>
+                          </label>
+                        </div>
                       </div>
 
                       {authType === 'password' && (
-                        <button
-                          type="button"
-                          onClick={() => showToast('Use OTP verification to sign in or reset credentials.', 'info')}
-                          className="text-[11px] font-bold text-emerald-700 hover:underline"
-                        >
-                          Create/Forgot Password?
-                        </button>
+                        <input
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Enter password"
+                          className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
+                        />
                       )}
                     </div>
-
-                    {authType === 'password' && (
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter password"
-                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
-                      />
-                    )}
-                  </div>
-                )}
-
-                <div id="recaptcha-container"></div>
-
-                {/* PRIMARY ACTION BUTTON */}
-                <button
-                  type="submit"
-                  disabled={loading || (loginMethod === 'farmerId' ? !farmerId.trim() : mobile.length !== 10)}
-                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm rounded-2xl shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center space-x-2 cursor-pointer"
-                >
-                  {loading ? (
-                    <span className="inline-block animate-spin">⏳</span>
-                  ) : (
-                    <span>{authType === 'password' ? 'Sign In' : (language === 'mr' ? 'OTP मिळवा (Send OTP)' : 'Send OTP')}</span>
                   )}
-                </button>
-              </form>
 
-              {/* QUICK 1-CLICK DEMO BUTTON */}
-              <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={handleQuickDemo}
-                  className="w-full py-2.5 px-3 bg-slate-100/90 hover:bg-emerald-50 hover:border-emerald-300 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-600 hover:text-emerald-800 transition-all flex items-center justify-center space-x-1.5"
-                >
-                  <span>🌾</span>
-                  <span>{language === 'mr' ? 'चाचणी शेतकरी लॉगिन (1-Click Demo)' : '1-Click Demo Farmer Login'}</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: OTP VERIFICATION VIEW */}
-          {step === 'otp_verify' && (
-            <div className="space-y-5 animate-fade-in">
-              <div className="text-center space-y-1">
-                <h4 className="text-base font-bold text-slate-900">
-                  {language === 'mr' ? 'OTP पडताळणी' : 'Enter 6-Digit OTP'}
-                </h4>
-                <p className="text-xs text-slate-500">
-                  {language === 'mr' ? 'नोंदणीकृत नंबरवर पाठवलेला OTP टाका' : 'Enter OTP sent to your registered mobile'}
-                </p>
-              </div>
-
-              <form onSubmit={handleVerifyOTP} className="space-y-4">
-                <div className="flex justify-between gap-1.5">
-                  {otp.map((digit, idx) => (
-                    <input
-                      key={idx}
-                      id={`farmer-otp-input-${idx}`}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength="1"
-                      value={digit}
-                      onChange={(e) => handleOtpChange(idx, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      autoFocus={idx === 0}
-                      className="w-10 sm:w-12 h-12 sm:h-14 text-center bg-slate-50 border border-slate-300 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 rounded-xl text-lg font-mono font-black text-slate-900 transition-all outline-none"
-                    />
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-slate-500">
-                  <span>
-                    {countdown > 0 ? (
-                      <span className="font-mono text-emerald-700 font-bold">
-                        {language === 'mr' ? `पुन्हा पाठवा: ${countdown}s` : `Resend in ${countdown}s`}
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleSendOTP}
-                        className="text-emerald-700 font-bold hover:underline"
-                      >
-                        {language === 'mr' ? 'OTP पुन्हा पाठवा' : 'Resend OTP'}
-                      </button>
-                    )}
-                  </span>
-                  <span className="text-[11px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Demo: 123456</span>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading || otp.join('').length !== 6}
-                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm rounded-2xl shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center space-x-2 cursor-pointer"
-                >
-                  {loading ? (
-                    <span className="inline-block animate-spin">⏳</span>
-                  ) : (
-                    <span>{language === 'mr' ? 'पडताळणी करा आणि लॉगिन व्हा' : 'Verify & Sign In'}</span>
-                  )}
-                </button>
-
-                <div className="text-center">
+                  {/* PRIMARY ACTION BUTTON */}
                   <button
-                    type="button"
-                    onClick={() => { setStep('input'); setOtp(['', '', '', '', '', '']); }}
-                    className="text-xs text-slate-500 hover:text-slate-800 font-bold"
+                    type="submit"
+                    disabled={loading || (loginMethod === 'farmerId' ? !farmerId.trim() : mobile.length !== 10)}
+                    className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm rounded-2xl shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center space-x-2 cursor-pointer"
                   >
-                    ← {language === 'mr' ? 'मागे जा (Go Back)' : 'Go Back'}
+                    {loading ? (
+                      <span className="inline-block animate-spin">⏳</span>
+                    ) : (
+                      <span>
+                        {authType === 'password'
+                          ? 'Sign In'
+                          : language === 'mr'
+                          ? 'OTP मिळवा (Send OTP)'
+                          : 'Send OTP'}
+                      </span>
+                    )}
                   </button>
+                </form>
+
+                {/* REGISTER LINK */}
+                <div className="text-center pt-2">
+                  <p className="text-xs text-slate-600">
+                    {language === 'mr' ? 'नवीन शेतकरी आहात?' : "Don't have an account?"}{' '}
+                    <Link to="/auth/farmer/register" className="text-emerald-700 font-bold hover:underline">
+                      {language === 'mr' ? 'येथे नोंदणी करा' : 'Register as Farmer'}
+                    </Link>
+                  </p>
                 </div>
-              </form>
-            </div>
-          )}
+              </div>
+            )}
 
-          {/* FOOTER: NEW REGISTRATION LINK */}
-          <div className="pt-3 border-t border-slate-100 text-center space-y-1">
-            <p className="text-xs text-slate-500">
-              {language === 'mr' ? 'खाते नाही का?' : "Don't have an account?"}
-            </p>
-            <Link
-              to="/register/farmer"
-              className="inline-block text-sm font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
-            >
-              {language === 'mr' ? 'नोंदणीसाठी येथे क्लिक करा (Click here for registration)' : 'Click here for registration →'}
-            </Link>
+            {/* STEP 2: OTP VERIFICATION VIEW */}
+            {step === 'otp_verify' && (
+              <div className="space-y-5 animate-fade-in">
+                <div className="text-center space-y-1">
+                  <h4 className="text-base font-bold text-slate-900">
+                    {language === 'mr' ? 'OTP पडताळणी' : 'Enter 6-Digit OTP'}
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    {language === 'mr'
+                      ? `+91 ${mobile} या नंबरवर पाठवलेला कोड टाका`
+                      : `OTP sent to +91 ${mobile.slice(0, 5)} ${mobile.slice(5)}`}
+                  </p>
+                </div>
+
+                <form onSubmit={handleVerifyOTP} className="space-y-4">
+                  <div className="flex justify-between gap-1.5" onPaste={handleOtpPaste}>
+                    {otp.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        id={`farmer-otp-input-${idx}`}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength="1"
+                        value={digit}
+                        onChange={(e) => handleOtpChange(idx, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                        autoFocus={idx === 0}
+                        className="w-10 sm:w-12 h-12 sm:h-14 text-center bg-slate-50 border border-slate-300 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 rounded-xl text-lg font-mono font-black text-slate-900 transition-all outline-none"
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span>
+                      {countdown > 0 ? (
+                        <span className="font-mono text-emerald-700 font-bold">
+                          {language === 'mr' ? `पुन्हा पाठवा: ${countdown}s` : `Resend in ${countdown}s`}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleSendOTP}
+                          className="text-emerald-700 font-bold hover:underline cursor-pointer"
+                        >
+                          {language === 'mr' ? 'OTP पुन्हा पाठवा' : 'Resend OTP'}
+                        </button>
+                      )}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStep('input');
+                        setOtp(['', '', '', '', '', '']);
+                      }}
+                      className="text-xs text-slate-500 hover:text-slate-800 font-bold hover:underline cursor-pointer"
+                    >
+                      {language === 'mr' ? 'मोबाईल बदला' : 'Change Number'}
+                    </button>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading || otp.join('').length !== 6}
+                    className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm rounded-2xl shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                  >
+                    {loading ? (
+                      <span className="inline-block animate-spin">⏳</span>
+                    ) : (
+                      <span>{language === 'mr' ? 'OTP सत्यापित करा (Verify OTP)' : 'Verify OTP & Log In'}</span>
+                    )}
+                  </button>
+                </form>
+              </div>
+            )}
           </div>
-
         </div>
-
       </div>
 
       {/* FOOTER */}
-      <footer className="relative z-10 w-full py-4 text-center text-xs text-slate-500 bg-white/70 backdrop-blur-md border-t border-slate-200/80">
-        KrishiSetu AI • Direct Farmer-to-Buyer Marketplace • 100% Escrow Protection
+      <footer className="relative z-10 py-4 text-center text-xs text-slate-500">
+        © {new Date().getFullYear()} KRISHAK — Ministry of Agriculture & Farmers Welfare, Govt of India
       </footer>
     </div>
   );

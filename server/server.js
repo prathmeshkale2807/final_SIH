@@ -10,11 +10,11 @@ import { marketIngestionService } from './services/marketIngestionService.js';
 // 1. Load environment variables
 dotenv.config();
 
-const app = express();
+export const app = express();
 const PORT = process.env.PORT || 5000;
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
+const CLIENT_URL = process.env.CLIENT_URL || process.env.FRONTEND_URL || 'http://localhost:3000';
 
-// 2. Allowed origins for development & production
+// 2. Allowed origins for development & Vercel production
 const allowedOrigins = [
   CLIENT_URL,
   'http://localhost:3000',
@@ -29,28 +29,48 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, postman) or from allowed list
-      if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.startsWith('http://localhost:') ||
+        origin.endsWith('.vercel.app')
+      ) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(null, true); // Allow for mobile apps & webhooks
       }
     },
     credentials: true,
   })
 );
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// 4. API Health endpoint reporting real backend and Firebase status
+// Lightweight cookie parsing middleware for Vercel serverless
+app.use((req, res, next) => {
+  req.cookies = req.cookies || {};
+  const cookieHeader = req.headers.cookie;
+  if (cookieHeader) {
+    cookieHeader.split(';').forEach((cookie) => {
+      const parts = cookie.split('=');
+      const name = parts[0]?.trim();
+      const val = parts.slice(1).join('=').trim();
+      if (name) req.cookies[name] = decodeURIComponent(val);
+    });
+  }
+  next();
+});
+
+// 4. API Health endpoint reporting real backend and database status
 app.get('/api/health', (req, res) => {
   const connected = isDBConnected();
   res.status(200).json({
     success: connected,
     backend: 'running',
+    environment: process.env.NODE_ENV || 'development',
     database: getDBStatus(),
     databaseName: getDBName(),
-    authMode: process.env.AUTH_MODE || 'firebase',
     timestamp: new Date().toISOString(),
   });
 });
@@ -96,25 +116,21 @@ app.post('/api/ors/directions/:profile', async (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-// 7. Connect to Firebase and start server
-async function startServer() {
-  await connectDB();
+// 7. Connect to Firebase / Database
+connectDB().catch((err) => console.warn('[DB Connect Notice]:', err.message));
+initFirebaseAdmin();
 
-
-  // Initialize Firebase Admin SDK safely (standby in mock mode)
-  initFirebaseAdmin();
-
-  // Start market scheduler for daily ingestion & initial sync
+// 8. Start server locally if not running on Vercel Serverless
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
   marketIngestionService.startMarketScheduler();
-
   app.listen(PORT, () => {
     console.log(`=============================================`);
-    console.log(`  🌾 KRISHAK BACKEND SERVER RUNNING       `);
-    console.log(`  Server:    http://localhost:${PORT}      `);
+    console.log(`  🌾 KRISHAK BACKEND SERVER RUNNING          `);
+    console.log(`  Server:    http://localhost:${PORT}        `);
     console.log(`  Health:    http://localhost:${PORT}/api/health`);
-    console.log(`  Auth Mode: ${process.env.AUTH_MODE || 'mock'} (OTP: 123456)`);
+    console.log(`  SMS:       ${process.env.SMS_PROVIDER || 'local-dev-logger'}`);
     console.log(`=============================================`);
   });
 }
 
-startServer();
+export default app;

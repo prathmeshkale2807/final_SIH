@@ -1,5 +1,9 @@
 import express from 'express';
 import {
+  sendOTP,
+  verifyOTP,
+  getMe,
+  logout,
   validateFarmerUser,
   validateBuyerUser,
   sendFarmerOTP,
@@ -14,24 +18,27 @@ import {
 
 const router = express.Router();
 
-// User Pre-validation
+// ─── PRIMARY UNIFIED MOBILE + OTP AUTH ENDPOINTS ───
+router.post('/send-otp', sendOTP);
+router.post('/verify-otp', verifyOTP);
+router.get('/me', getMe);
+router.post('/logout', logout);
+
+// ─── USER PRE-VALIDATION ───
 router.post('/farmer/validate', validateFarmerUser);
 router.post('/buyer/validate', validateBuyerUser);
 
-// Farmer Auth Endpoints
+// ─── ROLE-SPECIFIC ALIASES ───
 router.post('/farmer/send-otp', sendFarmerOTP);
 router.post('/farmer/verify-otp', verifyFarmerOTP);
 router.post('/farmer/register', registerFarmer);
 
-// Buyer Auth Endpoints
 router.post('/buyer/send-otp', sendBuyerOTP);
 router.post('/buyer/verify-otp', verifyBuyerOTP);
 router.post('/buyer/register', registerBuyer);
 
-// Admin Auth Endpoints
+// ─── ADMIN & FIREBASE ───
 router.post('/admin/login', loginAdmin);
-
-// Direct Firebase ID Token Auth
 router.post('/firebase-login', firebaseLogin);
 
 export default router;

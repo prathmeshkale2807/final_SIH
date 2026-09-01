@@ -25,7 +25,7 @@ export const firebaseAuthService = {
       } else if (error.code === 'auth/invalid-phone-number') {
         userFriendlyMsg = 'The provided phone number is invalid. Please enter a valid 10-digit number.';
       } else if (error.code === 'auth/too-many-requests') {
-        userFriendlyMsg = 'Too many requests. Please wait a few minutes or use development mock OTP: 123456.';
+        userFriendlyMsg = 'Too many requests. Please wait a few minutes before trying again.';
       } else if (error.code === 'auth/quota-exceeded') {
         userFriendlyMsg = 'Firebase daily SMS quota exceeded. Configure test phone numbers or upgrade Firebase plan.';
       } else if (error.code === 'auth/captcha-check-failed') {

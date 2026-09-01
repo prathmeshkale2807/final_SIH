@@ -1,36 +1,43 @@
 /**
  * Central API Client for KRISHAK Platform
- * Communicates with the Express backend using VITE_API_URL or localhost fallback
+ * Communicates with the Express backend on local development and Vercel serverless
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '/api';
+  }
+  return 'http://localhost:5000/api';
+};
+
+const BASE_URL = getApiBaseUrl();
 
 /**
- * Retrieve the active JWT token from localStorage
- * Supports direct 'token' key and structured auth user objects
+ * Retrieve the active JWT token from sessionStorage or localStorage
  */
 export const getAuthToken = () => {
   try {
-    const directToken = localStorage.getItem('token');
-    if (directToken && directToken !== 'undefined' && directToken !== 'null') {
-      return directToken;
+    const sessionToken = sessionStorage.getItem('token');
+    if (sessionToken && sessionToken !== 'undefined' && sessionToken !== 'null') {
+      return sessionToken;
     }
 
-    const rawKrishak = localStorage.getItem('krishak_auth_user');
+    const localToken = localStorage.getItem('token');
+    if (localToken && localToken !== 'undefined' && localToken !== 'null') {
+      return localToken;
+    }
+
+    const rawKrishak = sessionStorage.getItem('krishak_auth_user') || localStorage.getItem('krishak_auth_user');
     if (rawKrishak) {
       const parsed = JSON.parse(rawKrishak);
       if (parsed?.token) return parsed.token;
     }
 
-    const rawDhanya = localStorage.getItem('dhanya_auth_user');
-    if (rawDhanya) {
-      const parsed = JSON.parse(rawDhanya);
-      if (parsed?.token) return parsed.token;
-    }
-
     return null;
   } catch (e) {
-    console.warn('[getAuthToken] Error retrieving token from storage:', e);
     return null;
   }
 };
@@ -44,6 +51,7 @@ const request = async (endpoint, options = {}) => {
   };
 
   const config = {
+    credentials: 'include', // Send and receive secure HTTP-only cookies
     ...options,
     headers,
   };

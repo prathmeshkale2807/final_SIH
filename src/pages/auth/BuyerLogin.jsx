@@ -261,8 +261,8 @@ export const BuyerLogin = () => {
                   type="button"
                   onClick={() => setLoginMethod('mobile')}
                   className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${loginMethod === 'mobile'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
                     }`}
                 >
                   Mobile No.
@@ -271,8 +271,8 @@ export const BuyerLogin = () => {
                   type="button"
                   onClick={() => setLoginMethod('buyerId')}
                   className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${loginMethod === 'buyerId'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
                     }`}
                 >
                   Shop / Buyer ID
@@ -398,6 +398,35 @@ export const BuyerLogin = () => {
                       className="w-10 sm:w-12 h-12 sm:h-14 text-center bg-slate-50 border border-slate-300 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-500/20 rounded-xl text-lg font-mono font-black text-slate-900 transition-all outline-none"
                     />
                   ))}
+                </div>
+
+                <div className="pt-2 space-y-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {hasPassword ? 'Enter Password' : 'Set New Password'}
+                    </label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Password"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-blue-600 focus:outline-none transition-all"
+                    />
+                  </div>
+                  {!hasPassword && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        Confirm Password
+                      </label>
+                      <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Verify Password"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-blue-600 focus:outline-none transition-all"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-slate-500">

@@ -267,8 +267,8 @@ export const FarmerLogin = () => {
                     type="button"
                     onClick={() => setLoginMethod('mobile')}
                     className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${loginMethod === 'mobile'
-                        ? 'bg-emerald-600 text-white shadow-md'
-                        : 'text-slate-600 hover:text-slate-900 bg-transparent'
+                      ? 'bg-emerald-600 text-white shadow-md'
+                      : 'text-slate-600 hover:text-slate-900 bg-transparent'
                       }`}
                   >
                     {language === 'mr' ? 'मोबाईल क्र.' : 'Mobile No.'}
@@ -278,8 +278,8 @@ export const FarmerLogin = () => {
                     type="button"
                     onClick={() => setLoginMethod('farmerId')}
                     className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${loginMethod === 'farmerId'
-                        ? 'bg-emerald-600 text-white shadow-md'
-                        : 'text-slate-600 hover:text-slate-900 bg-transparent'
+                      ? 'bg-emerald-600 text-white shadow-md'
+                      : 'text-slate-600 hover:text-slate-900 bg-transparent'
                       }`}
                   >
                     {language === 'mr' ? 'शेतकरी आयडी' : 'Farmer ID'}
@@ -428,6 +428,35 @@ export const FarmerLogin = () => {
                         className="w-10 sm:w-12 h-12 sm:h-14 text-center bg-slate-50 border border-slate-300 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 rounded-xl text-lg font-mono font-black text-slate-900 transition-all outline-none"
                       />
                     ))}
+                  </div>
+
+                  <div className="pt-2 space-y-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        {language === 'mr' ? 'तुमचा पासवर्ड टाका' : (hasPassword ? 'Enter Password' : 'Set New Password')}
+                      </label>
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder={language === 'mr' ? 'पासवर्ड' : 'Password'}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-emerald-600 focus:outline-none transition-all"
+                      />
+                    </div>
+                    {!hasPassword && (
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          {language === 'mr' ? 'पासवर्डची पुष्टी करा' : 'Confirm Password'}
+                        </label>
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder={language === 'mr' ? 'पासवर्डची पुष्टी करा' : 'Verify Password'}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 font-medium text-sm focus:bg-white focus:border-emerald-600 focus:outline-none transition-all"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-slate-500">

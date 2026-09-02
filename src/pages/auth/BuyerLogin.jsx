@@ -16,6 +16,7 @@ export const BuyerLogin = () => {
   // Login Method: 'buyerId' | 'mobile'
   const [loginMethod, setLoginMethod] = useState('mobile');
 
+  const [authType, setAuthType] = useState('otp');
   const [hasPassword, setHasPassword] = useState(true);
   const [confirmPassword, setConfirmPassword] = useState('');
 

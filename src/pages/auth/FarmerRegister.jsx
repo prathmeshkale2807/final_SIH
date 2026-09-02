@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { LocationPicker } from '../../components/auth/LocationPicker';
 import { LanguageSwitcher } from '../../components/common/LanguageSwitcher';
+import { authService } from '../../services/authService';
 
 export const FarmerRegister = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ export const FarmerRegister = () => {
     setFormData((prev) => ({ ...prev, [field]: val }));
   };
 
-  const handleNext = (e) => {
+  const handleNext = async (e) => {
     e.preventDefault();
     if (step === 1) {
       if (formData.password.length < 6) {
@@ -42,6 +43,15 @@ export const FarmerRegister = () => {
       if (formData.password !== formData.confirmPassword) {
         showToast('Passwords do not match', 'error');
         return;
+      }
+      if (formData.mobile.length === 10) {
+        try {
+          const valRes = await authService.validateFarmer(null, formData.mobile);
+          if (valRes && valRes.farmerExists) {
+            showToast('This mobile number is already registered. Please log in.', 'error');
+            return;
+          }
+        } catch (err) { }
       }
     }
     if (step < 4) setStep(step + 1);

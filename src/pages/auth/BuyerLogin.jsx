@@ -16,8 +16,8 @@ export const BuyerLogin = () => {
   // Login Method: 'buyerId' | 'mobile'
   const [loginMethod, setLoginMethod] = useState('mobile');
 
-  // Auth Type: 'otp' | 'password'
-  const [authType, setAuthType] = useState('otp');
+  const [hasPassword, setHasPassword] = useState(true);
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // Step: 'input' | 'otp_verify'
   const [step, setStep] = useState('input');

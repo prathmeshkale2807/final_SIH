@@ -48,10 +48,16 @@ export const FarmerRegister = () => {
   };
 
   const handleFinish = async () => {
-    const res = await registerFarmer(formData);
-    if (res.success) {
-      showToast('Account created successfully! Welcome to KRISHAK.');
-      navigate('/farmer/dashboard');
+    try {
+      const res = await registerFarmer(formData);
+      if (res && res.success) {
+        showToast('Account created successfully! Welcome to KRISHAK.');
+        navigate('/farmer/dashboard');
+      } else {
+        showToast(res?.message || 'Registration failed. Please check your details.', 'error');
+      }
+    } catch (err) {
+      showToast(err.message || 'An error occurred during registration.', 'error');
     }
   };
 
@@ -86,8 +92,8 @@ export const FarmerRegister = () => {
             <div
               key={s}
               className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-black z-10 transition-all ${step >= s
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                  : 'bg-slate-100 text-slate-400 border border-slate-200'
+                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+                : 'bg-slate-100 text-slate-400 border border-slate-200'
                 }`}
             >
               {step > s ? '✓' : s}

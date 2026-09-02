@@ -36,10 +36,16 @@ export const BuyerRegister = () => {
       showToast('Passwords do not match', 'error');
       return;
     }
-    const res = await registerBuyer(formData);
-    if (res.success) {
-      showToast('Buyer registration submitted! Verification status: Pending KYC');
-      navigate('/buyer/dashboard');
+    try {
+      const res = await registerBuyer(formData);
+      if (res && res.success) {
+        showToast('Buyer registration submitted! Verification status: Pending KYC');
+        navigate('/buyer/dashboard');
+      } else {
+        showToast(res?.message || 'Registration failed. Please try again.', 'error');
+      }
+    } catch (err) {
+      showToast(err.message || 'An error occurred during registration.', 'error');
     }
   };
 
@@ -146,8 +152,8 @@ export const BuyerRegister = () => {
                   type="button"
                   onClick={() => setFormData({ ...formData, businessType: type })}
                   className={`p-2.5 rounded-xl text-xs font-bold border transition-all ${formData.businessType === type
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-black'
-                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-black'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                 >
                   {type}

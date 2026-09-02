@@ -16,6 +16,8 @@ export const FarmerRegister = () => {
   const [formData, setFormData] = useState({
     name: '',
     mobile: '',
+    password: '',
+    confirmPassword: '',
     primaryCrop: 'Onion',
     otherCrops: '',
     landArea: '',
@@ -32,6 +34,16 @@ export const FarmerRegister = () => {
 
   const handleNext = (e) => {
     e.preventDefault();
+    if (step === 1) {
+      if (formData.password.length < 6) {
+        showToast('Password must be at least 6 characters long', 'error');
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        return;
+      }
+    }
     if (step < 4) setStep(step + 1);
   };
 
@@ -73,11 +85,10 @@ export const FarmerRegister = () => {
           {[1, 2, 3, 4].map((s) => (
             <div
               key={s}
-              className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-black z-10 transition-all ${
-                step >= s
+              className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-black z-10 transition-all ${step >= s
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
                   : 'bg-slate-100 text-slate-400 border border-slate-200'
-              }`}
+                }`}
             >
               {step > s ? '✓' : s}
             </div>
@@ -133,6 +144,36 @@ export const FarmerRegister = () => {
                 placeholder="9876543210"
                 className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Password *
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={(e) => updateField('password', e.target.value)}
+                  placeholder="Secret key"
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                  Confirm Password *
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={(e) => updateField('confirmPassword', e.target.value)}
+                  placeholder="Verify key"
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
             </div>
 
             <button

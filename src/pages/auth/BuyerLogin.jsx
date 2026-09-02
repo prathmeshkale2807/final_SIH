@@ -428,7 +428,7 @@ export const BuyerLogin = () => {
 
                 <button
                   type="submit"
-                  disabled={loading || otp.join('').length !== 6}
+                  disabled={loading || otp.join('').length !== 6 || !password}
                   className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm rounded-xl shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   {loading ? <span className="animate-spin">⏳</span> : <span>Verify OTP & Log In</span>}

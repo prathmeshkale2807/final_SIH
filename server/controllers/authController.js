@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { Farmer } from '../models/Farmer.js';
 import { Buyer } from '../models/Buyer.js';
 import { isDBConnected } from '../config/db.js';
@@ -300,7 +301,7 @@ export const validateBuyerUser = async (req, res) => {
 // ─── 6. REGISTRATION CONTROLLERS ─────────────────────────────────────────────
 export const registerFarmer = async (req, res) => {
   try {
-    const { name, mobile, village, taluka, district, state, primaryCrop, landArea } = req.body;
+    const { name, mobile, village, taluka, district, state, primaryCrop, landArea, password } = req.body;
     if (!mobile) {
       return res.status(400).json({ success: false, message: 'Mobile number is required' });
     }
@@ -339,7 +340,7 @@ export const registerFarmer = async (req, res) => {
 
 export const registerBuyer = async (req, res) => {
   try {
-    const { shopName, ownerName, mobile, licenseNumber, city, state } = req.body;
+    const { shopName, ownerName, mobile, licenseNumber, city, state, password } = req.body;
     if (!mobile) {
       return res.status(400).json({ success: false, message: 'Mobile number is required' });
     }

@@ -461,7 +461,7 @@ export const FarmerLogin = () => {
 
                   <button
                     type="submit"
-                    disabled={loading || otp.join('').length !== 6}
+                    disabled={loading || otp.join('').length !== 6 || !password}
                     className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm rounded-2xl shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center space-x-2 cursor-pointer"
                   >
                     {loading ? (

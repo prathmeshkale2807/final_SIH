@@ -16,6 +16,8 @@ export const BuyerRegister = () => {
     businessName: '',
     ownerName: '',
     mobile: '',
+    password: '',
+    confirmPassword: '',
     businessType: 'Food Processor',
     cropInterests: ['Onion', 'Tomato'],
     monthlyRequirement: '',
@@ -26,6 +28,14 @@ export const BuyerRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.password.length < 6) {
+      showToast('Password must be at least 6 characters long', 'error');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      showToast('Passwords do not match', 'error');
+      return;
+    }
     const res = await registerBuyer(formData);
     if (res.success) {
       showToast('Buyer registration submitted! Verification status: Pending KYC');
@@ -35,7 +45,7 @@ export const BuyerRegister = () => {
 
   return (
     <div className="relative min-h-screen flex flex-col justify-between bg-slate-50 px-4 py-8 overflow-hidden selection:bg-blue-500 selection:text-white">
-      
+
       {/* CINEMATIC ENTERPRISE SOURCING BACKGROUND */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
         <img
@@ -102,6 +112,31 @@ export const BuyerRegister = () => {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Password *</label>
+              <input
+                type="password"
+                required
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Secret key"
+                className="w-full p-3.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 focus:border-blue-500 rounded-2xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Confirm Password *</label>
+              <input
+                type="password"
+                required
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                placeholder="Verify key"
+                className="w-full p-3.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 focus:border-blue-500 rounded-2xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Business Category</label>
             <div className="grid grid-cols-3 gap-2">
@@ -110,11 +145,10 @@ export const BuyerRegister = () => {
                   key={type}
                   type="button"
                   onClick={() => setFormData({ ...formData, businessType: type })}
-                  className={`p-2.5 rounded-xl text-xs font-bold border transition-all ${
-                    formData.businessType === type
+                  className={`p-2.5 rounded-xl text-xs font-bold border transition-all ${formData.businessType === type
                       ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-black'
                       : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   {type}
                 </button>

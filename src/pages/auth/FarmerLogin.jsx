@@ -15,13 +15,13 @@ export const FarmerLogin = () => {
 
   // Login Method: 'farmerId' | 'mobile'
   const [loginMethod, setLoginMethod] = useState('mobile');
-  
+
   // Auth Type: 'otp' | 'password'
   const [authType, setAuthType] = useState('otp');
-  
+
   // Step: 'input' | 'otp_verify'
   const [step, setStep] = useState('input');
-  
+
   const [farmerId, setFarmerId] = useState('');
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
@@ -161,7 +161,7 @@ export const FarmerLogin = () => {
 
   return (
     <div className="relative min-h-screen bg-slate-50 flex flex-col justify-between overflow-x-hidden selection:bg-emerald-500 selection:text-white">
-      
+
       {/* CINEMATIC SUNRISE FARMER BACKGROUND */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
         <img
@@ -176,7 +176,7 @@ export const FarmerLogin = () => {
 
       {/* MAIN TWO-COLUMN CONTAINER */}
       <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-14 items-center gap-10">
-        
+
         {/* LEFT COLUMN: BRANDING & PLATFORM VALUE PROPOSITION */}
         <div className="hidden lg:block lg:col-span-6 space-y-6 animate-fade-in-up">
           <Link to="/" className="inline-block">
@@ -231,7 +231,7 @@ export const FarmerLogin = () => {
         {/* RIGHT COLUMN: LOGIN CARD */}
         <div className="lg:col-span-6 w-full max-w-md mx-auto animate-fade-in">
           <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200/80 space-y-6">
-            
+
             {/* CARD TOP BAR: LOGO & LANGUAGE SWITCHER */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <Link to="/" className="lg:hidden">
@@ -260,17 +260,16 @@ export const FarmerLogin = () => {
             {/* STEP 1: CREDENTIAL INPUT VIEW */}
             {step === 'input' && (
               <div className="space-y-5">
-                
+
                 {/* DUAL PILL TOGGLE TABS */}
                 <div className="p-1 bg-slate-100 rounded-full border border-slate-200 shadow-inner flex items-center">
                   <button
                     type="button"
                     onClick={() => setLoginMethod('mobile')}
-                    className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${
-                      loginMethod === 'mobile'
+                    className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${loginMethod === 'mobile'
                         ? 'bg-emerald-600 text-white shadow-md'
                         : 'text-slate-600 hover:text-slate-900 bg-transparent'
-                    }`}
+                      }`}
                   >
                     {language === 'mr' ? 'मोबाईल क्र.' : 'Mobile No.'}
                   </button>
@@ -278,11 +277,10 @@ export const FarmerLogin = () => {
                   <button
                     type="button"
                     onClick={() => setLoginMethod('farmerId')}
-                    className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${
-                      loginMethod === 'farmerId'
+                    className={`flex-1 py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold transition-all text-center cursor-pointer ${loginMethod === 'farmerId'
                         ? 'bg-emerald-600 text-white shadow-md'
                         : 'text-slate-600 hover:text-slate-900 bg-transparent'
-                    }`}
+                      }`}
                   >
                     {language === 'mr' ? 'शेतकरी आयडी' : 'Farmer ID'}
                   </button>
@@ -290,7 +288,7 @@ export const FarmerLogin = () => {
 
                 {/* INPUT FORM */}
                 <form onSubmit={handleSendOTP} className="space-y-4">
-                  
+
                   {loginMethod === 'farmerId' ? (
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
@@ -381,8 +379,8 @@ export const FarmerLogin = () => {
                         {authType === 'password'
                           ? 'Sign In'
                           : language === 'mr'
-                          ? 'OTP मिळवा (Send OTP)'
-                          : 'Send OTP'}
+                            ? 'OTP मिळवा (Send OTP)'
+                            : 'Send OTP'}
                       </span>
                     )}
                   </button>
@@ -392,7 +390,7 @@ export const FarmerLogin = () => {
                 <div className="text-center pt-2">
                   <p className="text-xs text-slate-600">
                     {language === 'mr' ? 'नवीन शेतकरी आहात?' : "Don't have an account?"}{' '}
-                    <Link to="/auth/farmer/register" className="text-emerald-700 font-bold hover:underline">
+                    <Link to="/register/farmer" className="text-emerald-700 font-bold hover:underline">
                       {language === 'mr' ? 'येथे नोंदणी करा' : 'Register as Farmer'}
                     </Link>
                   </p>

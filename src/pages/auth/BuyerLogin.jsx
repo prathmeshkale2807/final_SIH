@@ -15,13 +15,13 @@ export const BuyerLogin = () => {
 
   // Login Method: 'buyerId' | 'mobile'
   const [loginMethod, setLoginMethod] = useState('mobile');
-  
+
   // Auth Type: 'otp' | 'password'
   const [authType, setAuthType] = useState('otp');
-  
+
   // Step: 'input' | 'otp_verify'
   const [step, setStep] = useState('input');
-  
+
   const [buyerId, setBuyerId] = useState('');
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
@@ -160,7 +160,7 @@ export const BuyerLogin = () => {
 
   return (
     <div className="relative min-h-screen bg-slate-50 flex flex-col justify-between overflow-x-hidden selection:bg-blue-500 selection:text-white">
-      
+
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
         <img
           src="/farmer_hero_bg.jpg"
@@ -173,7 +173,7 @@ export const BuyerLogin = () => {
       </div>
 
       <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-14 items-center gap-10">
-        
+
         <div className="hidden lg:block lg:col-span-6 space-y-6 animate-fade-in-up">
           <Link to="/" className="inline-block">
             <KrishakLogo size="large" />
@@ -205,7 +205,7 @@ export const BuyerLogin = () => {
         </div>
 
         <div className="lg:col-span-6 max-w-md mx-auto w-full bg-white/95 backdrop-blur-2xl rounded-[36px] p-6 sm:p-9 shadow-2xl border border-slate-200/90 space-y-6 animate-fade-in-up relative">
-          
+
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate('/')}
@@ -260,22 +260,20 @@ export const BuyerLogin = () => {
                 <button
                   type="button"
                   onClick={() => setLoginMethod('mobile')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
-                    loginMethod === 'mobile'
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${loginMethod === 'mobile'
                       ? 'bg-blue-600 text-white shadow-sm'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Mobile No.
                 </button>
                 <button
                   type="button"
                   onClick={() => setLoginMethod('buyerId')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
-                    loginMethod === 'buyerId'
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${loginMethod === 'buyerId'
                       ? 'bg-blue-600 text-white shadow-sm'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Shop / Buyer ID
                 </button>
@@ -367,7 +365,7 @@ export const BuyerLogin = () => {
               <div className="text-center pt-2">
                 <p className="text-xs text-slate-600">
                   New trader?{' '}
-                  <Link to="/auth/buyer/register" className="text-blue-700 font-bold hover:underline">
+                  <Link to="/register/buyer" className="text-blue-700 font-bold hover:underline">
                     Register as Buyer
                   </Link>
                 </p>

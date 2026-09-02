@@ -36,6 +36,15 @@ export const BuyerRegister = () => {
       showToast('Passwords do not match', 'error');
       return;
     }
+    if (formData.mobile.length === 10) {
+      try {
+        const valRes = await authService.validateBuyer(null, formData.mobile);
+        if (valRes && valRes.buyerExists) {
+          showToast('This mobile number is already registered. Please log in.', 'error');
+          return;
+        }
+      } catch (err) { }
+    }
     try {
       const res = await registerBuyer(formData);
       if (res && res.success) {

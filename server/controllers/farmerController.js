@@ -8,11 +8,11 @@ export const getFarmerProfile = async (req, res) => {
     if (isDBConnected()) {
       try {
         let farmer = null;
-        if (farmerId) {
-          farmer = await Farmer.findOne({ farmerId });
-        }
-        if (!farmer && req.user?.mobile) {
+        if (req.user?.mobile) {
           farmer = await Farmer.findOne({ mobile: req.user.mobile });
+        }
+        if (!farmer && farmerId) {
+          farmer = await Farmer.findOne({ farmerId });
         }
         if (farmer) {
           const locStr = farmer.location
@@ -40,7 +40,7 @@ export const getFarmerProfile = async (req, res) => {
           };
           return res.json({ success: true, farmer: formatted, user: formatted });
         }
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     const fallbackUser = {
@@ -73,9 +73,12 @@ export const updateFarmerProfile = async (req, res) => {
 
     if (isDBConnected()) {
       try {
-        let farmer = await Farmer.findOne({ farmerId });
-        if (!farmer && mobile) {
+        let farmer = null;
+        if (mobile) {
           farmer = await Farmer.findOne({ mobile });
+        }
+        if (!farmer && farmerId) {
+          farmer = await Farmer.findOne({ farmerId });
         }
         if (!farmer) {
           farmer = new Farmer({ farmerId: farmerId || `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`, name, mobile });
@@ -98,7 +101,7 @@ export const updateFarmerProfile = async (req, res) => {
 
         await farmer.save();
         return res.json({ success: true, message: 'Profile updated successfully', farmer });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     return res.json({

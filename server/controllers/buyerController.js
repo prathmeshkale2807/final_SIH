@@ -33,10 +33,12 @@ let buyerMemoryStore = [
 export const getBuyerProfile = async (req, res) => {
   try {
     const shopId = req.user?.id || req.user?.shopId || 'BUY-2026-PN08';
+    const mobile = req.user?.mobile;
 
     if (isDBConnected()) {
       try {
-        const buyer = await Buyer.findOne({ $or: [{ shopId }, { _id: shopId }] });
+        const query = mobile ? { mobile } : { $or: [{ shopId }, { _id: shopId }] };
+        const buyer = await Buyer.findOne(query);
         if (buyer) {
           return res.json({
             success: true,
@@ -63,10 +65,10 @@ export const getBuyerProfile = async (req, res) => {
             },
           });
         }
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
-    let buyer = buyerMemoryStore.find((b) => b.shopId === shopId || b.id === shopId);
+    let buyer = buyerMemoryStore.find((b) => (mobile && b.mobile === mobile) || b.shopId === shopId || b.id === shopId);
     if (!buyer) {
       buyer = {
         shopId,
@@ -116,19 +118,21 @@ export const getBuyerProfile = async (req, res) => {
 export const updateBuyerProfile = async (req, res) => {
   try {
     const shopId = req.user?.id || req.user?.shopId || 'BUY-2026-PN08';
+    const mobile = req.user?.mobile;
 
     if (isDBConnected()) {
       try {
-        const buyer = await Buyer.findOne({ $or: [{ shopId }, { _id: shopId }] });
+        const query = mobile ? { mobile } : { $or: [{ shopId }, { _id: shopId }] };
+        const buyer = await Buyer.findOne(query);
         if (buyer) {
           Object.assign(buyer, req.body);
           await buyer.save();
           return res.json({ success: true, message: 'Buyer profile updated successfully', buyer });
         }
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
-    const idx = buyerMemoryStore.findIndex((b) => b.shopId === shopId || b.id === shopId);
+    const idx = buyerMemoryStore.findIndex((b) => (mobile && b.mobile === mobile) || b.shopId === shopId || b.id === shopId);
     if (idx !== -1) {
       buyerMemoryStore[idx] = { ...buyerMemoryStore[idx], ...req.body, updatedAt: new Date().toISOString() };
       return res.json({ success: true, message: 'Buyer profile updated successfully', buyer: buyerMemoryStore[idx] });

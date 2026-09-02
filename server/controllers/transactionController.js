@@ -51,7 +51,7 @@ export const createTransactionForAcceptedOffer = async (offer, farmerName = '') 
     try {
       const existing = await Transaction.findOne({ offerId: offerKey });
       if (existing) return existing;
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // 2. Idempotency Check in Memory
@@ -76,6 +76,7 @@ export const createTransactionForAcceptedOffer = async (offer, farmerName = '') 
     farmerName: farmerName || offer.farmerName || 'Rahul Jadhav',
     buyerId: offer.buyerId || 'BUY-2026-PN08',
     buyerName: offer.buyerName || 'AgroFresh Food Processors Ltd.',
+    buyerMobile: offer.buyerMobile || offer.buyerPhone || '',
     crop: offer.crop || 'Onion',
     variety: offer.variety || 'Standard Variety',
     quantity: qty,
@@ -110,7 +111,7 @@ export const createTransactionForAcceptedOffer = async (offer, farmerName = '') 
       const created = await Transaction.create(newTxnData);
       transactionMemoryStore.unshift(newTxnData);
       return created;
-    } catch (e) {}
+    } catch (e) { }
   }
 
   transactionMemoryStore.unshift(newTxnData);
@@ -128,7 +129,7 @@ export const getFarmerTransactions = async (req, res) => {
       try {
         const list = await Transaction.find({ farmerId }).sort({ createdAt: -1 });
         return res.json({ success: true, count: list.length, transactions: list });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     const list = transactionMemoryStore.filter((t) => t.farmerId === farmerId);
@@ -141,18 +142,20 @@ export const getFarmerTransactions = async (req, res) => {
 export const getBuyerTransactions = async (req, res) => {
   try {
     const buyerId = req.user?.id || req.user?.shopId;
-    if (!buyerId) {
+    const mobile = req.user?.mobile;
+    if (!buyerId && !mobile) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
     if (isDBConnected()) {
       try {
-        const list = await Transaction.find({ buyerId }).sort({ createdAt: -1 });
+        const query = mobile ? { buyerMobile: mobile } : { buyerId };
+        const list = await Transaction.find(query).sort({ createdAt: -1 });
         return res.json({ success: true, count: list.length, transactions: list });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
-    const list = transactionMemoryStore.filter((t) => t.buyerId === buyerId);
+    const list = transactionMemoryStore.filter((t) => (mobile && t.buyerMobile === mobile) || t.buyerId === buyerId);
     return res.json({ success: true, count: list.length, transactions: list });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -168,7 +171,7 @@ export const getTransactionById = async (req, res) => {
     if (isDBConnected()) {
       try {
         item = await Transaction.findOne({ $or: [{ txnId: id }, { _id: id }] });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     if (!item) {
@@ -223,7 +226,7 @@ export const updateTransactionStatus = async (req, res) => {
     if (isDBConnected()) {
       try {
         txn = await Transaction.findOne({ $or: [{ txnId: id }, { _id: id }] });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     if (!txn) {
@@ -334,7 +337,7 @@ export const updateTransactionStatus = async (req, res) => {
     if (isDBConnected() && typeof txn.save === 'function') {
       try {
         await txn.save();
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const memIdx = transactionMemoryStore.findIndex((t) => t.txnId === id || t.id === id);

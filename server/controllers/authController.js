@@ -263,7 +263,7 @@ export const validateFarmerUser = async (req, res) => {
     try {
       if (farmerId) farmer = await Farmer.findOne({ farmerId });
       if (!farmer && mobile) farmer = await Farmer.findOne({ mobile });
-    } catch (err) {}
+    } catch (err) { }
   }
 
   return res.json({
@@ -285,7 +285,7 @@ export const validateBuyerUser = async (req, res) => {
     try {
       if (shopId) buyer = await Buyer.findOne({ shopId });
       if (!buyer && mobile) buyer = await Buyer.findOne({ mobile });
-    } catch (err) {}
+    } catch (err) { }
   }
 
   return res.json({
@@ -306,24 +306,26 @@ export const registerFarmer = async (req, res) => {
     }
 
     let farmer = await Farmer.findOne({ mobile });
-    if (!farmer) {
-      const farmerId = `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-      farmer = await Farmer.create({
-        farmerId,
-        id: farmerId,
-        name: name || 'Farmer',
-        mobile,
-        village: village || 'Nashik Rural',
-        taluka: taluka || 'Niphad',
-        district: district || 'Nashik',
-        state: state || 'Maharashtra',
-        primaryCrop: primaryCrop || 'Onion',
-        landArea: landArea || '5',
-        role: 'farmer',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
+    if (farmer) {
+      return res.status(400).json({ success: false, message: 'This mobile number is already registered. Please log in or use a different number.' });
     }
+
+    const farmerId = `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    farmer = await Farmer.create({
+      farmerId,
+      id: farmerId,
+      name: name || 'Farmer',
+      mobile,
+      village: village || 'Nashik Rural',
+      taluka: taluka || 'Niphad',
+      district: district || 'Nashik',
+      state: state || 'Maharashtra',
+      primaryCrop: primaryCrop || 'Onion',
+      landArea: landArea || '5',
+      role: 'farmer',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
 
     const farmerData = farmer.toObject ? farmer.toObject() : farmer;
     const token = generateToken({ id: farmerData.farmerId, role: 'farmer', mobile, name: farmerData.name });
@@ -343,22 +345,24 @@ export const registerBuyer = async (req, res) => {
     }
 
     let buyer = await Buyer.findOne({ mobile });
-    if (!buyer) {
-      const shopId = `BUY-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-      buyer = await Buyer.create({
-        shopId,
-        id: shopId,
-        shopName: shopName || 'Wholesale Buyer',
-        ownerName: ownerName || 'Trader',
-        mobile,
-        licenseNumber: licenseNumber || 'MH-APMC-2026-08',
-        city: city || 'Nashik',
-        state: state || 'Maharashtra',
-        role: 'buyer',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
+    if (buyer) {
+      return res.status(400).json({ success: false, message: 'This mobile number is already registered. Please log in or use a different number.' });
     }
+
+    const shopId = `BUY-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    buyer = await Buyer.create({
+      shopId,
+      id: shopId,
+      shopName: shopName || 'Wholesale Buyer',
+      ownerName: ownerName || 'Trader',
+      mobile,
+      licenseNumber: licenseNumber || 'MH-APMC-2026-08',
+      city: city || 'Nashik',
+      state: state || 'Maharashtra',
+      role: 'buyer',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
 
     const buyerData = buyer.toObject ? buyer.toObject() : buyer;
     const token = generateToken({ id: buyerData.shopId, role: 'buyer', mobile, name: buyerData.ownerName });
@@ -391,7 +395,7 @@ export const firebaseLogin = async (req, res) => {
     if (idToken && isFirebaseAdminInitialized()) {
       try {
         decoded = await verifyFirebaseIdToken(idToken);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const cleanMobile = (decoded?.phone_number || mobile || '').replace(/\D/g, '').slice(-10);

@@ -15,6 +15,7 @@ export const createRequirement = async (req, res) => {
   try {
     const buyerId = req.user?.id || req.user?.shopId || 'BUY-2026-PN08';
     const buyerName = req.user?.businessName || req.user?.ownerName || 'Enterprise Sourcing Desk';
+    const buyerMobile = req.user?.mobile || '9822012345';
 
     const {
       cropName,
@@ -66,6 +67,7 @@ export const createRequirement = async (req, res) => {
       requirementId,
       id: requirementId,
       buyerId,
+      buyerMobile,
       buyerName,
       crop: chosenCrop,
       variety: variety || 'Standard Variety',
@@ -94,7 +96,7 @@ export const createRequirement = async (req, res) => {
         const created = await BuyerRequirement.create(newReqData);
         requirementMemoryStore.unshift(newReqData);
         return res.status(201).json({ success: true, message: 'Requirement posted successfully', requirement: created });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     requirementMemoryStore.unshift(newReqData);
@@ -107,15 +109,17 @@ export const createRequirement = async (req, res) => {
 export const getMyRequirements = async (req, res) => {
   try {
     const buyerId = req.user?.id || req.user?.shopId || 'BUY-2026-PN08';
+    const mobile = req.user?.mobile;
 
     if (isDBConnected()) {
       try {
-        const list = await BuyerRequirement.find({ buyerId }).sort({ createdAt: -1 });
+        const query = mobile ? { buyerMobile: mobile } : { buyerId };
+        const list = await BuyerRequirement.find(query).sort({ createdAt: -1 });
         return res.json({ success: true, count: list.length, requirements: list });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
-    const list = requirementMemoryStore.filter((r) => r.buyerId === buyerId);
+    const list = requirementMemoryStore.filter((r) => (mobile && r.buyerMobile === mobile) || r.buyerId === buyerId);
     return res.json({ success: true, count: list.length, requirements: list });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -128,7 +132,7 @@ export const getAllRequirements = async (req, res) => {
       try {
         const list = await BuyerRequirement.find({ status: 'OPEN' }).sort({ createdAt: -1 });
         return res.json({ success: true, count: list.length, requirements: list });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     const openList = requirementMemoryStore.filter((r) => (r.status || 'OPEN').toUpperCase() === 'OPEN');
@@ -145,7 +149,7 @@ export const getRequirementById = async (req, res) => {
       try {
         const item = await BuyerRequirement.findOne({ $or: [{ requirementId: id }, { _id: id }] });
         if (item) return res.json({ success: true, requirement: item });
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     const item = requirementMemoryStore.find((r) => r.requirementId === id || r.id === id);
@@ -173,7 +177,7 @@ export const updateRequirement = async (req, res) => {
           await item.save();
           return res.json({ success: true, message: 'Requirement updated', requirement: item });
         }
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     const idx = requirementMemoryStore.findIndex((r) => r.requirementId === id || r.id === id);
@@ -206,7 +210,7 @@ export const updateRequirementStatus = async (req, res) => {
           await item.save();
           return res.json({ success: true, message: 'Status updated', requirement: item });
         }
-      } catch (dbErr) {}
+      } catch (dbErr) { }
     }
 
     const idx = requirementMemoryStore.findIndex((r) => r.requirementId === id || r.id === id);

@@ -301,7 +301,7 @@ export const validateBuyerUser = async (req, res) => {
 // ─── 6. REGISTRATION CONTROLLERS ─────────────────────────────────────────────
 export const registerFarmer = async (req, res) => {
   try {
-    const { name, mobile, village, taluka, district, state, primaryCrop, landArea, password } = req.body;
+    const { mobile, password, confirmPassword, ...rest } = req.body;
     if (!mobile) {
       return res.status(400).json({ success: false, message: 'Mobile number is required' });
     }
@@ -312,17 +312,14 @@ export const registerFarmer = async (req, res) => {
     }
 
     const farmerId = `FARM-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const passwordHash = password ? await bcrypt.hash(password, 10) : '';
+
     farmer = await Farmer.create({
+      ...rest,
       farmerId,
       id: farmerId,
-      name: name || 'Farmer',
       mobile,
-      village: village || 'Nashik Rural',
-      taluka: taluka || 'Niphad',
-      district: district || 'Nashik',
-      state: state || 'Maharashtra',
-      primaryCrop: primaryCrop || 'Onion',
-      landArea: landArea || '5',
+      password: passwordHash,
       role: 'farmer',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -340,7 +337,7 @@ export const registerFarmer = async (req, res) => {
 
 export const registerBuyer = async (req, res) => {
   try {
-    const { shopName, ownerName, mobile, licenseNumber, city, state, password } = req.body;
+    const { mobile, password, confirmPassword, agreed, ...rest } = req.body;
     if (!mobile) {
       return res.status(400).json({ success: false, message: 'Mobile number is required' });
     }
@@ -351,15 +348,13 @@ export const registerBuyer = async (req, res) => {
     }
 
     const shopId = `BUY-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const passwordHash = password ? await bcrypt.hash(password, 10) : '';
     buyer = await Buyer.create({
+      ...rest,
       shopId,
       id: shopId,
-      shopName: shopName || 'Wholesale Buyer',
-      ownerName: ownerName || 'Trader',
       mobile,
-      licenseNumber: licenseNumber || 'MH-APMC-2026-08',
-      city: city || 'Nashik',
-      state: state || 'Maharashtra',
+      password: passwordHash,
       role: 'buyer',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
